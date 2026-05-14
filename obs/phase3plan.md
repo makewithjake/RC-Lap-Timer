@@ -748,19 +748,19 @@ const PRECACHE_URLS = [
 
 Before closing Phase 3, manually verify:
 
-- [ ] Opening the Viewfinder screen shows the live camera feed with a crosshair cursor over the canvas area
-- [ ] Tapping once on the canvas places a lime-colored handle circle
-- [ ] Tapping a second time places the second handle and draws the trigger line with the zone band between them
-- [ ] Dragging an existing handle repositions it and the line/band redraws in real time
-- [ ] Zone Width slider changes the visual thickness of the zone band on the canvas immediately
-- [ ] "Clear" button appears when the line is complete and resets the canvas when tapped
-- [ ] Sensitivity slider updates its inline value readout (e.g., "62%") as it is dragged
-- [ ] Debounce slider updates its inline value readout (e.g., "3.5s") as it is dragged
-- [ ] All three sliders display the correct filled-track gradient
-- [ ] Virtual LED element is visible in the lower-right corner, above the calibration panel
-- [ ] Confirm button is disabled until the trigger line is fully drawn; enabled after
-- [ ] Tapping Confirm logs the ROI + settings object to the console (verify `roi.p1Norm`, `roi.p2Norm`, `roi.zoneWidthNorm` are all `[0, 1]` fractions)
-- [ ] Phase 2 "Test TTS" button is no longer present in the UI
+- [x] Opening the Viewfinder screen shows the live camera feed with a crosshair cursor over the canvas area
+- [x] Tapping once on the canvas places a lime-colored handle circle
+- [x] Tapping a second time places the second handle and draws the trigger line with the zone band between them
+- [x] Dragging an existing handle repositions it and the line/band redraws in real time
+- [x] Zone Width slider changes the visual thickness of the zone band on the canvas immediately
+- [x] "Clear" button appears when the line is complete and resets the canvas when tapped
+- [x] Sensitivity slider updates its inline value readout (e.g., "62%") as it is dragged
+- [x] Debounce slider updates its inline value readout (e.g., "3.5s") as it is dragged
+- [x] All three sliders display the correct filled-track gradient
+- [x] Virtual LED element is visible in the lower-right corner, above the calibration panel
+- [x] Confirm button is disabled until the trigger line is fully drawn; enabled after
+- [x] Tapping Confirm logs the ROI + settings object to the console (verify `roi.p1Norm`, `roi.p2Norm`, `roi.zoneWidthNorm` are all `[0, 1]` fractions)
+- [x] Phase 2 "Test TTS" button is no longer present in the UI
 
 **Phase 3 Complete ✓** — All milestone criteria verified. Proceed to Phase 4.
 

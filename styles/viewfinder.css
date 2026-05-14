@@ -159,3 +159,187 @@
 #viewfinder-stabilizing.is-hidden {
   display: none;
 }
+
+/* ============================================================
+   Phase 3 — Task Group C: Trigger Zone Drawing Layer & Calibration
+   All rules below are additive; no Phase 2 rules are modified.
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   C1 — Canvas overlay for trigger zone drawing
+   Above <video> (no explicit z-index), below HUD bar (z-index: 20)
+   ---------------------------------------------------------- */
+#viewfinder-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  width: 100%;
+  height: 100%;
+  touch-action: none;     /* Belt-and-suspenders with JS event.preventDefault() */
+  cursor: crosshair;
+}
+
+/* ----------------------------------------------------------
+   C2 — Calibration tools panel
+   Anchored directly above #viewfinder-confirm (min-height: 64px)
+   ---------------------------------------------------------- */
+.calibration-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 64px;                    /* Sits flush above #viewfinder-confirm */
+  z-index: 20;
+  padding: var(--space-4);
+  background-color: rgba(17, 17, 17, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--color-border);
+}
+
+/* ----------------------------------------------------------
+   C3 — Calibration row: label + slider + range indicators
+   ---------------------------------------------------------- */
+.calibration-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-bottom: var(--space-3);
+}
+
+.calibration-row:last-child {
+  margin-bottom: 0;
+}
+
+.calibration-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-secondary);
+}
+
+.calibration-value {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  font-variant-numeric: tabular-nums;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.calibration-range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-top: var(--space-1);
+}
+
+/* ----------------------------------------------------------
+   C4 — Custom range slider (shared by all three calibration sliders)
+   --slider-fill is set by JS on every input event; fallback 74%
+   matches the 75% sensitivity default.
+   ---------------------------------------------------------- */
+.calibration-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: var(--radius-sm);
+  outline: none;
+  cursor: pointer;
+  background: linear-gradient(
+    to right,
+    var(--color-accent) 0%,
+    var(--color-accent) var(--slider-fill, 74%),
+    var(--color-border) var(--slider-fill, 74%),
+    var(--color-border) 100%
+  );
+}
+
+/* Thumb — WebKit / Blink (Chrome, Safari, Edge) */
+.calibration-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-circle);
+  background: var(--color-accent);
+  cursor: pointer;
+}
+
+/* Thumb — Firefox */
+.calibration-slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: var(--radius-circle);
+  background: var(--color-accent);
+  cursor: pointer;
+}
+
+/* ----------------------------------------------------------
+   C5 — Virtual LED
+   Activation logic (data-active toggling) added in Phase 4.
+   bottom stacks: 64px (Confirm) + 12px (gap) + safe-area
+   ---------------------------------------------------------- */
+.virtual-led {
+  position: absolute;
+  bottom: calc(var(--space-16) + var(--space-3) + env(safe-area-inset-bottom, 0px));
+  right: var(--space-4);
+  z-index: 21;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-circle);
+  background: var(--color-surface-raised);
+  border: 2px solid var(--color-border);
+  transition: background 80ms ease, box-shadow 80ms ease;
+}
+
+/* Active state — set data-active="true" from Phase 4 detection engine */
+.virtual-led[data-active="true"] {
+  background: var(--color-best-lap);
+  box-shadow: 0 0 12px 4px var(--color-accent-glow);
+}
+
+/* ----------------------------------------------------------
+   C6 — Clear drawn line button (shown by JS via .is-visible)
+   Positioned below HUD bar (~56px from top)
+   ---------------------------------------------------------- */
+#btn-clear-line {
+  position: absolute;
+  top: calc(var(--space-12) + var(--space-2));
+  right: var(--space-4);
+  z-index: 21;
+  min-width: 48px;
+  min-height: 48px;
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  display: none;          /* Hidden by default; toggled by .is-visible */
+}
+
+#btn-clear-line.is-visible {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#btn-clear-line:active {
+  opacity: 0.85;
+  transform: scale(0.97);
+}

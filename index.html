@@ -114,6 +114,101 @@
           aria-label="Camera viewfinder"
         ></video>
 
+        <!-- Phase 3: Canvas overlay for trigger zone drawing (Task 3.1) -->
+        <canvas
+          id="viewfinder-canvas"
+          role="img"
+          aria-label="Trigger zone drawing area. Tap to place start and end points."
+        ></canvas>
+
+        <!-- Phase 3: Clear drawn line — shown only after line is complete (Task 3.2) -->
+        <button
+          id="btn-clear-line"
+          type="button"
+          aria-label="Clear the drawn trigger line and start over"
+        >Clear</button>
+
+        <!-- Phase 3: Virtual LED indicator — activated by Phase 4 detection engine (Task 4.3) -->
+        <div
+          id="virtual-led"
+          class="virtual-led"
+          role="status"
+          aria-label="Motion detection indicator"
+          data-active="false"
+        ></div>
+
+        <!-- Phase 3: Calibration tools panel (Task 3.3) -->
+        <div class="calibration-panel" id="calibration-panel" aria-label="Detection calibration controls">
+
+          <!-- Sensitivity Slider -->
+          <div class="calibration-row">
+            <label for="slider-sensitivity" class="calibration-label">
+              Sensitivity
+              <span id="sensitivity-value" class="calibration-value">75%</span>
+            </label>
+            <input
+              type="range"
+              id="slider-sensitivity"
+              class="calibration-slider"
+              min="1"
+              max="100"
+              value="75"
+              step="1"
+              aria-valuemin="1"
+              aria-valuemax="100"
+              aria-valuenow="75"
+              aria-label="Detection sensitivity: 75 percent"
+            />
+          </div>
+
+          <!-- Debounce Slider -->
+          <div class="calibration-row">
+            <label for="slider-debounce" class="calibration-label">
+              Debounce
+              <span id="debounce-value" class="calibration-value">2.0s</span>
+            </label>
+            <input
+              type="range"
+              id="slider-debounce"
+              class="calibration-slider"
+              min="1.0"
+              max="5.0"
+              value="2.0"
+              step="0.1"
+              aria-valuemin="1.0"
+              aria-valuemax="5.0"
+              aria-valuenow="2.0"
+              aria-label="Debounce delay: 2.0 seconds"
+            />
+            <div class="calibration-range-labels">
+              <span>1.0s</span>
+              <span>5.0s</span>
+            </div>
+          </div>
+
+          <!-- Zone Width Slider -->
+          <div class="calibration-row">
+            <label for="slider-zone-width" class="calibration-label">
+              Zone Width
+              <span id="zone-width-value" class="calibration-value">20px</span>
+            </label>
+            <input
+              type="range"
+              id="slider-zone-width"
+              class="calibration-slider"
+              min="10"
+              max="100"
+              value="20"
+              step="2"
+              aria-valuemin="10"
+              aria-valuemax="100"
+              aria-valuenow="20"
+              aria-label="Detection zone width: 20 pixels"
+            />
+          </div>
+
+        </div>
+
         <!-- HUD status bar — Wake Lock chip (B2) + Camera Lock chip (B4) -->
         <div class="viewfinder-hud" aria-label="Status indicators">
           <span
@@ -144,13 +239,6 @@
           aria-live="polite"
           aria-atomic="true"
         ></div>
-
-        <!-- F3: Milestone test button — remove or repurpose in Phase 3 -->
-        <button
-          id="btn-test-tts"
-          type="button"
-          aria-label="Test text-to-speech"
-        >Test TTS</button>
 
         <!-- Confirm button — enabled after camera stabilizes (E2) -->
         <button

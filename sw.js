@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rc-timer-v2';
+const CACHE_NAME = 'rc-timer-v3';
 
 const PRECACHE_URLS = [
   'index.html',
@@ -13,6 +13,8 @@ const PRECACHE_URLS = [
   'js/camera.js',
   'js/wakeLock.js',
   'js/audio.js',
+  'js/viewfinder.js',   // ← Phase 3 additions
+  'js/calibration.js',  // ← Phase 3 additions
 ];
 
 // Install: pre-cache all shell assets
