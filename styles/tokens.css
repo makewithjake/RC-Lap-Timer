@@ -1,0 +1,79 @@
+/* ============================================================
+   tokens.css — CSS Custom Properties
+   RC Lap Timer · Phase 1
+   All design tokens. Import before any other stylesheet.
+   ============================================================ */
+
+:root {
+
+  /* ----------------------------------------------------------
+     Color · Base
+     ---------------------------------------------------------- */
+  --color-bg:             #000000;  /* App & page root (OLED true-black) */
+  --color-surface:        #111111;  /* Cards, modals, setting panels */
+  --color-surface-raised: #1A1A1A;  /* Elevated cards, dropdowns, input fills */
+  --color-border:         #2A2A2A;  /* Dividers, input outlines, card edges */
+  --color-border-subtle:  #1E1E1E;  /* Inner separators within a card */
+
+  /* ----------------------------------------------------------
+     Color · Text
+     ---------------------------------------------------------- */
+  --color-text-primary:   #FFFFFF;  /* Headings, large display values, labels */
+  --color-text-secondary: #A0A0A0;  /* Supporting copy, column headers, metadata */
+  --color-text-muted:     #555555;  /* Placeholder text, disabled states */
+
+  /* ----------------------------------------------------------
+     Color · Brand Accent (Electric Lime)
+     ---------------------------------------------------------- */
+  --color-accent:         #C6FF00;           /* Primary CTAs, active fills, brand highlight */
+  --color-accent-dim:     #8AAF00;           /* Accent hover/press state */
+  --color-accent-glow:    rgba(198,255,0,0.15); /* Glow halo, focus rings */
+
+  /* ----------------------------------------------------------
+     Color · Functional / Status
+     ---------------------------------------------------------- */
+  --color-start:          #22C55E;  /* START button, motion-detected flash, "System Active" */
+  --color-start-dim:      #16A34A;  /* START hover/press */
+  --color-stop:           #EF4444;  /* STOP button */
+  --color-stop-dim:       #B91C1C;  /* STOP hover/press */
+  --color-reset:          #F59E0B;  /* RESET button */
+  --color-reset-dim:      #B45309;  /* RESET hover/press */
+  --color-best-lap:       #00FF41;              /* Best-lap row highlight, Detection LED active */
+  --color-best-lap-bg:    rgba(0,255,65,0.15);  /* Best-lap row background tint */
+
+  /* ----------------------------------------------------------
+     Typography · Font Stacks
+     ---------------------------------------------------------- */
+
+  /* Primary UI font — body copy, labels, controls */
+  --font-ui: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+             "Helvetica Neue", Arial, sans-serif;
+
+  /* Display / Hero font — large headings (marketing page only) */
+  --font-display: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+
+  /* Monospace — timer & numeric readouts; prevents layout jitter */
+  --font-mono: "Roboto Mono", "SF Mono", "Fira Code", ui-monospace,
+               SFMono-Regular, Menlo, monospace;
+
+  /* ----------------------------------------------------------
+     Spacing · 8px base scale
+     ---------------------------------------------------------- */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ----------------------------------------------------------
+     Border Radius
+     ---------------------------------------------------------- */
+  --radius-sm:   6px;   /* Input fields, slider tracks */
+  --radius-md:   8px;   /* Small inline buttons */
+  --radius-lg:   12px;  /* Large CTAs, cards, panels */
+  --radius-full: 999px; /* Pill badges */
+  --radius-circle: 50%; /* Detection LED */
+}

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#C6FF00" />
+
+    <!-- Apple PWA meta tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <link rel="apple-touch-icon" href="Assets/icons/icon-180.png" />
+
+    <!-- PWA manifest -->
+    <link rel="manifest" href="manifest.json" />
+
+    <!-- Stylesheets (order matters: tokens → global → component) -->
+    <link rel="stylesheet" href="styles/tokens.css" />
+    <link rel="stylesheet" href="styles/global.css" />
+    <link rel="stylesheet" href="styles/home.css" />
+    <link rel="stylesheet" href="styles/viewfinder.css" />
+
+    <title>RC Lap Timer</title>
+  </head>
+  <body>
+    <main>
+      <!-- ── Screen 1: Home ─────────────────────────────────────────── -->
+      <section id="screen-home">
+        <!-- Gear / settings button — absolutely positioned top-right -->
+        <button
+          id="btn-settings"
+          class="home-gear-btn"
+          aria-label="Open Settings"
+          type="button"
+        >
+          <!-- Gear icon (inline SVG, no external dependency) -->
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="24"
+            height="24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+        </button>
+
+        <div class="home-title-area">
+          <h1 class="home-title">RC Timer</h1>
+        </div>
+
+        <div class="home-form">
+          <div class="home-field">
+            <label for="input-driver-name">Driver Name</label>
+            <input
+              type="text"
+              id="input-driver-name"
+              name="driverName"
+              placeholder="Enter driver name"
+              autocomplete="off"
+              spellcheck="false"
+            />
+          </div>
+
+          <div class="home-field">
+            <label for="input-car-name">Car Name</label>
+            <input
+              type="text"
+              id="input-car-name"
+              name="carName"
+              placeholder="Enter car name"
+              autocomplete="off"
+              spellcheck="false"
+            />
+          </div>
+
+          <div class="home-field">
+            <label for="input-location">Location</label>
+            <input
+              type="text"
+              id="input-location"
+              name="location"
+              placeholder="Enter location"
+              autocomplete="off"
+              spellcheck="false"
+            />
+          </div>
+        </div>
+
+        <div class="home-nav">
+          <button id="btn-start-session" class="btn-start-session" type="button">
+            Start New Session
+          </button>
+          <button id="btn-view-history" class="btn-view-history" type="button">
+            View History
+          </button>
+        </div>
+      </section>
+
+      <!-- ── Screen 2: Viewfinder ──────────────────────────────────── -->
+      <section id="screen-viewfinder" hidden>
+        <!-- Live camera feed (A2) -->
+        <video
+          id="viewfinder-video"
+          autoplay
+          playsinline
+          muted
+          aria-label="Camera viewfinder"
+        ></video>
+
+        <!-- HUD status bar — Wake Lock chip (B2) + Camera Lock chip (B4) -->
+        <div class="viewfinder-hud" aria-label="Status indicators">
+          <span
+            id="status-wake-lock"
+            class="viewfinder-status-chip"
+            data-state="inactive"
+            aria-label="Screen lock status"
+          >🔓 Screen May Sleep</span>
+          <span
+            id="status-camera-lock"
+            class="viewfinder-status-chip"
+            data-state="inactive"
+            aria-label="Camera stabilization status"
+          >📷 Camera Auto</span>
+        </div>
+
+        <!-- Inline error banner — shown by camera.js error handlers (A3) -->
+        <div
+          id="viewfinder-error"
+          role="alert"
+          aria-live="assertive"
+        ></div>
+
+        <!-- Stabilizing overlay text — shown during 2-second warm-up (E2) -->
+        <div
+          id="viewfinder-stabilizing"
+          class="is-hidden"
+          aria-live="polite"
+          aria-atomic="true"
+        ></div>
+
+        <!-- F3: Milestone test button — remove or repurpose in Phase 3 -->
+        <button
+          id="btn-test-tts"
+          type="button"
+          aria-label="Test text-to-speech"
+        >Test TTS</button>
+
+        <!-- Confirm button — enabled after camera stabilizes (E2) -->
+        <button
+          id="viewfinder-confirm"
+          type="button"
+          disabled
+          aria-label="Confirm and begin session"
+        >Confirm</button>
+      </section>
+    </main>
+
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,161 @@
+/* ============================================================
+   viewfinder.css — Viewfinder Screen Styles
+   RC Lap Timer · Phase 2 (Task Group D)
+   Import after global.css in index.html.
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   D1 — Full-Screen Viewfinder Container
+   ---------------------------------------------------------- */
+
+/* When active, the viewfinder section covers the full viewport
+   behind all other content (z-index: 10). The `hidden` attribute
+   hides it; JS removes `hidden` to show the screen. */
+#screen-viewfinder {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background-color: var(--color-bg);
+  overflow: hidden;
+}
+
+/* Live camera feed */
+#viewfinder-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ----------------------------------------------------------
+   D2 — Status Indicator HUD Bar
+   Pill-shaped bar centred at the top of the viewfinder.
+   Contains two status chips: Wake Lock and Camera Lock.
+   ---------------------------------------------------------- */
+.viewfinder-hud {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  background-color: rgba(17, 17, 17, 0.85);
+  border-radius: var(--radius-full);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  white-space: nowrap;
+}
+
+/* Individual status chips inside the HUD bar */
+.viewfinder-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  /* Default / inactive state */
+  color: var(--color-text-muted);
+}
+
+/* Active state — set by JS when lock is acquired */
+.viewfinder-status-chip[data-state="active"] {
+  color: var(--color-start);
+}
+
+/* ----------------------------------------------------------
+   D3 — Confirm Button
+   Full-width, anchored to the bottom of the viewfinder.
+   Respects iOS safe-area inset so it clears the home bar.
+   Disabled until the camera stream is active (E2 enables it).
+   ---------------------------------------------------------- */
+#viewfinder-confirm {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  min-height: 64px;
+  /* Stack the padding so safe-area adds on top of base padding */
+  padding: var(--space-4) var(--space-4)
+    calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+  background-color: var(--color-accent);
+  color: #000000;
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  z-index: 20;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#viewfinder-confirm:active {
+  background-color: var(--color-accent-dim);
+}
+
+/* Disabled until camera stream is active (set by app.js / E2) */
+#viewfinder-confirm:disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* ----------------------------------------------------------
+   D4 — Error Banner
+   Rendered above the Confirm button; hidden by default.
+   JS camera error handlers (A3) set display:block and inject
+   the error message text. role="alert" is on the element in HTML.
+   ---------------------------------------------------------- */
+#viewfinder-error {
+  position: absolute;
+  bottom: 80px;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  padding: var(--space-3) var(--space-4);
+  background-color: rgba(239, 68, 68, 0.20);
+  border-left: 4px solid var(--color-stop);
+  color: var(--color-text-primary);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  /* Hidden by default; shown by JS error handlers */
+  display: none;
+}
+
+/* ----------------------------------------------------------
+   E2 — Stabilizing Overlay
+   Centred text shown during the 2-second camera warm-up window.
+   JS adds/removes .is-hidden and .is-fading to control visibility.
+   ---------------------------------------------------------- */
+#viewfinder-stabilizing {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 20;
+  color: var(--color-text-secondary);
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.4s ease;
+}
+
+#viewfinder-stabilizing.is-fading {
+  opacity: 0;
+}
+
+#viewfinder-stabilizing.is-hidden {
+  display: none;
+}
