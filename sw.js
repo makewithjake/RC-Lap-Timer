@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rc-timer-v4';
+const CACHE_NAME = 'rc-timer-v5';
 
 const PRECACHE_URLS = [
   'index.html',
@@ -16,6 +16,11 @@ const PRECACHE_URLS = [
   'js/viewfinder.js',
   'js/calibration.js',
   'js/detector.js',   // ← Phase 4 addition
+  'styles/countdown.css',
+  'styles/dashboard.css',
+  'js/session.js',
+  'js/countdown.js',
+  'js/dashboard.js',
 ];
 
 // Install: pre-cache all shell assets

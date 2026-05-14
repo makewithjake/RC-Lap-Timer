@@ -18,6 +18,8 @@
     <link rel="stylesheet" href="styles/global.css" />
     <link rel="stylesheet" href="styles/home.css" />
     <link rel="stylesheet" href="styles/viewfinder.css" />
+    <link rel="stylesheet" href="styles/countdown.css" />
+    <link rel="stylesheet" href="styles/dashboard.css" />
 
     <title>RC Lap Timer</title>
   </head>
@@ -207,6 +209,43 @@
             />
           </div>
 
+          <!-- Delayed Start Toggle -->
+          <div class="calibration-row calibration-row--toggle">
+            <label for="toggle-delayed-start" class="calibration-label">
+              Delayed Start
+              <span class="calibration-value" id="delayed-start-value">Off</span>
+            </label>
+            <button
+              id="toggle-delayed-start"
+              type="button"
+              role="switch"
+              aria-checked="false"
+              aria-label="Enable 10-second countdown before race begins"
+              class="calibration-toggle"
+              data-active="false"
+            >
+              <span class="calibration-toggle-thumb"></span>
+            </button>
+          </div>
+
+          <!-- Goal Laps Input -->
+          <div class="calibration-row">
+            <label for="input-goal-laps" class="calibration-label">
+              Goal Laps
+              <span class="calibration-value" id="goal-laps-value">∞</span>
+            </label>
+            <input
+              type="number"
+              id="input-goal-laps"
+              class="calibration-number-input"
+              min="1"
+              max="99"
+              placeholder="∞"
+              inputmode="numeric"
+              aria-label="Number of laps before auto-stop (leave empty for unlimited)"
+            />
+          </div>
+
         </div>
 
         <!-- HUD status bar — Wake Lock chip (B2) + Camera Lock chip (B4) -->
@@ -247,6 +286,109 @@
           disabled
           aria-label="Confirm and begin session"
         >Confirm</button>
+      </section>
+
+      <!-- ── Screen 3: Countdown Overlay ──────────────────────────────── -->
+      <section id="screen-countdown" hidden>
+        <div class="countdown-overlay">
+          <div
+            id="countdown-digit"
+            class="countdown-digit"
+            role="status"
+            aria-live="assertive"
+            aria-atomic="true"
+          >10</div>
+          <p class="countdown-label">Get ready!</p>
+          <button
+            id="btn-cancel-countdown"
+            type="button"
+            class="countdown-cancel-btn"
+            aria-label="Cancel countdown and return to setup"
+          >Cancel</button>
+        </div>
+      </section>
+
+      <!-- ── Screen 4: Race Dashboard ─────────────────────────────────── -->
+      <section id="screen-dashboard" hidden>
+
+        <!-- Status Bar -->
+        <div class="dashboard-status-bar" role="status" aria-live="polite" aria-atomic="false">
+          <span id="dash-lap-counter" aria-label="Current lap">Lap —</span>
+          <span
+            id="dash-system-status"
+            class="dash-system-status"
+            data-state="inactive"
+            aria-label="System status"
+          >System Active</span>
+        </div>
+
+        <!-- Big Clock (current lap timer) -->
+        <div class="dashboard-clock-area" aria-label="Timer display">
+          <div
+            id="dash-big-clock"
+            class="dash-big-clock"
+            role="timer"
+            aria-label="Current lap time"
+            aria-live="off"
+          >0:00.00</div>
+          <div
+            id="dash-total-time"
+            class="dash-total-time"
+            aria-label="Total session time"
+            aria-live="off"
+          >0:00.00</div>
+        </div>
+
+        <!-- Live Lap Table -->
+        <div class="dashboard-lap-table-wrap">
+          <table class="dashboard-lap-table" aria-label="Lap history">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Lap Time</th>
+                <th scope="col">Gap</th>
+              </tr>
+            </thead>
+            <tbody id="dash-lap-tbody">
+              <!-- Populated by dashboard.js _appendLapRow() -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Camera Toggle + Preview -->
+        <div class="dashboard-camera-toggle">
+          <button
+            id="btn-dash-camera-toggle"
+            type="button"
+            aria-label="Show camera feed"
+            aria-expanded="false"
+          >Show Camera</button>
+          <video
+            id="dash-camera-preview"
+            class="dash-camera-preview is-hidden"
+            autoplay
+            playsinline
+            muted
+            aria-label="Camera preview"
+          ></video>
+        </div>
+
+        <!-- Glove-Friendly Controls -->
+        <div class="dashboard-controls">
+          <button
+            id="btn-dash-stop"
+            type="button"
+            class="btn-dash-stop"
+            aria-label="Stop the current session"
+          >STOP</button>
+          <button
+            id="btn-dash-reset"
+            type="button"
+            class="btn-dash-reset"
+            aria-label="Reset the current session"
+          >RESET</button>
+        </div>
+
       </section>
     </main>
 

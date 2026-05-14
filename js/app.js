@@ -23,6 +23,8 @@ import {
   getAllSettings,
 } from './calibration.js';
 import { startDetection, stopDetection, isDetecting } from './detector.js';
+import { startCountdown, cancelCountdown } from './countdown.js';
+import { initDashboard } from './dashboard.js';
 
 // ── Status chip helpers ───────────────────────────────────────
 
@@ -199,27 +201,129 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function _readViewfinderSessionConfig() {
+    const toggleEl   = document.getElementById('toggle-delayed-start');
+    const goalLapsEl = document.getElementById('input-goal-laps');
+
+    const delayedStart = toggleEl?.getAttribute('aria-checked') === 'true' ?? false;
+    const rawGoal      = goalLapsEl?.value?.trim();
+    const goalLaps     = rawGoal && !isNaN(parseInt(rawGoal, 10))
+      ? Math.max(1, parseInt(rawGoal, 10))
+      : null;
+
+    return { delayedStart, goalLaps };
+  }
+
   _initViewfinderCanvas();
   _initCalibrationSliders();
+
+  // ── Phase 5: Delayed Start toggle wiring ──────────────────────────────────
+  const _delayedStartBtn   = document.getElementById('toggle-delayed-start');
+  const _delayedStartLabel = document.getElementById('delayed-start-value');
+
+  if (_delayedStartBtn) {
+    _delayedStartBtn.addEventListener('click', () => {
+      const isActive = _delayedStartBtn.getAttribute('aria-checked') === 'true';
+      const next     = !isActive;
+      _delayedStartBtn.setAttribute('aria-checked', String(next));
+      _delayedStartBtn.dataset.active = String(next);
+      if (_delayedStartLabel) _delayedStartLabel.textContent = next ? 'On' : 'Off';
+    });
+  }
+
+  const _goalLapsInput = document.getElementById('input-goal-laps');
+  const _goalLapsLabel = document.getElementById('goal-laps-value');
+
+  if (_goalLapsInput) {
+    _goalLapsInput.addEventListener('input', () => {
+      const v = _goalLapsInput.value.trim();
+      if (_goalLapsLabel) {
+        _goalLapsLabel.textContent = v && !isNaN(parseInt(v, 10)) ? `${parseInt(v, 10)} laps` : '∞';
+      }
+    });
+  }
 
   // ── Phase 3: Confirm button navigation ─────────────────────────────────
 
   const confirmBtn = document.getElementById('viewfinder-confirm');
   if (confirmBtn) {
     confirmBtn.addEventListener('click', () => {
-      stopDetection();             // Phase 4: tear down test mode before navigating
+      stopDetection(); // Phase 4: tear down test mode
 
-      const roi      = getROI();          // from viewfinder.js
-      const settings = getAllSettings();  // from calibration.js
+      const roi      = getROI();
+      const settings = getAllSettings();
+      const { delayedStart, goalLaps } = _readViewfinderSessionConfig();
 
-      // Temporary session holder for Phase 4/5 consumption.
-      // Phase 5 will replace this with a proper session state module.
-      window.__rcSession = { roi, settings };
+      const driverName = document.getElementById('input-driver-name')?.value.trim() ?? '';
+      const carName    = document.getElementById('input-car-name')?.value.trim()    ?? '';
+      const location   = document.getElementById('input-location')?.value.trim()    ?? '';
 
-      console.log('[Phase 3] Session state ready:', window.__rcSession);
+      window.__rcSession = {
+        roi,
+        settings,
+        goalLaps,
+        delayedStart,
+        meta: { driverName, carName, location },
+      };
 
-      // Screen 'dashboard' does not yet exist; router silently no-ops until Phase 5.
-      showScreen('dashboard');
+      const _enterDashboard = () => {
+        showScreen('dashboard');
+        initDashboard({ roi, detectionSettings: settings });
+      };
+
+      if (delayedStart) {
+        showScreen('countdown');
+        _runCountdown(_enterDashboard);
+      } else {
+        _enterDashboard();
+      }
+    });
+  }
+
+  // ── Phase 5: Countdown helper ───────────────────────────────────────────────
+  function _runCountdown(onComplete) {
+    const digitEl   = document.getElementById('countdown-digit');
+    const cancelBtn = document.getElementById('btn-cancel-countdown');
+
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', () => {
+        cancelCountdown();
+      }, { once: true });
+    }
+
+    startCountdown({
+      duration: 10,
+      onTick: (n) => {
+        if (!digitEl) return;
+        digitEl.classList.add('is-ticking');
+        requestAnimationFrame(() => {
+          digitEl.textContent = n === 0 ? 'GO!' : String(n);
+          requestAnimationFrame(() => digitEl.classList.remove('is-ticking'));
+        });
+        if (n === 0) {
+          import('./audio.js').then(({ playFinalBeep }) => playFinalBeep());
+        } else {
+          import('./audio.js').then(({ playCountdownBeep }) => playCountdownBeep());
+        }
+      },
+      onComplete: () => {
+        onComplete();
+      },
+      onCancel: () => {
+        showScreen('viewfinder');
+        const roi      = getROI();
+        const settings = getAllSettings();
+        if (roi && hasCompleteLine()) {
+          startDetection({
+            videoEl:     document.getElementById('viewfinder-video'),
+            canvasEl:    document.getElementById('viewfinder-canvas'),
+            roi,
+            sensitivity: settings.sensitivity,
+            debounce:    settings.debounce,
+            onTrigger:   _onDetectionTrigger,
+          });
+        }
+      },
     });
   }
 
