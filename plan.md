@@ -1,43 +1,35 @@
 # RC Lap Timer – Implementation Plan
 
 ## Current Focus
-
+Phase 4 – Motion Detection Engine
 
 ## Completed
+- Phase 1 – Foundation & PWA Scaffold
+- Phase 2 – Hardware Interfacing (Camera & Audio)
+- Phase 3 – The Setup Layer / Viewfinder (Screen 2)
 
+---
 
-## Phase 1: Foundation & PWA Scaffold
-_Goal: Establish the shell and offline capabilities before adding complex logic._
+## ✅ Phase 1: Foundation & PWA Scaffold _(Complete)_
+- PWA manifest with Electric Lime theme, OLED black background, portrait orientation
+- Cache-first Service Worker (`rc-timer-v1`) pre-caching all shell assets
+- Home Screen with Driver Name, Car Name, Location inputs; Start/History buttons; gear icon
+- `router.js` exports `showScreen()` / `currentScreen()` (named functions, not a class)
+- `localStorage` keys: `rc_driverName`, `rc_carName`, `rc_location`
+- CSS design tokens in `tokens.css`; placeholder icons at `Assets/icons/`
 
-- [ ] **1.1 Project Structure & PWA Manifest** – Create the basic HTML/CSS/JS file structure. Set up `manifest.json` with icons and theme colors.
-- [ ] **1.2 Service Worker Registration** – Implement a basic Service Worker to cache the shell (`index.html`, styles, and main script) for offline use.
-- [ ] **1.3 Home Screen (Screen 1)** – Build the app entry point: text fields for Driver Name, Car Name, and Location; large high-contrast "Start New Session" and "View History" navigation buttons; gear icon that links to Global Settings (Screen 7).
+## ✅ Phase 2: Hardware Interfacing (Camera & Audio) _(Complete)_
+- `camera.js` – `startCamera()`, `stopCamera()`, `getCameraStream()`, `isCameraActive()`; requests `environment` facing mode with fallback for desktop; inline error banners (no `alert()`)
+- `wakeLock.js` – `acquireWakeLock()`, `releaseWakeLock()`, auto-reacquire on `visibilitychange`; graceful no-op if unsupported
+- `audio.js` – Web Audio API beeps + `speechSynthesis` TTS; `playBeep()`, `speak()`, `announceLap()`
+- `viewfinder.css` – full-screen video, canvas overlay, HUD chips, stabilizing overlay
+- Service Worker updated to `rc-timer-v2` caching 13 assets
 
-> **Milestone:** The app is installable via Chrome/Safari and opens to the Home screen without an internet connection.
-
-## Phase 2: Hardware Interfacing (Camera & Audio)
-_Goal: Gain stable access to the device's sensors._
-
-- [ ] **2.1 Camera Stream & Viewfinder** – Use `getUserMedia` to stream video into a `<video>` element. Ensure it requests the `"environment"` (back) camera.
-- [ ] **2.2 Lock APIs** – Implement the Wake Lock API to keep the screen on and the ImageCapture API (where supported) to lock focus/exposure. Show status indicators confirming "Screen Lock is Active" and "Camera Stabilized."
-- [ ] **2.3 Stability Delay** – Skip the first ~2 seconds of frames after camera init to allow auto-exposure/focus to settle before detection begins.
-- [ ] **2.4 Audio & Speech Engine** – Initialize the Web Audio API for beeps and `window.speechSynthesis` for TTS lap announcements.
-
-> **Milestone:** User can see the camera feed, toggle a "Screen Stay Awake" button, and trigger a test TTS voice notification.
-
-## Phase 3: The Setup Layer / Viewfinder (Screen 2)
-_Goal: Allow the user to define where the car will be detected and calibrate detection settings._
-
-- [ ] **3.1 Transparent Canvas Overlay** – Place a `<canvas>` directly over the video feed.
-- [ ] **3.2 Drawing Logic** – Implement touch/click-drag events to allow the user to draw a "Thick Line" (Trigger Zone). Points can be repositioned by clicking and dragging after placement.
-- [ ] **3.3 Calibration Tools UI** – Build the three sliders directly on the Viewfinder screen:
-  - **Sensitivity Slider** – adjustable % threshold for detection.
-  - **Debounce Slider** – 1.0s–5.0s range to prevent double-triggers.
-  - **Zone Width Slider** – changes the pixel-width of the detection zone around the drawn line.
-- [ ] **3.4 Data Normalization** – Convert the drawn coordinates and Zone Width into a localized Region of Interest (ROI) array that the processing logic can consume.
-- [ ] **3.5 Confirm Button** – Large "Confirm" action button that advances the user to the Countdown Overlay or Race Dashboard.
-
-> **Milestone:** A user can draw a line over the track path, adjust all three calibration sliders, and the ROI coordinates plus settings are stored and ready for the detection engine.
+## ✅ Phase 3: The Setup Layer / Viewfinder (Screen 2) _(Complete)_
+- `viewfinder.js` – canvas over video; touch/mouse draw 2-point line; drag handles to reposition; proportional rescaling on resize; `initCanvas()`, `resetLine()`, `getROI()`, `onLineChange()`
+- `calibration.js` – Sensitivity (1–100%), Debounce (1.0–5.0s), Zone Width (10–100px) sliders; persisted to `localStorage`; exports `getCalibration()`, `setCalibration()`
+- ROI normalized to 0–1 coordinates for resolution-independent detection
+- Confirm button enabled only after line is drawn; advances to Race Dashboard
 
 ## Phase 4: Motion Detection Engine (The Core)
 _Goal: The most critical phase — turning pixels into data._
