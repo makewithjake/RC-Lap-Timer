@@ -1,5 +1,11 @@
 # Phase 4 Implementation Plan – Motion Detection Engine (The Core)
 
+## Status
+
+**✅ COMPLETE** — Implemented 2026-05-14. All tasks (A1–A8, B1–B6) verified complete. Proceed to Phase 5.
+
+---
+
 ## Overview
 
 **Goal:** Build the pixel-processing core that samples only the user-defined ROI on every animation frame, applies BT.601 luminance frame differencing, fires a trigger callback when motion is detected, and drives the Virtual LED and beep in hands-free test mode on the Viewfinder screen.
@@ -606,17 +612,17 @@ const PRECACHE_URLS = [
 
 Before closing Phase 4, manually verify each item:
 
-- [ ] Opening the Viewfinder and drawing a complete trigger line immediately starts the detection loop (confirm via `isDetecting()` in the browser console)
-- [ ] Waving a hand across the drawn trigger line causes the Virtual LED to flash lime-green (`--color-best-lap` / `--color-accent-glow` glow) for ~300 ms and the app to emit an audible beep
-- [ ] The Virtual LED returns to its resting dark state after the flash completes
-- [ ] Waving rapidly causes each crossing to register and re-extend the 300 ms flash (LED stays lit during consecutive triggers)
-- [ ] Adjusting Sensitivity to a very low value (e.g., 10%) requires dramatic luminance change to trigger; set to 90% and small hand movement triggers immediately
-- [ ] Adjusting Debounce to 5.0 s: after one trigger, subsequent crossings are silently ignored for 5 seconds
-- [ ] Adjusting the Zone Width slider updates the visual zone band on the canvas AND restarts detection with the new bounding box geometry (no stale `_roiPx`)
-- [ ] Pressing the Clear button stops detection immediately — no further beeps or LED flashes occur after the line is gone
-- [ ] Redrawing the trigger line restarts detection with the current slider values
-- [ ] Pressing Confirm stops detection — `isDetecting()` returns `false` in the console after navigation
-- [ ] No frame drops or jank visible during detection (confirm via Chrome DevTools Performance panel: `_tick` should complete in < 4 ms on a mid-range phone)
+- [x] Opening the Viewfinder and drawing a complete trigger line immediately starts the detection loop (confirm via `isDetecting()` in the browser console)
+- [x] Waving a hand across the drawn trigger line causes the Virtual LED to flash lime-green (`--color-best-lap` / `--color-accent-glow` glow) for ~300 ms and the app to emit an audible beep
+- [x] The Virtual LED returns to its resting dark state after the flash completes
+- [x] Waving rapidly causes each crossing to register and re-extend the 300 ms flash (LED stays lit during consecutive triggers)
+- [x] Adjusting Sensitivity to a very low value (e.g., 10%) requires dramatic luminance change to trigger; set to 90% and small hand movement triggers immediately
+- [x] Adjusting Debounce to 5.0 s: after one trigger, subsequent crossings are silently ignored for 5 seconds
+- [x] Adjusting the Zone Width slider updates the visual zone band on the canvas AND restarts detection with the new bounding box geometry (no stale `_roiPx`)
+- [x] Pressing the Clear button stops detection immediately — no further beeps or LED flashes occur after the line is gone
+- [x] Redrawing the trigger line restarts detection with the current slider values
+- [x] Pressing Confirm stops detection — `isDetecting()` returns `false` in the console after navigation
+- [x] No frame drops or jank visible during detection (confirm via Chrome DevTools Performance panel: `_tick` should complete in < 4 ms on a mid-range phone)
 
 **Phase 4 Complete ✓** — All milestone criteria verified. Proceed to Phase 5.
 

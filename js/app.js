@@ -22,6 +22,7 @@ import {
   setZoneWidth,
   getAllSettings,
 } from './calibration.js';
+import { startDetection, stopDetection, isDetecting } from './detector.js';
 
 // ── Status chip helpers ───────────────────────────────────────
 
@@ -93,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
       sensitivityDisplay.textContent = `${v}%`;
       sliderSensitivity.setAttribute('aria-valuenow', v);
       _syncSliderFill(sliderSensitivity);
+      _restartDetectionIfActive(); // Phase 4
     });
 
     sliderDebounce.addEventListener('input', () => {
@@ -101,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
       debounceDisplay.textContent = `${v}s`;
       sliderDebounce.setAttribute('aria-valuenow', v);
       _syncSliderFill(sliderDebounce);
+      _restartDetectionIfActive(); // Phase 4
     });
 
     sliderZoneWidth.addEventListener('input', () => {
@@ -110,6 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
       zoneWidthDisplay.textContent = `${v}px`;
       sliderZoneWidth.setAttribute('aria-valuenow', v);
       _syncSliderFill(sliderZoneWidth);
+      _restartDetectionIfActive(); // Phase 4 (zone width changes ROI geometry)
     });
   }
 
@@ -127,6 +131,22 @@ document.addEventListener('DOMContentLoaded', () => {
     onLineChange((hasLine) => {
       confirmBtn.disabled = !hasLine;
       clearBtn.classList.toggle('is-visible', hasLine);
+
+      // Phase 4: Auto-start test mode when trigger line is complete; stop when cleared.
+      if (hasLine) {
+        const roi      = getROI();
+        const settings = getAllSettings();
+        startDetection({
+          videoEl:     videoEl,
+          canvasEl:    canvasEl,
+          roi,
+          sensitivity: settings.sensitivity,
+          debounce:    settings.debounce,
+          onTrigger:   _onDetectionTrigger,
+        });
+      } else {
+        stopDetection();
+      }
     });
 
     // Start disabled — a drawn line is required (supersedes Phase 2 stability-delay enable)
@@ -134,6 +154,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
     clearBtn.addEventListener('click', () => {
       clearLine(); // onLineChange callback fires automatically, updating button states
+    });
+  }
+
+  // ── Phase 4: Virtual LED flash ────────────────────────────────────────────
+  const _ledEl = document.getElementById('virtual-led');
+  let _ledFlashTimer = null;
+
+  /**
+   * Flashes the Virtual LED for 300 ms.
+   * If called during an active flash, the timer is reset to give a full 300 ms
+   * from the most recent trigger — preventing the LED from cutting off early.
+   */
+  function _activateVirtualLED() {
+    if (!_ledEl) return;
+    if (_ledFlashTimer !== null) clearTimeout(_ledFlashTimer);
+    _ledEl.dataset.active = 'true';
+    _ledFlashTimer = setTimeout(() => {
+      _ledEl.dataset.active = 'false';
+      _ledFlashTimer = null;
+    }, 300);
+  }
+
+  /** Single shared onTrigger callback used by both startDetection() call sites. */
+  function _onDetectionTrigger() {
+    _activateVirtualLED();
+    playBeep();
+  }
+
+  // ── Phase 4: Restart detection with updated settings on slider change ────────
+  function _restartDetectionIfActive() {
+    if (!isDetecting()) return;
+    stopDetection();
+    const roi      = getROI();
+    const settings = getAllSettings();
+    if (roi === null) return; // Guard: line was cleared between isDetecting() and getROI()
+    startDetection({
+      videoEl:     document.getElementById('viewfinder-video'),
+      canvasEl:    document.getElementById('viewfinder-canvas'),
+      roi,
+      sensitivity: settings.sensitivity,
+      debounce:    settings.debounce,
+      onTrigger:   _onDetectionTrigger,
     });
   }
 
@@ -145,6 +207,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const confirmBtn = document.getElementById('viewfinder-confirm');
   if (confirmBtn) {
     confirmBtn.addEventListener('click', () => {
+      stopDetection();             // Phase 4: tear down test mode before navigating
+
       const roi      = getROI();          // from viewfinder.js
       const settings = getAllSettings();  // from calibration.js
 
