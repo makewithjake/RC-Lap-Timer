@@ -13,8 +13,10 @@ let _hiddenCtx    = null;      // 2D context for _hiddenCanvas
 let _prevPixels   = null;      // Float32Array — luminance values from the previous frame
 let _currPixels   = null;      // Float32Array — luminance values from the current frame (reused)
 let _roiPx        = null;      // Computed ROI geometry in pixel space (see _computeROIPixels)
-let _config       = null;      // Frozen config object set in startDetection()
-let _lastTrigger  = -Infinity; // performance.now() timestamp of the last fired trigger
+let _config          = null;      // Frozen config object set in startDetection()
+let _lastTrigger     = -Infinity; // performance.now() timestamp of the last fired trigger
+let _resumeAttempted = false;     // Guard: prevents repeated play() calls while awaiting resume
+let _debugFrameCount = 0;         // Monotonic counter for throttled diagnostic logging
 
 // ── A2 — ROI Pixel Space Computation ─────────────────────────────────────────
 
@@ -118,9 +120,35 @@ function _tick() {
 
   // Step 1: Guard — video not ready
   if (videoEl.readyState < 2 || videoEl.videoWidth === 0) {
+    _debugFrameCount++;
+    if (_debugFrameCount % 60 === 0) {
+      console.warn(
+        `[detector] WAITING frame=${_debugFrameCount}` +
+        ` readyState=${videoEl.readyState} videoWidth=${videoEl.videoWidth}` +
+        ` paused=${videoEl.paused} srcObject=${videoEl.srcObject ? 'set' : 'null'}`
+      );
+    }
     _rafId = requestAnimationFrame(_tick);
     return;
   }
+
+  // Step 1b: Guard — video paused (iOS Safari pauses <video> when its containing
+  // element gets display:none, e.g. when the viewfinder section is hidden behind
+  // the dashboard). A paused video returns the same frozen frame on every
+  // drawImage call → changeRatio stays 0 → onTrigger never fires.
+  if (videoEl.paused) {
+    if (!_resumeAttempted) {
+      _resumeAttempted = true;
+      videoEl.play()
+        .then(() => { _resumeAttempted = false; })
+        .catch(() => { _resumeAttempted = false; });
+    }
+    _rafId = requestAnimationFrame(_tick);
+    return;
+  }
+  _resumeAttempted = false; // Video is playing — clear the one-shot flag
+
+  try {
 
   // Step 2: Scale factors
   const scaleX = videoEl.videoWidth  / displayW;
@@ -163,20 +191,44 @@ function _tick() {
     }
   }
 
-  // Step 7: Trigger decision
+  // Step 7: Trigger decision + throttled diagnostic logging (~1× per second at 60 fps)
+  _debugFrameCount++;
   if (_prevPixels !== null && inZoneCount > 0) {
     const changeRatio = changedCount / inZoneCount;
-    const now         = performance.now();
+    if (_debugFrameCount % 60 === 0) {
+      console.log(
+        `[detector] frame=${_debugFrameCount} ready=${videoEl.readyState}` +
+        ` paused=${videoEl.paused} inZone=${inZoneCount} ratio=${changeRatio.toFixed(3)}`
+      );
+    }
+    const now = performance.now();
     if (changeRatio >= TRIGGER_RATIO && (now - _lastTrigger) / 1000 >= debounce) {
       _lastTrigger = now;
-      onTrigger();
+      try { onTrigger(); } catch (e) { console.error('[detector] onTrigger threw:', e); }
     }
+  } else if (_debugFrameCount % 60 === 0) {
+    console.log(
+      `[detector] frame=${_debugFrameCount} ready=${videoEl.readyState}` +
+      ` paused=${videoEl.paused} inZone=${inZoneCount} (no prev frame yet)`
+    );
   }
 
-  // Step 8: Swap pixel buffers (no allocation)
-  [_prevPixels, _currPixels] = [_currPixels, _prevPixels];
+  // Step 8: Swap pixel buffers.
+  // On the very first tick _prevPixels is null — allocate the second buffer now
+  // so both buffers exist from frame 2 onward. From frame 2 onward a plain swap
+  // reuses both pre-allocated arrays with zero new allocation.
+  if (_prevPixels === null) {
+    _prevPixels = _currPixels;
+    _currPixels = new Float32Array(_prevPixels.length);
+  } else {
+    [_prevPixels, _currPixels] = [_currPixels, _prevPixels];
+  }
 
-  // Step 9: Reschedule
+  } catch (e) {
+    console.error('[detector] _tick error (loop kept alive):', e);
+  }
+
+  // Step 9: Reschedule — always outside try/catch so the loop survives any error
   _rafId = requestAnimationFrame(_tick);
 }
 
@@ -223,7 +275,19 @@ export function startDetection(config) {
     onTrigger:   config.onTrigger,
   };
 
-  _lastTrigger = -Infinity; // Ensure the very first detection fires immediately
+  _lastTrigger     = -Infinity; // Ensure the very first detection fires immediately
+  _resumeAttempted = false;
+  _debugFrameCount = 0;
+
+  console.log(
+    `[detector] startDetection: displayW=${displayW} displayH=${displayH}` +
+    ` roiPx=${JSON.stringify(_roiPx)}` +
+    ` videoEl.readyState=${config.videoEl.readyState}` +
+    ` videoEl.videoWidth=${config.videoEl.videoWidth}` +
+    ` videoEl.paused=${config.videoEl.paused}` +
+    ` srcObject=${config.videoEl.srcObject ? 'set' : 'null'}`
+  );
+
   _rafId = requestAnimationFrame(_tick);
 }
 
@@ -238,12 +302,13 @@ export function stopDetection() {
     cancelAnimationFrame(_rafId);
     _rafId = null;
   }
-  _hiddenCanvas = null;
-  _hiddenCtx    = null;
-  _prevPixels   = null;
-  _currPixels   = null;
-  _roiPx        = null;
-  _config       = null;
+  _hiddenCanvas    = null;
+  _hiddenCtx       = null;
+  _prevPixels      = null;
+  _currPixels      = null;
+  _roiPx           = null;
+  _config          = null;
+  _resumeAttempted = false;
 }
 
 /**

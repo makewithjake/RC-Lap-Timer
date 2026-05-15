@@ -146,8 +146,18 @@ document.addEventListener('DOMContentLoaded', () => {
           debounce:    settings.debounce,
           onTrigger:   _onDetectionTrigger,
         });
+        if (_ledEl) _ledEl.dataset.state = 'active';
+        if (_motionChipEl) {
+          _motionChipEl.dataset.state = 'active';
+          _motionChipEl.textContent   = '● Motion: ON';
+        }
       } else {
         stopDetection();
+        if (_ledEl) _ledEl.dataset.state = 'idle';
+        if (_motionChipEl) {
+          _motionChipEl.dataset.state = 'idle';
+          _motionChipEl.textContent   = '● Motion: OFF';
+        }
       }
     });
 
@@ -160,22 +170,36 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ── Phase 4: Virtual LED flash ────────────────────────────────────────────
-  const _ledEl = document.getElementById('virtual-led');
+  const _ledEl        = document.getElementById('virtual-led');
+  const _motionChipEl = document.getElementById('status-motion');
+  const _flashEl      = document.getElementById('detection-flash');
   let _ledFlashTimer = null;
 
-  /**
-   * Flashes the Virtual LED for 300 ms.
-   * If called during an active flash, the timer is reset to give a full 300 ms
-   * from the most recent trigger — preventing the LED from cutting off early.
-   */
   function _activateVirtualLED() {
     if (!_ledEl) return;
     if (_ledFlashTimer !== null) clearTimeout(_ledFlashTimer);
-    _ledEl.dataset.active = 'true';
+
+    // LED circle
+    _ledEl.dataset.state = 'triggered';
+    // HUD chip
+    if (_motionChipEl) {
+      _motionChipEl.dataset.state = 'triggered';
+      _motionChipEl.textContent   = '● DETECTED!';
+    }
+    // Full-screen green flash
+    if (_flashEl) {
+      _flashEl.classList.add('is-active');
+    }
+
     _ledFlashTimer = setTimeout(() => {
-      _ledEl.dataset.active = 'false';
+      _ledEl.dataset.state = 'active';
+      if (_motionChipEl) {
+        _motionChipEl.dataset.state = 'active';
+        _motionChipEl.textContent   = '● Motion: ON';
+      }
+      if (_flashEl) _flashEl.classList.remove('is-active');
       _ledFlashTimer = null;
-    }, 300);
+    }, 600);
   }
 
   /** Single shared onTrigger callback used by both startDetection() call sites. */
@@ -199,6 +223,11 @@ document.addEventListener('DOMContentLoaded', () => {
       debounce:    settings.debounce,
       onTrigger:   _onDetectionTrigger,
     });
+    if (_ledEl) _ledEl.dataset.state = 'active';
+    if (_motionChipEl) {
+      _motionChipEl.dataset.state = 'active';
+      _motionChipEl.textContent   = '● Motion: ON';
+    }
   }
 
   function _readViewfinderSessionConfig() {
@@ -280,16 +309,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ── Stub screen back buttons ────────────────────────────────────────────────
+  document.getElementById('btn-history-back')?.addEventListener('click', () => showScreen('home'));
+  document.getElementById('btn-settings-back')?.addEventListener('click', () => showScreen('home'));
+
+  // ── Phase 5: Cancel button — wired once at init so it always works ─────────
+  const _cancelCountdownBtn = document.getElementById('btn-cancel-countdown');
+  if (_cancelCountdownBtn) {
+    _cancelCountdownBtn.addEventListener('click', () => {
+      cancelCountdown();
+    });
+  }
+
   // ── Phase 5: Countdown helper ───────────────────────────────────────────────
   function _runCountdown(onComplete) {
-    const digitEl   = document.getElementById('countdown-digit');
-    const cancelBtn = document.getElementById('btn-cancel-countdown');
-
-    if (cancelBtn) {
-      cancelBtn.addEventListener('click', () => {
-        cancelCountdown();
-      }, { once: true });
-    }
+    const digitEl = document.getElementById('countdown-digit');
 
     startCountdown({
       duration: 10,
@@ -322,6 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
             debounce:    settings.debounce,
             onTrigger:   _onDetectionTrigger,
           });
+          if (_ledEl) _ledEl.dataset.state = 'active';
         }
       },
     });

@@ -36,8 +36,9 @@ export function startCountdown(config) {
 
     // _remaining === 0: final tick
     _callbacks.onTick(0);
+    const onComplete = _callbacks.onComplete;
     _clearInterval();
-    _callbacks.onComplete();
+    onComplete();
   }, 1000);
 }
 
@@ -47,8 +48,9 @@ export function startCountdown(config) {
  */
 export function cancelCountdown() {
   if (_intervalId === null) return;
+  const onCancel = _callbacks.onCancel;
   _clearInterval();
-  _callbacks.onCancel();
+  onCancel();
 }
 
 /** @private */

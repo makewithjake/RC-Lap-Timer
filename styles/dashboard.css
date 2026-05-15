@@ -39,6 +39,12 @@
   color: var(--color-start);
 }
 
+/* Brief green flash on trigger detection (set by _flashTriggerIndicator) */
+.dash-system-status[data-state="triggered"] {
+  color: var(--color-best-lap);
+  transition: color 0ms;
+}
+
 .dashboard-clock-area {
   display: flex;
   flex-direction: column;

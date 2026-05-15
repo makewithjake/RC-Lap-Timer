@@ -136,7 +136,7 @@
           class="virtual-led"
           role="status"
           aria-label="Motion detection indicator"
-          data-active="false"
+          data-state="idle"
         ></div>
 
         <!-- Phase 3: Calibration tools panel (Task 3.3) -->
@@ -248,7 +248,10 @@
 
         </div>
 
-        <!-- HUD status bar — Wake Lock chip (B2) + Camera Lock chip (B4) -->
+        <!-- Detection flash overlay — full-screen green pulse on each trigger -->
+        <div id="detection-flash" class="detection-flash" aria-hidden="true"></div>
+
+        <!-- HUD status bar — Wake Lock chip (B2) + Camera Lock chip (B4) + Motion chip -->
         <div class="viewfinder-hud" aria-label="Status indicators">
           <span
             id="status-wake-lock"
@@ -262,6 +265,13 @@
             data-state="inactive"
             aria-label="Camera stabilization status"
           >📷 Camera Auto</span>
+          <span
+            id="status-motion"
+            class="viewfinder-status-chip viewfinder-motion-chip"
+            data-state="idle"
+            aria-live="polite"
+            aria-label="Motion detection status"
+          >● Motion: OFF</span>
         </div>
 
         <!-- Inline error banner — shown by camera.js error handlers (A3) -->
@@ -297,7 +307,7 @@
             role="status"
             aria-live="assertive"
             aria-atomic="true"
-          >10</div>
+          ></div>
           <p class="countdown-label">Get ready!</p>
           <button
             id="btn-cancel-countdown"
@@ -306,6 +316,24 @@
             aria-label="Cancel countdown and return to setup"
           >Cancel</button>
         </div>
+      </section>
+
+      <!-- ── Screen 5: History ──────────────────────────────────────────── -->
+      <section id="screen-history" hidden>
+        <header class="stub-header">
+          <button id="btn-history-back" type="button" class="stub-back-btn" aria-label="Back to home">← Back</button>
+          <h1 class="stub-title">History</h1>
+        </header>
+        <p class="stub-body">Session history coming soon.</p>
+      </section>
+
+      <!-- ── Screen 6: Settings ─────────────────────────────────────────── -->
+      <section id="screen-settings" hidden>
+        <header class="stub-header">
+          <button id="btn-settings-back" type="button" class="stub-back-btn" aria-label="Back to home">← Back</button>
+          <h1 class="stub-title">Settings</h1>
+        </header>
+        <p class="stub-body">Settings coming soon.</p>
       </section>
 
       <!-- ── Screen 4: Race Dashboard ─────────────────────────────────── -->

@@ -121,6 +121,42 @@ a {
 }
 
 /* ----------------------------------------------------------
+   Enforce the HTML `hidden` attribute — prevents display
+   overrides from component-level CSS from making hidden
+   sections visible. [hidden] must always win.
+   ---------------------------------------------------------- */
+[hidden] {
+  display: none !important;
+}
+
+/* ----------------------------------------------------------
+   Stub screen layout (History / Settings placeholders)
+   ---------------------------------------------------------- */
+.stub-header {
+  display:     flex;
+  align-items: center;
+  gap:         var(--space-3, 12px);
+  padding:     var(--space-4, 16px);
+  border-bottom: 1px solid var(--color-border, #333);
+}
+
+.stub-title {
+  font-size:   1.25rem;
+  font-weight: 700;
+}
+
+.stub-back-btn {
+  font-size:   1rem;
+  padding:     var(--space-2, 8px) var(--space-3, 12px);
+  color:       var(--color-accent, #C6FF00);
+}
+
+.stub-body {
+  padding: var(--space-4, 16px);
+  color:   var(--color-text-secondary, #888);
+}
+
+/* ----------------------------------------------------------
    Utility: visually hidden (accessible label helper)
    ---------------------------------------------------------- */
 .visually-hidden {

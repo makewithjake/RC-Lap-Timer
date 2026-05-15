@@ -132,7 +132,8 @@ function _updateLapCounter(lapCount, goalLaps) {
 
 // ── Big Clock RAF Loop ────────────────────────────────────────────────────────
 
-let _clockRafId = null;
+let _clockRafId       = null;
+let _detectionVideoEl = null; // Off-screen <video> used for detection on the dashboard
 
 function _startClockRaf() {
   if (_clockRafId !== null) return;
@@ -186,6 +187,33 @@ function _setSystemStatus(active) {
   el.textContent   = active ? 'System Active' : 'System Stopped';
 }
 
+/**
+ * Briefly flashes the system-status chip green to give visual confirmation
+ * that a trigger was detected (first crossing or subsequent lap).
+ */
+function _flashTriggerIndicator() {
+  const el = document.getElementById('dash-system-status');
+  if (!el) return;
+  el.dataset.state = 'triggered';
+  setTimeout(() => { el.dataset.state = 'active'; }, 180);
+}
+
+/**
+ * Tears down the off-screen detection video element created in _beginSession().
+ * Must be called in every code path that exits the active session
+ * (stop, reset, goal met).
+ */
+function _teardownDetectionVideo() {
+  if (_detectionVideoEl) {
+    _detectionVideoEl.pause();
+    _detectionVideoEl.srcObject = null;
+    if (_detectionVideoEl.parentNode) {
+      _detectionVideoEl.parentNode.removeChild(_detectionVideoEl);
+    }
+    _detectionVideoEl = null;
+  }
+}
+
 // ── Camera Toggle ─────────────────────────────────────────────────────────────
 
 function _initCameraToggle() {
@@ -220,6 +248,7 @@ function _initCameraToggle() {
 function _handleStop(frozenTime) {
   stopSession();
   stopDetection();
+  _teardownDetectionVideo();
   _stopClockRaf();
   _freezeClock(frozenTime.lapMs, frozenTime.totalMs);
   _setSystemStatus(false);
@@ -246,6 +275,7 @@ function _handleStop(frozenTime) {
 function _handleReset(roi, detectionSettings) {
   _stopClockRaf();
   stopDetection();
+  _teardownDetectionVideo();
   resetSession();
 
   const tbody = document.getElementById('dash-lap-tbody');
@@ -273,6 +303,7 @@ function _beginSession(roi, detectionSettings) {
     onFirstCross: () => {
       _startClockRaf();
       _updateLapCounter(0, goalLaps);
+      _flashTriggerIndicator();
     },
     onLap: (lap, allLaps) => {
       playLapBeep();
@@ -280,6 +311,7 @@ function _beginSession(roi, detectionSettings) {
       _appendLapRow(lap);
       _refreshBestLapHighlight();
       _updateLapCounter(allLaps.length, goalLaps);
+      _flashTriggerIndicator();
     },
     onGoalMet: (allLaps) => {
       const lastLap = allLaps[allLaps.length - 1];
@@ -288,17 +320,77 @@ function _beginSession(roi, detectionSettings) {
     },
   });
 
-  const videoEl  = document.getElementById('viewfinder-video');
+  // Use the viewfinder canvas only for its intrinsic width/height (ROI geometry).
+  // Its dimensions persist even when the section is hidden.
   const canvasEl = document.getElementById('viewfinder-canvas');
 
-  startDetection({
-    videoEl,
-    canvasEl,
-    roi,
-    sensitivity: detectionSettings.sensitivity,
-    debounce:    detectionSettings.debounce,
-    onTrigger:   recordTrigger,
+  // Create a dedicated off-screen <video> assigned the live camera stream.
+  // This avoids the iOS Safari bug where <video> inside a display:none parent
+  // is paused, making every drawImage call return an identical frozen frame
+  // and preventing motion detection from ever firing.
+  const stream = getCameraStream();
+
+  if (!stream) {
+    console.error('[dashboard] getCameraStream() returned null — cannot start detection');
+  }
+
+  _detectionVideoEl = document.createElement('video');
+  _detectionVideoEl.muted       = true;
+  _detectionVideoEl.playsInline = true;
+  _detectionVideoEl.setAttribute('playsinline', '');
+  _detectionVideoEl.autoplay    = true;
+  // Fixed off-screen: visible to the browser engine but invisible to the user.
+  // Using visibility:hidden or opacity:0 instead of display:none keeps iOS from
+  // pausing the stream.
+  Object.assign(_detectionVideoEl.style, {
+    position: 'fixed',
+    top:      '-9999px',
+    left:     '-9999px',
+    width:    '1px',
+    height:   '1px',
+    opacity:  '0',
   });
+  if (stream) _detectionVideoEl.srcObject = stream;
+  document.body.appendChild(_detectionVideoEl);
+
+  const _doStartDetection = () => {
+    console.log(
+      `[dashboard] starting detection: videoW=${_detectionVideoEl.videoWidth}` +
+      ` videoH=${_detectionVideoEl.videoHeight}` +
+      ` readyState=${_detectionVideoEl.readyState}` +
+      ` paused=${_detectionVideoEl.paused}` +
+      ` canvasW=${canvasEl ? canvasEl.width : 'null'}` +
+      ` canvasH=${canvasEl ? canvasEl.height : 'null'}`
+    );
+    startDetection({
+      videoEl:     _detectionVideoEl,
+      canvasEl,
+      roi,
+      sensitivity: detectionSettings.sensitivity,
+      debounce:    detectionSettings.debounce,
+      onTrigger:   recordTrigger,
+    });
+  };
+
+  // Wait for video metadata so videoWidth/videoHeight are populated before
+  // detector.js reads them. On iOS a MediaStream video may take a moment.
+  if (_detectionVideoEl.readyState >= 1) {
+    _detectionVideoEl.play().catch((e) => console.warn('[dashboard] play() failed:', e));
+    _doStartDetection();
+  } else {
+    _detectionVideoEl.addEventListener('loadedmetadata', () => {
+      _detectionVideoEl.play().catch((e) => console.warn('[dashboard] play() failed:', e));
+      _doStartDetection();
+    }, { once: true });
+    // Fallback: if loadedmetadata never fires (shouldn't happen), start after 2s
+    setTimeout(() => {
+      if (!_detectionVideoEl) return; // already torn down
+      if (_detectionVideoEl.readyState >= 1) return; // loadedmetadata already handled it
+      console.warn('[dashboard] loadedmetadata timeout — forcing detection start');
+      _detectionVideoEl.play().catch(() => {});
+      _doStartDetection();
+    }, 2000);
+  }
 
   _updateLapCounter(0, goalLaps);
   _setSystemStatus(true);

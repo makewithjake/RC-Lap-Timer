@@ -231,3 +231,11 @@ export function setZoneWidth(px) {
 export function onLineChange(callback) {
   _onLineChangeCb = callback;
 }
+
+/**
+ * Force canvas to re-read its layout dimensions.
+ * Call after the viewfinder screen becomes visible (hidden attribute removed).
+ */
+export function resizeCanvas() {
+  if (_canvas) _resizeCanvas();
+}

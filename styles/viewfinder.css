@@ -70,6 +70,47 @@
 }
 
 /* ----------------------------------------------------------
+   D2b — Motion detection status chip
+   Hidden until the trigger line is drawn (data-state="idle").
+   Amber while detection is running, green flash on each trigger.
+   ---------------------------------------------------------- */
+.viewfinder-motion-chip {
+  display: inline-flex;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+  transition: color 80ms ease, font-size 80ms ease;
+}
+
+.viewfinder-motion-chip[data-state="idle"] {
+  color: var(--color-text-muted);
+}
+
+.viewfinder-motion-chip[data-state="active"] {
+  color: #F59E0B;
+}
+
+.viewfinder-motion-chip[data-state="triggered"] {
+  color: var(--color-best-lap);
+  transition: color 0ms;
+}
+
+/* ── Detection flash overlay ─────────────────────────────────────────────── */
+.detection-flash {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  background: var(--color-best-lap);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 80ms ease-in;
+}
+
+.detection-flash.is-active {
+  opacity: 0.35;
+  transition: opacity 0ms; /* instant on */
+}
+
+/* ----------------------------------------------------------
    D3 — Confirm Button
    Full-width, anchored to the bottom of the viewfinder.
    Respects iOS safe-area inset so it clears the home bar.
@@ -299,13 +340,21 @@
   border-radius: var(--radius-circle);
   background: var(--color-surface-raised);
   border: 2px solid var(--color-border);
-  transition: background 80ms ease, box-shadow 80ms ease;
+  transition: background 80ms ease, box-shadow 80ms ease, border-color 80ms ease;
 }
 
-/* Active state — set data-active="true" from Phase 4 detection engine */
-.virtual-led[data-active="true"] {
+/* Detection running but no motion — amber ring */
+.virtual-led[data-state="active"] {
+  background: var(--color-surface-raised);
+  border-color: #F59E0B;
+  box-shadow: 0 0 8px 2px rgba(245, 158, 11, 0.35);
+}
+
+/* Motion detected — bright green flash */
+.virtual-led[data-state="triggered"] {
   background: var(--color-best-lap);
-  box-shadow: 0 0 12px 4px var(--color-accent-glow);
+  border-color: var(--color-best-lap);
+  box-shadow: 0 0 16px 6px var(--color-accent-glow);
 }
 
 /* ----------------------------------------------------------
@@ -342,4 +391,73 @@
 #btn-clear-line:active {
   opacity: 0.85;
   transform: scale(0.97);
+}
+
+/* ----------------------------------------------------------
+   Phase 5 — Calibration toggle switch and number input
+   ---------------------------------------------------------- */
+
+/* Pill track */
+.calibration-toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  min-width: 44px;
+  min-height: 24px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-border);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.calibration-toggle[data-active="true"] {
+  background-color: var(--color-accent);
+}
+
+/* Sliding thumb */
+.calibration-toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-circle);
+  background-color: #ffffff;
+  transition: transform 0.2s ease;
+  pointer-events: none;
+}
+
+.calibration-toggle[data-active="true"] .calibration-toggle-thumb {
+  transform: translateX(20px);
+}
+
+/* Toggle row — horizontal layout */
+.calibration-row--toggle {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Goal Laps number field */
+.calibration-number-input {
+  width: 72px;
+  height: 36px;
+  padding: var(--space-1) var(--space-2);
+  background-color: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.calibration-number-input:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
 }

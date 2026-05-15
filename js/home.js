@@ -1,6 +1,7 @@
 import { showScreen } from './router.js';
 import { startCamera } from './camera.js';
 import { acquireWakeLock, lockCameraSettings } from './wakeLock.js';
+import { resizeCanvas } from './viewfinder.js';
 
 const STORAGE_KEYS = {
   driverName: 'rc_driverName',
@@ -32,6 +33,7 @@ export function initHome() {
   // Navigation
   document.getElementById('btn-start-session').addEventListener('click', async () => {
     showScreen('viewfinder');
+    resizeCanvas();
 
     const videoEl = document.getElementById('viewfinder-video');
     try {
