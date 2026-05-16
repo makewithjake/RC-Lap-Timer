@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://rctimer.app/sitemap.xml
+# Sitemap: add once a domain is confirmed
