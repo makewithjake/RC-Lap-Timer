@@ -1,0 +1,9 @@
+exclude:
+  - obs/
+  - DEPLOY.md
+  - plan.md
+  - prd.md
+  - prompt_notes_guide.md
+  - screens.md
+  - style_guide.md
+  - webpage_plan.md
