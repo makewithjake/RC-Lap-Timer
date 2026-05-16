@@ -3,405 +3,383 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#C6FF00" />
+    <meta name="theme-color" content="#000000" />
 
-    <!-- Apple PWA meta tags -->
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-    <link rel="apple-touch-icon" href="Assets/icons/icon-180.png" />
+    <title>RC Timer — Camera-Based Lap Timer for RC Cars</title>
+    <meta name="description" content="RC Timer turns your phone into a precision RC car lap timer. No hardware needed — just point your camera at the finish line, draw a trigger zone, and race." />
 
-    <!-- PWA manifest -->
-    <link rel="manifest" href="manifest.json" />
+    <!-- Canonical -->
+    <link rel="canonical" href="https://rctimer.app" />
 
-    <!-- Stylesheets (order matters: tokens → global → component) -->
-    <link rel="stylesheet" href="styles/tokens.css" />
-    <link rel="stylesheet" href="styles/global.css" />
-    <link rel="stylesheet" href="styles/home.css" />
-    <link rel="stylesheet" href="styles/viewfinder.css" />
-    <link rel="stylesheet" href="styles/countdown.css" />
-    <link rel="stylesheet" href="styles/dashboard.css" />
+    <!-- Open Graph -->
+    <meta property="og:title" content="RC Timer — Camera-Based Lap Timer for RC Cars" />
+    <meta property="og:description" content="RC Timer turns your phone into a precision RC car lap timer. No hardware needed — just point your camera at the finish line, draw a trigger zone, and race." />
+    <meta property="og:image" content="Assets/og-image.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://rctimer.app" />
 
-    <title>RC Lap Timer</title>
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="RC Timer — Camera-Based Lap Timer for RC Cars" />
+    <meta name="twitter:description" content="RC Timer turns your phone into a precision RC car lap timer. No hardware needed — just point your camera at the finish line, draw a trigger zone, and race." />
+    <meta name="twitter:image" content="Assets/og-image.png" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet" />
+
+    <!-- Landing stylesheet -->
+    <link rel="stylesheet" href="styles/landing.css" />
   </head>
   <body>
-    <main>
-      <!-- ── Screen 1: Home ─────────────────────────────────────────── -->
-      <section id="screen-home">
-        <!-- Gear / settings button — absolutely positioned top-right -->
+    <!-- Skip to content -->
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    <!-- ─────────────────────────────────────────────
+         NAV
+    ───────────────────────────────────────────── -->
+    <nav id="site-nav" class="site-nav" aria-label="Main navigation">
+      <div class="nav-inner">
+        <a href="/" class="nav-logo" aria-label="RC Timer home">RC TIMER</a>
         <button
-          id="btn-settings"
-          class="home-gear-btn"
-          aria-label="Open Settings"
-          type="button"
+          class="nav-hamburger"
+          id="nav-hamburger"
+          aria-label="Open navigation menu"
+          aria-expanded="false"
+          aria-controls="nav-links"
         >
-          <!-- Gear icon (inline SVG, no external dependency) -->
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            width="24"
-            height="24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-            focusable="false"
-          >
-            <circle cx="12" cy="12" r="3" />
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+            <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            <line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            <line x1="3" y1="18" x2="21" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
           </svg>
         </button>
+        <ul class="nav-links" id="nav-links" role="list">
+          <li><a href="#features">Features</a></li>
+          <li><a href="#how-it-works">How It Works</a></li>
+          <li><a href="#install">Install</a></li>
+          <li><a href="/app/" class="btn-ghost btn-sm">Launch App</a></li>
+        </ul>
+      </div>
+    </nav>
 
-        <div class="home-title-area">
-          <h1 class="home-title">RC Timer</h1>
-        </div>
+    <main id="main-content">
 
-        <div class="home-form">
-          <div class="home-field">
-            <label for="input-driver-name">Driver Name</label>
-            <input
-              type="text"
-              id="input-driver-name"
-              name="driverName"
-              placeholder="Enter driver name"
-              autocomplete="off"
-              spellcheck="false"
+      <!-- ─────────────────────────────────────────────
+           HERO
+      ───────────────────────────────────────────── -->
+      <section id="hero" class="hero circuit-bg" aria-labelledby="hero-heading">
+        <div class="radial-glow" aria-hidden="true"></div>
+        <div class="hero-inner">
+          <div class="hero-text">
+            <p class="hero-eyebrow">The Free Open-Source RC Lap Timer</p>
+            <h1 id="hero-heading" class="hero-headline">
+              Your Phone Is<br>Your Finish Line.
+            </h1>
+            <p class="hero-sub">
+              No hardware. No subscription. Just point, draw, and race. RC Timer uses your phone's camera to detect every crossing — lap times announced instantly.
+            </p>
+            <div class="hero-ctas">
+              <button
+                id="btn-install-hero"
+                class="btn-primary"
+                style="display:none"
+                aria-label="Install RC Timer app for free"
+              >Install Free App</button>
+              <noscript>
+                <a href="/app/" class="btn-primary">Open App</a>
+              </noscript>
+              <a href="#how-it-works" class="btn-ghost">See How It Works</a>
+            </div>
+            <p class="hero-install-fallback">
+              <a href="/app/">Open the app in your browser &rarr;</a>
+            </p>
+          </div>
+          <div class="hero-mockup" aria-hidden="true">
+            <img
+              src="Assets/app-screenshot.png"
+              alt="RC Timer dashboard showing active lap timing session"
+              loading="eager"
+              width="320"
+              height="580"
             />
           </div>
-
-          <div class="home-field">
-            <label for="input-car-name">Car Name</label>
-            <input
-              type="text"
-              id="input-car-name"
-              name="carName"
-              placeholder="Enter car name"
-              autocomplete="off"
-              spellcheck="false"
-            />
-          </div>
-
-          <div class="home-field">
-            <label for="input-location">Location</label>
-            <input
-              type="text"
-              id="input-location"
-              name="location"
-              placeholder="Enter location"
-              autocomplete="off"
-              spellcheck="false"
-            />
-          </div>
-        </div>
-
-        <div class="home-nav">
-          <button id="btn-start-session" class="btn-start-session" type="button">
-            Start New Session
-          </button>
-          <button id="btn-view-history" class="btn-view-history" type="button">
-            View History
-          </button>
         </div>
       </section>
 
-      <!-- ── Screen 2: Viewfinder ──────────────────────────────────── -->
-      <section id="screen-viewfinder" hidden>
-        <!-- Live camera feed (A2) -->
-        <video
-          id="viewfinder-video"
-          autoplay
-          playsinline
-          muted
-          aria-label="Camera viewfinder"
-        ></video>
+      <!-- ─────────────────────────────────────────────
+           FEATURES
+      ───────────────────────────────────────────── -->
+      <section id="features" class="features" aria-labelledby="features-heading">
+        <div class="section-inner">
+          <div class="section-label" data-animate="fade-up">Built for the Track</div>
+          <h2 id="features-heading" class="section-heading" data-animate="fade-up">
+            Everything you need.<br>Nothing you don't.
+          </h2>
+          <div class="features-grid">
 
-        <!-- Phase 3: Canvas overlay for trigger zone drawing (Task 3.1) -->
-        <canvas
-          id="viewfinder-canvas"
-          role="img"
-          aria-label="Trigger zone drawing area. Tap to place start and end points."
-        ></canvas>
+            <!-- Card 1: Camera-Based Detection -->
+            <article class="feature-card" data-animate="fade-up">
+              <div class="feature-icon" aria-hidden="true">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#C6FF00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              </div>
+              <h3 class="feature-title">Camera-Based Detection</h3>
+              <p class="feature-body">No hardware needed. Uses your phone's camera as a motion-sensing finish line. Works with any RC car.</p>
+            </article>
 
-        <!-- Phase 3: Clear drawn line — shown only after line is complete (Task 3.2) -->
-        <button
-          id="btn-clear-line"
-          type="button"
-          aria-label="Clear the drawn trigger line and start over"
-        >Clear</button>
+            <!-- Card 2: Custom Trigger Zone -->
+            <article class="feature-card" data-animate="fade-up">
+              <div class="feature-icon" aria-hidden="true">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#C6FF00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="2" x2="12" y2="6" />
+                  <line x1="12" y1="18" x2="12" y2="22" />
+                  <line x1="2" y1="12" x2="6" y2="12" />
+                  <line x1="18" y1="12" x2="22" y2="12" />
+                  <circle cx="12" cy="12" r="2" />
+                </svg>
+              </div>
+              <h3 class="feature-title">Custom Trigger Zone</h3>
+              <p class="feature-body">Draw your detection line directly on the live feed. Only pixels in the zone are processed — maximum battery life.</p>
+            </article>
 
-        <!-- Phase 3: Virtual LED indicator — activated by Phase 4 detection engine (Task 4.3) -->
-        <div
-          id="virtual-led"
-          class="virtual-led"
-          role="status"
-          aria-label="Motion detection indicator"
-          data-state="idle"
-        ></div>
+            <!-- Card 3: Real-Time Lap Audio -->
+            <article class="feature-card" data-animate="fade-up">
+              <div class="feature-icon" aria-hidden="true">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#C6FF00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                </svg>
+              </div>
+              <h3 class="feature-title">Real-Time Lap Audio</h3>
+              <p class="feature-body">TTS voice announces every lap time the moment your car crosses. Eyes stay on the track.</p>
+            </article>
 
-        <!-- Phase 3: Calibration tools panel (Task 3.3) -->
-        <div class="calibration-panel" id="calibration-panel" aria-label="Detection calibration controls">
+            <!-- Card 4: Offline Ready -->
+            <article class="feature-card" data-animate="fade-up">
+              <div class="feature-icon" aria-hidden="true">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#C6FF00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                  <line x1="1" y1="1" x2="23" y2="23" />
+                  <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55" />
+                  <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39" />
+                  <path d="M10.71 5.05A16 16 0 0 1 22.56 9" />
+                  <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88" />
+                  <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
+                  <line x1="12" y1="20" x2="12.01" y2="20" />
+                </svg>
+              </div>
+              <h3 class="feature-title">Offline Ready</h3>
+              <p class="feature-body">Full airplane-mode support via service worker. Works at remote tracks with zero signal.</p>
+            </article>
 
-          <!-- Sensitivity Slider -->
-          <div class="calibration-row">
-            <label for="slider-sensitivity" class="calibration-label">
-              Sensitivity
-              <span id="sensitivity-value" class="calibration-value">75%</span>
-            </label>
-            <input
-              type="range"
-              id="slider-sensitivity"
-              class="calibration-slider"
-              min="1"
-              max="100"
-              value="75"
-              step="1"
-              aria-valuemin="1"
-              aria-valuemax="100"
-              aria-valuenow="75"
-              aria-label="Detection sensitivity: 75 percent"
-            />
+            <!-- Card 5: Glove-Friendly Controls -->
+            <article class="feature-card" data-animate="fade-up">
+              <div class="feature-icon" aria-hidden="true">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#C6FF00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                  <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0" />
+                  <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2" />
+                  <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8" />
+                  <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" />
+                </svg>
+              </div>
+              <h3 class="feature-title">Glove-Friendly Controls</h3>
+              <p class="feature-body">Extra-large buttons and high-contrast OLED display built for use at arm's length.</p>
+            </article>
+
+            <!-- Card 6: Session History -->
+            <article class="feature-card" data-animate="fade-up">
+              <div class="feature-icon" aria-hidden="true">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#C6FF00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                  <rect x="1" y="1" width="22" height="22" rx="2" ry="2" />
+                  <line x1="6" y1="20" x2="6" y2="14" />
+                  <line x1="12" y1="20" x2="12" y2="4" />
+                  <line x1="18" y1="20" x2="18" y2="10" />
+                </svg>
+              </div>
+              <h3 class="feature-title">Session History</h3>
+              <p class="feature-body">Every session saved locally. Review lap tables, charts, and personal bests anytime.</p>
+            </article>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ─────────────────────────────────────────────
+           HOW IT WORKS
+      ───────────────────────────────────────────── -->
+      <section id="how-it-works" class="how-it-works" aria-labelledby="hiw-heading">
+        <div class="section-inner">
+          <div class="section-label" data-animate="fade-up">Simple by Design</div>
+          <h2 id="hiw-heading" class="section-heading" data-animate="fade-up">
+            Three Steps to Your First Lap
+          </h2>
+          <div class="steps-container">
+            <div class="steps-track" aria-hidden="true"></div>
+
+            <!-- Step 1 -->
+            <article class="step" data-animate="fade-up">
+              <div class="step-number" aria-hidden="true">01</div>
+              <h3 class="step-title">Point &amp; Draw</h3>
+              <p class="step-body">Open the app, aim the camera at your finish line, drag to draw your Trigger Zone on the live feed.</p>
+            </article>
+
+            <!-- Step 2 -->
+            <article class="step" data-animate="fade-up">
+              <div class="step-number" aria-hidden="true">02</div>
+              <h3 class="step-title">Lock &amp; Calibrate</h3>
+              <p class="step-body">Freeze exposure, test sensitivity with the Virtual LED indicator, set your debounce window.</p>
+            </article>
+
+            <!-- Step 3 -->
+            <article class="step" data-animate="fade-up">
+              <div class="step-number" aria-hidden="true">03</div>
+              <h3 class="step-title">Race</h3>
+              <p class="step-body">Hit Start. The timer runs automatically every time your car crosses the Trigger Zone.</p>
+            </article>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ─────────────────────────────────────────────
+           INSTALL
+      ───────────────────────────────────────────── -->
+      <section id="install" class="install circuit-bg" aria-labelledby="install-heading">
+        <div class="section-inner install-inner">
+          <div class="install-label" id="install-heading" data-animate="fade-up">Free. Instant. No App Store.</div>
+          <p class="install-body" data-animate="fade-up">
+            RC Timer is a Progressive Web App. Install it directly from your browser — no app store, no account, no cost.
+          </p>
+          <div class="install-ctas" data-animate="fade-up">
+            <button
+              id="btn-install-main"
+              class="btn-primary btn-lg"
+              style="display:none"
+              aria-label="Install RC Timer app for free"
+            >Install Free App</button>
+            <noscript>
+              <a href="/app/" class="btn-primary btn-lg">Open App</a>
+            </noscript>
+            <p class="install-open-fallback">
+              Already using a browser? <a href="/app/">Open the app &rarr;</a>
+            </p>
           </div>
 
-          <!-- Debounce Slider -->
-          <div class="calibration-row">
-            <label for="slider-debounce" class="calibration-label">
-              Debounce
-              <span id="debounce-value" class="calibration-value">2.0s</span>
-            </label>
-            <input
-              type="range"
-              id="slider-debounce"
-              class="calibration-slider"
-              min="1.0"
-              max="5.0"
-              value="2.0"
-              step="0.1"
-              aria-valuemin="1.0"
-              aria-valuemax="5.0"
-              aria-valuenow="2.0"
-              aria-label="Debounce delay: 2.0 seconds"
-            />
-            <div class="calibration-range-labels">
-              <span>1.0s</span>
-              <span>5.0s</span>
+          <div class="install-platforms" data-animate="fade-up">
+            <details class="platform-detail">
+              <summary class="platform-summary">
+                <span>iOS Safari</span>
+                <svg class="summary-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </summary>
+              <ol class="platform-steps">
+                <li>Open this page in Safari on your iPhone or iPad</li>
+                <li>Tap the Share button <span aria-label="share icon">&#x2B06;</span></li>
+                <li>Scroll down and tap &#x201C;Add to Home Screen&#x201D;</li>
+                <li>Tap &#x201C;Add&#x201D; to confirm</li>
+              </ol>
+            </details>
+
+            <details class="platform-detail">
+              <summary class="platform-summary">
+                <span>Android Chrome</span>
+                <svg class="summary-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </summary>
+              <ol class="platform-steps">
+                <li>Open this page in Chrome on Android</li>
+                <li>Tap the three-dot menu &#x22EE;</li>
+                <li>Tap &#x201C;Add to Home Screen&#x201D; or &#x201C;Install App&#x201D;</li>
+                <li>Tap &#x201C;Install&#x201D; to confirm</li>
+              </ol>
+            </details>
+
+            <details class="platform-detail">
+              <summary class="platform-summary">
+                <span>Desktop Chrome / Edge</span>
+                <svg class="summary-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </summary>
+              <ol class="platform-steps">
+                <li>Look for the install icon in the address bar (computer icon)</li>
+                <li>Click it and select &#x201C;Install&#x201D;</li>
+                <li>Or open the menu &rarr; &#x201C;Install RC Timer&#x201D;</li>
+              </ol>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─────────────────────────────────────────────
+           SCREENSHOTS
+      ───────────────────────────────────────────── -->
+      <section id="screenshots" class="screenshots" aria-labelledby="screenshots-heading">
+        <div class="section-inner">
+          <h2 id="screenshots-heading" class="section-heading" data-animate="fade-up">
+            See It in Action
+          </h2>
+          <div class="screenshots-strip" role="region" aria-label="App screenshots">
+            <div class="screenshot-frame" data-animate="fade-up">
+              <img
+                src="Assets/screenshot-viewfinder.png"
+                alt="RC Timer viewfinder screen showing the camera feed with a drawn Trigger Zone across the finish line"
+                loading="lazy"
+                width="280"
+                height="500"
+              />
+            </div>
+            <div class="screenshot-frame" data-animate="fade-up">
+              <img
+                src="Assets/screenshot-dashboard.png"
+                alt="RC Timer dashboard with an active race showing lap times, current lap counter, and best lap"
+                loading="lazy"
+                width="280"
+                height="500"
+              />
+            </div>
+            <div class="screenshot-frame" data-animate="fade-up">
+              <img
+                src="Assets/screenshot-history.png"
+                alt="RC Timer session history screen showing a lap time chart and full lap table with personal best highlighted"
+                loading="lazy"
+                width="280"
+                height="500"
+              />
             </div>
           </div>
-
-          <!-- Zone Width Slider -->
-          <div class="calibration-row">
-            <label for="slider-zone-width" class="calibration-label">
-              Zone Width
-              <span id="zone-width-value" class="calibration-value">20px</span>
-            </label>
-            <input
-              type="range"
-              id="slider-zone-width"
-              class="calibration-slider"
-              min="10"
-              max="100"
-              value="20"
-              step="2"
-              aria-valuemin="10"
-              aria-valuemax="100"
-              aria-valuenow="20"
-              aria-label="Detection zone width: 20 pixels"
-            />
-          </div>
-
-          <!-- Delayed Start Toggle -->
-          <div class="calibration-row calibration-row--toggle">
-            <label for="toggle-delayed-start" class="calibration-label">
-              Delayed Start
-              <span class="calibration-value" id="delayed-start-value">Off</span>
-            </label>
-            <button
-              id="toggle-delayed-start"
-              type="button"
-              role="switch"
-              aria-checked="false"
-              aria-label="Enable 10-second countdown before race begins"
-              class="calibration-toggle"
-              data-active="false"
-            >
-              <span class="calibration-toggle-thumb"></span>
-            </button>
-          </div>
-
-          <!-- Goal Laps Input -->
-          <div class="calibration-row">
-            <label for="input-goal-laps" class="calibration-label">
-              Goal Laps
-              <span class="calibration-value" id="goal-laps-value">∞</span>
-            </label>
-            <input
-              type="number"
-              id="input-goal-laps"
-              class="calibration-number-input"
-              min="1"
-              max="99"
-              placeholder="∞"
-              inputmode="numeric"
-              aria-label="Number of laps before auto-stop (leave empty for unlimited)"
-            />
-          </div>
-
-        </div>
-
-        <!-- Detection flash overlay — full-screen green pulse on each trigger -->
-        <div id="detection-flash" class="detection-flash" aria-hidden="true"></div>
-
-        <!-- HUD status bar — Wake Lock chip (B2) + Camera Lock chip (B4) + Motion chip -->
-        <div class="viewfinder-hud" aria-label="Status indicators">
-          <span
-            id="status-wake-lock"
-            class="viewfinder-status-chip"
-            data-state="inactive"
-            aria-label="Screen lock status"
-          >🔓 Screen May Sleep</span>
-          <span
-            id="status-camera-lock"
-            class="viewfinder-status-chip"
-            data-state="inactive"
-            aria-label="Camera stabilization status"
-          >📷 Camera Auto</span>
-          <span
-            id="status-motion"
-            class="viewfinder-status-chip viewfinder-motion-chip"
-            data-state="idle"
-            aria-live="polite"
-            aria-label="Motion detection status"
-          >● Motion: OFF</span>
-        </div>
-
-        <!-- Inline error banner — shown by camera.js error handlers (A3) -->
-        <div
-          id="viewfinder-error"
-          role="alert"
-          aria-live="assertive"
-        ></div>
-
-        <!-- Stabilizing overlay text — shown during 2-second warm-up (E2) -->
-        <div
-          id="viewfinder-stabilizing"
-          class="is-hidden"
-          aria-live="polite"
-          aria-atomic="true"
-        ></div>
-
-        <!-- Confirm button — enabled after camera stabilizes (E2) -->
-        <button
-          id="viewfinder-confirm"
-          type="button"
-          disabled
-          aria-label="Confirm and begin session"
-        >Confirm</button>
-      </section>
-
-      <!-- ── Screen 3: Countdown Overlay ──────────────────────────────── -->
-      <section id="screen-countdown" hidden>
-        <div class="countdown-overlay">
-          <div
-            id="countdown-digit"
-            class="countdown-digit"
-            role="status"
-            aria-live="assertive"
-            aria-atomic="true"
-          ></div>
-          <p class="countdown-label">Get ready!</p>
-          <button
-            id="btn-cancel-countdown"
-            type="button"
-            class="countdown-cancel-btn"
-            aria-label="Cancel countdown and return to setup"
-          >Cancel</button>
         </div>
       </section>
 
-      <!-- ── Screen 5: History ──────────────────────────────────────────── -->
-      <section id="screen-history" hidden>
-        <header class="stub-header">
-          <button id="btn-history-back" type="button" class="stub-back-btn" aria-label="Back to home">← Back</button>
-          <h1 class="stub-title">History</h1>
-        </header>
-        <p class="stub-body">Session history coming soon.</p>
-      </section>
-
-      <!-- ── Screen 6: Settings ─────────────────────────────────────────── -->
-      <section id="screen-settings" hidden>
-        <header class="stub-header">
-          <button id="btn-settings-back" type="button" class="stub-back-btn" aria-label="Back to home">← Back</button>
-          <h1 class="stub-title">Settings</h1>
-        </header>
-        <p class="stub-body">Settings coming soon.</p>
-      </section>
-
-      <!-- ── Screen 4: Race Dashboard ─────────────────────────────────── -->
-      <section id="screen-dashboard" hidden>
-
-        <!-- Status Bar -->
-        <div class="dashboard-status-bar" role="status" aria-live="polite" aria-atomic="false">
-          <span id="dash-lap-counter" aria-label="Current lap">Lap —</span>
-          <span
-            id="dash-system-status"
-            class="dash-system-status"
-            data-state="inactive"
-            aria-label="System status"
-          >System Active</span>
-        </div>
-
-        <!-- Big Clock (current lap timer) -->
-        <div class="dashboard-clock-area" aria-label="Timer display">
-          <div
-            id="dash-big-clock"
-            class="dash-big-clock"
-            role="timer"
-            aria-label="Current lap time"
-            aria-live="off"
-          >0:00.00</div>
-          <div
-            id="dash-total-time"
-            class="dash-total-time"
-            aria-label="Total session time"
-            aria-live="off"
-          >0:00.00</div>
-        </div>
-
-        <!-- Live Lap Table -->
-        <div class="dashboard-lap-table-wrap">
-          <table class="dashboard-lap-table" aria-label="Lap history">
-            <thead>
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">Lap Time</th>
-                <th scope="col">Gap</th>
-              </tr>
-            </thead>
-            <tbody id="dash-lap-tbody">
-              <!-- Populated by dashboard.js _appendLapRow() -->
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Glove-Friendly Controls -->
-        <div class="dashboard-controls">
-          <button
-            id="btn-dash-stop"
-            type="button"
-            class="btn-dash-stop"
-            aria-label="Stop the current session"
-          >STOP</button>
-          <button
-            id="btn-dash-reset"
-            type="button"
-            class="btn-dash-reset"
-            aria-label="Reset the current session"
-          >RESET</button>
-        </div>
-
-      </section>
     </main>
 
-    <script type="module" src="js/app.js"></script>
+    <!-- ─────────────────────────────────────────────
+         FOOTER
+    ───────────────────────────────────────────── -->
+    <footer id="site-footer" class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <span class="footer-logo">RC TIMER</span>
+          <p class="footer-tagline">Made with &#x2764;&#xFE0F; for RC</p>
+        </div>
+        <nav class="footer-links" aria-label="Footer navigation">
+          <a href="https://github.com/jacobdrews/rc-lap-timer" rel="noopener noreferrer">GitHub</a>
+          <a href="/app/">Launch App</a>
+          <a href="#features">Features</a>
+          <a href="#install">Install</a>
+        </nav>
+        <p class="footer-copy">&copy; 2025 RC Timer. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <!-- Landing JS -->
+    <script src="js/landing.js" defer></script>
   </body>
 </html>

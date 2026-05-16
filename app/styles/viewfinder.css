@@ -1,0 +1,463 @@
+/* ============================================================
+   viewfinder.css — Viewfinder Screen Styles
+   RC Lap Timer · Phase 2 (Task Group D)
+   Import after global.css in index.html.
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   D1 — Full-Screen Viewfinder Container
+   ---------------------------------------------------------- */
+
+/* When active, the viewfinder section covers the full viewport
+   behind all other content (z-index: 10). The `hidden` attribute
+   hides it; JS removes `hidden` to show the screen. */
+#screen-viewfinder {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background-color: var(--color-bg);
+  overflow: hidden;
+}
+
+/* Live camera feed */
+#viewfinder-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ----------------------------------------------------------
+   D2 — Status Indicator HUD Bar
+   Pill-shaped bar centred at the top of the viewfinder.
+   Contains two status chips: Wake Lock and Camera Lock.
+   ---------------------------------------------------------- */
+.viewfinder-hud {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  background-color: rgba(17, 17, 17, 0.85);
+  border-radius: var(--radius-full);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  white-space: nowrap;
+}
+
+/* Individual status chips inside the HUD bar */
+.viewfinder-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  /* Default / inactive state */
+  color: var(--color-text-muted);
+}
+
+/* Active state — set by JS when lock is acquired */
+.viewfinder-status-chip[data-state="active"] {
+  color: var(--color-start);
+}
+
+/* ----------------------------------------------------------
+   D2b — Motion detection status chip
+   Hidden until the trigger line is drawn (data-state="idle").
+   Amber while detection is running, green flash on each trigger.
+   ---------------------------------------------------------- */
+.viewfinder-motion-chip {
+  display: inline-flex;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+  transition: color 80ms ease, font-size 80ms ease;
+}
+
+.viewfinder-motion-chip[data-state="idle"] {
+  color: var(--color-text-muted);
+}
+
+.viewfinder-motion-chip[data-state="active"] {
+  color: #F59E0B;
+}
+
+.viewfinder-motion-chip[data-state="triggered"] {
+  color: var(--color-best-lap);
+  transition: color 0ms;
+}
+
+/* ── Detection flash overlay ─────────────────────────────────────────────── */
+.detection-flash {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  background: var(--color-best-lap);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 80ms ease-in;
+}
+
+.detection-flash.is-active {
+  opacity: 0.35;
+  transition: opacity 0ms; /* instant on */
+}
+
+/* ----------------------------------------------------------
+   D3 — Confirm Button
+   Full-width, anchored to the bottom of the viewfinder.
+   Respects iOS safe-area inset so it clears the home bar.
+   Disabled until the camera stream is active (E2 enables it).
+   ---------------------------------------------------------- */
+#viewfinder-confirm {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  min-height: 64px;
+  /* Stack the padding so safe-area adds on top of base padding */
+  padding: var(--space-4) var(--space-4)
+    calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+  background-color: var(--color-accent);
+  color: #000000;
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  z-index: 20;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#viewfinder-confirm:active {
+  background-color: var(--color-accent-dim);
+}
+
+/* Disabled until camera stream is active (set by app.js / E2) */
+#viewfinder-confirm:disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* ----------------------------------------------------------
+   D4 — Error Banner
+   Rendered above the Confirm button; hidden by default.
+   JS camera error handlers (A3) set display:block and inject
+   the error message text. role="alert" is on the element in HTML.
+   ---------------------------------------------------------- */
+#viewfinder-error {
+  position: absolute;
+  bottom: 80px;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  padding: var(--space-3) var(--space-4);
+  background-color: rgba(239, 68, 68, 0.20);
+  border-left: 4px solid var(--color-stop);
+  color: var(--color-text-primary);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  /* Hidden by default; shown by JS error handlers */
+  display: none;
+}
+
+/* ----------------------------------------------------------
+   E2 — Stabilizing Overlay
+   Centred text shown during the 2-second camera warm-up window.
+   JS adds/removes .is-hidden and .is-fading to control visibility.
+   ---------------------------------------------------------- */
+#viewfinder-stabilizing {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 20;
+  color: var(--color-text-secondary);
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.4s ease;
+}
+
+#viewfinder-stabilizing.is-fading {
+  opacity: 0;
+}
+
+#viewfinder-stabilizing.is-hidden {
+  display: none;
+}
+
+/* ============================================================
+   Phase 3 — Task Group C: Trigger Zone Drawing Layer & Calibration
+   All rules below are additive; no Phase 2 rules are modified.
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   C1 — Canvas overlay for trigger zone drawing
+   Above <video> (no explicit z-index), below HUD bar (z-index: 20)
+   ---------------------------------------------------------- */
+#viewfinder-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  width: 100%;
+  height: 100%;
+  touch-action: none;     /* Belt-and-suspenders with JS event.preventDefault() */
+  cursor: crosshair;
+}
+
+/* ----------------------------------------------------------
+   C2 — Calibration tools panel
+   Anchored directly above #viewfinder-confirm (min-height: 64px)
+   ---------------------------------------------------------- */
+.calibration-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 64px;                    /* Sits flush above #viewfinder-confirm */
+  z-index: 20;
+  padding: var(--space-4);
+  background-color: rgba(17, 17, 17, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--color-border);
+}
+
+/* ----------------------------------------------------------
+   C3 — Calibration row: label + slider + range indicators
+   ---------------------------------------------------------- */
+.calibration-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-bottom: var(--space-3);
+}
+
+.calibration-row:last-child {
+  margin-bottom: 0;
+}
+
+.calibration-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-secondary);
+}
+
+.calibration-value {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  font-variant-numeric: tabular-nums;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.calibration-range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-top: var(--space-1);
+}
+
+/* ----------------------------------------------------------
+   C4 — Custom range slider (shared by all three calibration sliders)
+   --slider-fill is set by JS on every input event; fallback 74%
+   matches the 75% sensitivity default.
+   ---------------------------------------------------------- */
+.calibration-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: var(--radius-sm);
+  outline: none;
+  cursor: pointer;
+  background: linear-gradient(
+    to right,
+    var(--color-accent) 0%,
+    var(--color-accent) var(--slider-fill, 74%),
+    var(--color-border) var(--slider-fill, 74%),
+    var(--color-border) 100%
+  );
+}
+
+/* Thumb — WebKit / Blink (Chrome, Safari, Edge) */
+.calibration-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-circle);
+  background: var(--color-accent);
+  cursor: pointer;
+}
+
+/* Thumb — Firefox */
+.calibration-slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: var(--radius-circle);
+  background: var(--color-accent);
+  cursor: pointer;
+}
+
+/* ----------------------------------------------------------
+   C5 — Virtual LED
+   Activation logic (data-active toggling) added in Phase 4.
+   bottom stacks: 64px (Confirm) + 12px (gap) + safe-area
+   ---------------------------------------------------------- */
+.virtual-led {
+  position: absolute;
+  bottom: calc(var(--space-16) + var(--space-3) + env(safe-area-inset-bottom, 0px));
+  right: var(--space-4);
+  z-index: 21;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-circle);
+  background: var(--color-surface-raised);
+  border: 2px solid var(--color-border);
+  transition: background 80ms ease, box-shadow 80ms ease, border-color 80ms ease;
+}
+
+/* Detection running but no motion — amber ring */
+.virtual-led[data-state="active"] {
+  background: var(--color-surface-raised);
+  border-color: #F59E0B;
+  box-shadow: 0 0 8px 2px rgba(245, 158, 11, 0.35);
+}
+
+/* Motion detected — bright green flash */
+.virtual-led[data-state="triggered"] {
+  background: var(--color-best-lap);
+  border-color: var(--color-best-lap);
+  box-shadow: 0 0 16px 6px var(--color-accent-glow);
+}
+
+/* ----------------------------------------------------------
+   C6 — Clear drawn line button (shown by JS via .is-visible)
+   Positioned below HUD bar (~56px from top)
+   ---------------------------------------------------------- */
+#btn-clear-line {
+  position: absolute;
+  top: calc(var(--space-12) + var(--space-2));
+  right: var(--space-4);
+  z-index: 21;
+  min-width: 48px;
+  min-height: 48px;
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  display: none;          /* Hidden by default; toggled by .is-visible */
+}
+
+#btn-clear-line.is-visible {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#btn-clear-line:active {
+  opacity: 0.85;
+  transform: scale(0.97);
+}
+
+/* ----------------------------------------------------------
+   Phase 5 — Calibration toggle switch and number input
+   ---------------------------------------------------------- */
+
+/* Pill track */
+.calibration-toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  min-width: 44px;
+  min-height: 24px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-border);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.calibration-toggle[data-active="true"] {
+  background-color: var(--color-accent);
+}
+
+/* Sliding thumb */
+.calibration-toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-circle);
+  background-color: #ffffff;
+  transition: transform 0.2s ease;
+  pointer-events: none;
+}
+
+.calibration-toggle[data-active="true"] .calibration-toggle-thumb {
+  transform: translateX(20px);
+}
+
+/* Toggle row — horizontal layout */
+.calibration-row--toggle {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Goal Laps number field */
+.calibration-number-input {
+  width: 72px;
+  height: 36px;
+  padding: var(--space-1) var(--space-2);
+  background-color: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.calibration-number-input:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}

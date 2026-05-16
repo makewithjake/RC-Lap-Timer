@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#C6FF00" />
+
+    <!-- Apple PWA meta tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <link rel="apple-touch-icon" href="Assets/icons/icon-180.png" />
+
+    <!-- PWA manifest -->
+    <link rel="manifest" href="manifest.json" />
+
+    <!-- Stylesheets (order matters: tokens → global → component) -->
+    <link rel="stylesheet" href="styles/tokens.css" />
+    <link rel="stylesheet" href="styles/global.css" />
+    <link rel="stylesheet" href="styles/home.css" />
+    <link rel="stylesheet" href="styles/viewfinder.css" />
+    <link rel="stylesheet" href="styles/countdown.css" />
+    <link rel="stylesheet" href="styles/dashboard.css" />
+
+    <title>RC Lap Timer</title>
+  </head>
+  <body>
+    <main>
+      <!-- ── Screen 1: Home ─────────────────────────────────────────── -->
+      <section id="screen-home">
+        <!-- Gear / settings button — absolutely positioned top-right -->
+        <button
+          id="btn-settings"
+          class="home-gear-btn"
+          aria-label="Open Settings"
+          type="button"
+        >
+          <!-- Gear icon (inline SVG, no external dependency) -->
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="24"
+            height="24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+        </button>
+
+        <div class="home-title-area">
+          <h1 class="home-title">RC Timer</h1>
+        </div>
+
+        <div class="home-form">
+          <div class="home-field">
+            <label for="input-driver-name">Driver Name</label>
+            <input
+              type="text"
+              id="input-driver-name"
+              name="driverName"
+              placeholder="Enter driver name"
+              autocomplete="off"
+              spellcheck="false"
+            />
+          </div>
+
+          <div class="home-field">
+            <label for="input-car-name">Car Name</label>
+            <input
+              type="text"
+              id="input-car-name"
+              name="carName"
+              placeholder="Enter car name"
+              autocomplete="off"
+              spellcheck="false"
+            />
+          </div>
+
+          <div class="home-field">
+            <label for="input-location">Location</label>
+            <input
+              type="text"
+              id="input-location"
+              name="location"
+              placeholder="Enter location"
+              autocomplete="off"
+              spellcheck="false"
+            />
+          </div>
+        </div>
+
+        <div class="home-nav">
+          <button id="btn-start-session" class="btn-start-session" type="button">
+            Start New Session
+          </button>
+          <button id="btn-view-history" class="btn-view-history" type="button">
+            View History
+          </button>
+        </div>
+      </section>
+
+      <!-- ── Screen 2: Viewfinder ──────────────────────────────────── -->
+      <section id="screen-viewfinder" hidden>
+        <!-- Live camera feed (A2) -->
+        <video
+          id="viewfinder-video"
+          autoplay
+          playsinline
+          muted
+          aria-label="Camera viewfinder"
+        ></video>
+
+        <!-- Phase 3: Canvas overlay for trigger zone drawing (Task 3.1) -->
+        <canvas
+          id="viewfinder-canvas"
+          role="img"
+          aria-label="Trigger zone drawing area. Tap to place start and end points."
+        ></canvas>
+
+        <!-- Phase 3: Clear drawn line — shown only after line is complete (Task 3.2) -->
+        <button
+          id="btn-clear-line"
+          type="button"
+          aria-label="Clear the drawn trigger line and start over"
+        >Clear</button>
+
+        <!-- Phase 3: Virtual LED indicator — activated by Phase 4 detection engine (Task 4.3) -->
+        <div
+          id="virtual-led"
+          class="virtual-led"
+          role="status"
+          aria-label="Motion detection indicator"
+          data-state="idle"
+        ></div>
+
+        <!-- Phase 3: Calibration tools panel (Task 3.3) -->
+        <div class="calibration-panel" id="calibration-panel" aria-label="Detection calibration controls">
+
+          <!-- Sensitivity Slider -->
+          <div class="calibration-row">
+            <label for="slider-sensitivity" class="calibration-label">
+              Sensitivity
+              <span id="sensitivity-value" class="calibration-value">75%</span>
+            </label>
+            <input
+              type="range"
+              id="slider-sensitivity"
+              class="calibration-slider"
+              min="1"
+              max="100"
+              value="75"
+              step="1"
+              aria-valuemin="1"
+              aria-valuemax="100"
+              aria-valuenow="75"
+              aria-label="Detection sensitivity: 75 percent"
+            />
+          </div>
+
+          <!-- Debounce Slider -->
+          <div class="calibration-row">
+            <label for="slider-debounce" class="calibration-label">
+              Debounce
+              <span id="debounce-value" class="calibration-value">2.0s</span>
+            </label>
+            <input
+              type="range"
+              id="slider-debounce"
+              class="calibration-slider"
+              min="1.0"
+              max="5.0"
+              value="2.0"
+              step="0.1"
+              aria-valuemin="1.0"
+              aria-valuemax="5.0"
+              aria-valuenow="2.0"
+              aria-label="Debounce delay: 2.0 seconds"
+            />
+            <div class="calibration-range-labels">
+              <span>1.0s</span>
+              <span>5.0s</span>
+            </div>
+          </div>
+
+          <!-- Zone Width Slider -->
+          <div class="calibration-row">
+            <label for="slider-zone-width" class="calibration-label">
+              Zone Width
+              <span id="zone-width-value" class="calibration-value">20px</span>
+            </label>
+            <input
+              type="range"
+              id="slider-zone-width"
+              class="calibration-slider"
+              min="10"
+              max="100"
+              value="20"
+              step="2"
+              aria-valuemin="10"
+              aria-valuemax="100"
+              aria-valuenow="20"
+              aria-label="Detection zone width: 20 pixels"
+            />
+          </div>
+
+          <!-- Delayed Start Toggle -->
+          <div class="calibration-row calibration-row--toggle">
+            <label for="toggle-delayed-start" class="calibration-label">
+              Delayed Start
+              <span class="calibration-value" id="delayed-start-value">Off</span>
+            </label>
+            <button
+              id="toggle-delayed-start"
+              type="button"
+              role="switch"
+              aria-checked="false"
+              aria-label="Enable 10-second countdown before race begins"
+              class="calibration-toggle"
+              data-active="false"
+            >
+              <span class="calibration-toggle-thumb"></span>
+            </button>
+          </div>
+
+          <!-- Goal Laps Input -->
+          <div class="calibration-row">
+            <label for="input-goal-laps" class="calibration-label">
+              Goal Laps
+              <span class="calibration-value" id="goal-laps-value">∞</span>
+            </label>
+            <input
+              type="number"
+              id="input-goal-laps"
+              class="calibration-number-input"
+              min="1"
+              max="99"
+              placeholder="∞"
+              inputmode="numeric"
+              aria-label="Number of laps before auto-stop (leave empty for unlimited)"
+            />
+          </div>
+
+        </div>
+
+        <!-- Detection flash overlay — full-screen green pulse on each trigger -->
+        <div id="detection-flash" class="detection-flash" aria-hidden="true"></div>
+
+        <!-- HUD status bar — Wake Lock chip (B2) + Camera Lock chip (B4) + Motion chip -->
+        <div class="viewfinder-hud" aria-label="Status indicators">
+          <span
+            id="status-wake-lock"
+            class="viewfinder-status-chip"
+            data-state="inactive"
+            aria-label="Screen lock status"
+          >🔓 Screen May Sleep</span>
+          <span
+            id="status-camera-lock"
+            class="viewfinder-status-chip"
+            data-state="inactive"
+            aria-label="Camera stabilization status"
+          >📷 Camera Auto</span>
+          <span
+            id="status-motion"
+            class="viewfinder-status-chip viewfinder-motion-chip"
+            data-state="idle"
+            aria-live="polite"
+            aria-label="Motion detection status"
+          >● Motion: OFF</span>
+        </div>
+
+        <!-- Inline error banner — shown by camera.js error handlers (A3) -->
+        <div
+          id="viewfinder-error"
+          role="alert"
+          aria-live="assertive"
+        ></div>
+
+        <!-- Stabilizing overlay text — shown during 2-second warm-up (E2) -->
+        <div
+          id="viewfinder-stabilizing"
+          class="is-hidden"
+          aria-live="polite"
+          aria-atomic="true"
+        ></div>
+
+        <!-- Confirm button — enabled after camera stabilizes (E2) -->
+        <button
+          id="viewfinder-confirm"
+          type="button"
+          disabled
+          aria-label="Confirm and begin session"
+        >Confirm</button>
+      </section>
+
+      <!-- ── Screen 3: Countdown Overlay ──────────────────────────────── -->
+      <section id="screen-countdown" hidden>
+        <div class="countdown-overlay">
+          <div
+            id="countdown-digit"
+            class="countdown-digit"
+            role="status"
+            aria-live="assertive"
+            aria-atomic="true"
+          ></div>
+          <p class="countdown-label">Get ready!</p>
+          <button
+            id="btn-cancel-countdown"
+            type="button"
+            class="countdown-cancel-btn"
+            aria-label="Cancel countdown and return to setup"
+          >Cancel</button>
+        </div>
+      </section>
+
+      <!-- ── Screen 5: History ──────────────────────────────────────────── -->
+      <section id="screen-history" hidden>
+        <header class="stub-header">
+          <button id="btn-history-back" type="button" class="stub-back-btn" aria-label="Back to home">← Back</button>
+          <h1 class="stub-title">History</h1>
+        </header>
+        <p class="stub-body">Session history coming soon.</p>
+      </section>
+
+      <!-- ── Screen 6: Settings ─────────────────────────────────────────── -->
+      <section id="screen-settings" hidden>
+        <header class="stub-header">
+          <button id="btn-settings-back" type="button" class="stub-back-btn" aria-label="Back to home">← Back</button>
+          <h1 class="stub-title">Settings</h1>
+        </header>
+        <p class="stub-body">Settings coming soon.</p>
+      </section>
+
+      <!-- ── Screen 4: Race Dashboard ─────────────────────────────────── -->
+      <section id="screen-dashboard" hidden>
+
+        <!-- Status Bar -->
+        <div class="dashboard-status-bar" role="status" aria-live="polite" aria-atomic="false">
+          <span id="dash-lap-counter" aria-label="Current lap">Lap —</span>
+          <span
+            id="dash-system-status"
+            class="dash-system-status"
+            data-state="inactive"
+            aria-label="System status"
+          >System Active</span>
+        </div>
+
+        <!-- Big Clock (current lap timer) -->
+        <div class="dashboard-clock-area" aria-label="Timer display">
+          <div
+            id="dash-big-clock"
+            class="dash-big-clock"
+            role="timer"
+            aria-label="Current lap time"
+            aria-live="off"
+          >0:00.00</div>
+          <div
+            id="dash-total-time"
+            class="dash-total-time"
+            aria-label="Total session time"
+            aria-live="off"
+          >0:00.00</div>
+        </div>
+
+        <!-- Live Lap Table -->
+        <div class="dashboard-lap-table-wrap">
+          <table class="dashboard-lap-table" aria-label="Lap history">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Lap Time</th>
+                <th scope="col">Gap</th>
+              </tr>
+            </thead>
+            <tbody id="dash-lap-tbody">
+              <!-- Populated by dashboard.js _appendLapRow() -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Glove-Friendly Controls -->
+        <div class="dashboard-controls">
+          <button
+            id="btn-dash-stop"
+            type="button"
+            class="btn-dash-stop"
+            aria-label="Stop the current session"
+          >STOP</button>
+          <button
+            id="btn-dash-reset"
+            type="button"
+            class="btn-dash-reset"
+            aria-label="Reset the current session"
+          >RESET</button>
+        </div>
+
+      </section>
+    </main>
+
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>
