@@ -35,17 +35,17 @@
 
 Before closing Phase 5, verify each item manually in the browser:
 
-- [ ] Delayed Start = Off: Confirm navigates directly to Race Dashboard — no countdown shown
-- [ ] Delayed Start = On: Confirm shows Countdown screen; digits count 10→0 with beep each tick and "GO!" beep at 0; dashboard appears immediately after
-- [ ] Cancel during countdown returns to Viewfinder with trigger line intact and test-mode detection restarted
-- [ ] Goal Laps = 3, Delayed Start Off: after 3 crossings the session stops automatically; clock freezes, camera stops, app navigates home after ~1.5 s
-- [ ] Goal Laps empty (∞): session runs indefinitely until STOP is pressed
-- [ ] Big Clock ticks in `M:SS.mm` format with no digit-width jitter (`font-variant-numeric: tabular-nums`)
-- [ ] First crossing starts the master timer (`getSessionStatus()` transitions `waiting-for-first` → `racing`)
-- [ ] Each subsequent crossing appends a lap row; best lap highlighted in green; other Gap cells show `+M:SS.mm` offset
+- [ x] Delayed Start = Off: Confirm navigates directly to Race Dashboard — no countdown shown
+- [ x] Delayed Start = On: Confirm shows Countdown screen; digits count 10→0 with beep each tick and "GO!" beep at 0; dashboard appears immediately after
+- [ x] Cancel during countdown returns to Viewfinder with trigger line intact and test-mode detection restarted
+- [x ] Goal Laps = 3, Delayed Start Off: after 3 crossings the session stops automatically; clock freezes, camera stops, app navigates home after ~1.5 s
+- [x ] Goal Laps empty (∞): session runs indefinitely until STOP is pressed
+- [ x] Big Clock ticks in `M:SS.mm` format with no digit-width jitter (`font-variant-numeric: tabular-nums`)
+- [ x] First crossing starts the master timer (`getSessionStatus()` transitions `waiting-for-first` → `racing`)
+- [ x] Each subsequent crossing appends a lap row; best lap highlighted in green; other Gap cells show `+M:SS.mm` offset
 - [ ] TTS announces each lap: "Lap 2: twelve point four seconds"
-- [ ] STOP freezes the clock; `isDetecting()` returns `false`; `getCameraStream()` returns `null`
-- [ ] RESET clears the lap table, resets the clock to `0:00.00`, restarts waiting for first crossing
+- [ x] STOP freezes the clock; `isDetecting()` returns `false`; `getCameraStream()` returns `null`
+- [ x] RESET clears the lap table, resets the clock to `0:00.00`, restarts waiting for first crossing
 - [ ] "Show Camera" reveals camera thumbnail; "Hide Camera" hides it
 - [ ] `window.__rcSession.result` contains `{ laps, bestLapIndex, totalTime, driverName, carName, location, timestamp }` after session ends
 - [ ] No frame drops: Big Clock RAF loop completes in < 2 ms per tick (Chrome DevTools Performance panel)
