@@ -81,6 +81,7 @@ let _lastTrigger  = -Infinity; // performance.now() timestamp of the last fired 
 
 Private function. Converts normalized ROI coordinates (output of `getROI()`) into pixel-space geometry used for both the `drawImage` source crop and the in-zone membership test.
 
+{% raw %}
 ```js
 /**
  * Converts normalized ROI → pixel-space geometry relative to the display canvas.
@@ -126,6 +127,7 @@ function _computeROIPixels(roi, displayW, displayH) {
   };
 }
 ```
+{% endraw %}
 
 **Why normalize zone width to `displayH`?** Phase 3 (`getROI`, Task A4) divides `zoneWidthPx` by `canvas.height` to compute `zoneWidthNorm`. This function reverses that operation: `zoneWidthNorm × displayH`. The result is the zone half-width in display pixels, which is then used as the perpendicular distance cap in the zone membership test.
 

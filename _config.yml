@@ -1,5 +1,5 @@
 exclude:
-  - obs/
+  - obs
   - DEPLOY.md
   - plan.md
   - prd.md
