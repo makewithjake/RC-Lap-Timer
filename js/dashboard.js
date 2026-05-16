@@ -214,32 +214,6 @@ function _teardownDetectionVideo() {
   }
 }
 
-// ── Camera Toggle ─────────────────────────────────────────────────────────────
-
-function _initCameraToggle() {
-  const toggleBtn = document.getElementById('btn-dash-camera-toggle');
-  const preview   = document.getElementById('dash-camera-preview');
-  if (!toggleBtn || !preview) return;
-
-  toggleBtn.addEventListener('click', () => {
-    const isExpanded = toggleBtn.getAttribute('aria-expanded') === 'true';
-
-    if (!isExpanded) {
-      const stream = getCameraStream();
-      if (stream) preview.srcObject = stream;
-      preview.classList.remove('is-hidden');
-      toggleBtn.setAttribute('aria-expanded', 'true');
-      toggleBtn.textContent = 'Hide Camera';
-    } else {
-      preview.pause();
-      preview.srcObject = null;
-      preview.classList.add('is-hidden');
-      toggleBtn.setAttribute('aria-expanded', 'false');
-      toggleBtn.textContent = 'Show Camera';
-    }
-  });
-}
-
 // ── Session Teardown ──────────────────────────────────────────────────────────
 
 /**
@@ -426,7 +400,6 @@ export function initDashboard(config) {
     });
   }
 
-  _initCameraToggle();
   acquireWakeLock();
   _beginSession(roi, detectionSettings);
 }

@@ -43,10 +43,10 @@ Before closing Phase 5, verify each item manually in the browser:
 - [ x] Big Clock ticks in `M:SS.mm` format with no digit-width jitter (`font-variant-numeric: tabular-nums`)
 - [ x] First crossing starts the master timer (`getSessionStatus()` transitions `waiting-for-first` → `racing`)
 - [ x] Each subsequent crossing appends a lap row; best lap highlighted in green; other Gap cells show `+M:SS.mm` offset
-- [ ] TTS announces each lap: "Lap 2: twelve point four seconds"
+- [ x] TTS announces each lap: "Lap 2: twelve point four seconds"
 - [ x] STOP freezes the clock; `isDetecting()` returns `false`; `getCameraStream()` returns `null`
 - [ x] RESET clears the lap table, resets the clock to `0:00.00`, restarts waiting for first crossing
-- [ ] "Show Camera" reveals camera thumbnail; "Hide Camera" hides it
-- [ ] `window.__rcSession.result` contains `{ laps, bestLapIndex, totalTime, driverName, carName, location, timestamp }` after session ends
+- [x] "Show Camera" feature removed (camera thumbnail toggling dropped by design decision)
+- [x] `window.__rcSession.result` contains `{ laps, bestLapIndex, totalTime, driverName, carName, location, timestamp }` after session ends
 - [ ] No frame drops: Big Clock RAF loop completes in < 2 ms per tick (Chrome DevTools Performance panel)
 - [ ] iOS Safari: Wake Lock re-acquired after background; TTS fires correctly; countdown interval not throttled
