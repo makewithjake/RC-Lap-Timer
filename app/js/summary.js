@@ -254,10 +254,4 @@ export function showSummary(rawSession) {
   showScreen('summary');
 }
 
-// ── B6 — Public API ───────────────────────────────────────────────────────────
-export {
-  initSummary,
-  showSummary,
-  computeStats,
-  renderChart,
-};
+

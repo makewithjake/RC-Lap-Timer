@@ -233,13 +233,4 @@ export function saveSettings(partial) {
   }
 }
 
-// ── Public API ────────────────────────────────────────────────────────────────
-export {
-  buildSessionRecord,
-  saveSession,
-  getHistory,
-  deleteSession,
-  clearAllData,
-  getSettings,
-  saveSettings,
-};
+

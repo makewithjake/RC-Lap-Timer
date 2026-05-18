@@ -208,8 +208,4 @@ export function showSettings() {
   showScreen('settings');
 }
 
-// ── D8 — Public API ───────────────────────────────────────────────────────────
-export {
-  initSettings,
-  showSettings,
-};
+

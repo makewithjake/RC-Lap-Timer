@@ -262,9 +262,4 @@ export function showHistory() {
   showScreen('history');
 }
 
-// ── C7 — Public API ───────────────────────────────────────────────────────────
-export {
-  initHistory,
-  showHistory,
-  renderSessionList,
-};
+
