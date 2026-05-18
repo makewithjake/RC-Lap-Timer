@@ -48,7 +48,8 @@ function _startStabilizationTimer() {
         { once: true }
       );
     }
-    if (confirmBtn) confirmBtn.disabled = false;
+    // Do NOT re-enable confirmBtn here — the drawn-line gate in app.js
+    // (onLineChange callback) is the sole authority for enabling it.
   }, STABILITY_DELAY_MS);
 }
 

@@ -301,7 +301,7 @@ Final gate (H6 audit) waits for A, B, C, D, E, F, G all complete.
 ## 7. Acceptance Criteria
 
 - [x] Page scores ≥ 90 on Lighthouse Performance, Accessibility, Best Practices, SEO
-- [ ] PWA install prompt fires correctly on Android Chrome and is suppressed gracefully on iOS
+- [ x] PWA install prompt fires correctly on Android Chrome and is suppressed gracefully on iOS
 - [ x] All 6 feature cards, 3 how-it-works steps, and all sections render correctly at 375px, 768px, and 1440px
 - [ x] Electric Lime (`#C6FF00`) is the only non-white foreground color used on headings/CTAs
 - [ x] Circuit board overlay visible on hero and install section backgrounds, absent inside the app
