@@ -1,0 +1,157 @@
+/* summary.css — Post-Session Summary Screen (Screen 5) */
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+
+.summary-header {
+  padding: var(--space-6) var(--space-4) var(--space-4);
+  text-align: center;
+}
+
+.summary-title {
+  font-family: var(--font-ui);
+  font-size: 1.125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-primary);
+}
+
+.summary-meta {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin-top: var(--space-1);
+}
+
+/* ── Chart ──────────────────────────────────────────────────────────────── */
+
+.summary-chart-container {
+  margin: 0 var(--space-4);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-2) var(--space-2);
+}
+
+.lap-chart {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.chart-grid {
+  stroke: var(--color-border);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+  fill: none;
+}
+
+.chart-line {
+  stroke: var(--color-accent);
+  stroke-width: 2;
+  fill: none;
+  stroke-linejoin: round;
+}
+
+.chart-dot {
+  fill: var(--color-surface-raised);
+  stroke: var(--color-accent);
+  stroke-width: 2;
+}
+
+.chart-dot--best {
+  fill: var(--color-best-lap);
+  stroke: var(--color-best-lap);
+}
+
+.chart-label-x,
+.chart-label-y {
+  fill: var(--color-text-muted);
+  font-size: 10px;
+  font-family: var(--font-mono);
+}
+
+/* ── Stat Cards ─────────────────────────────────────────────────────────── */
+
+.summary-stats-row {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  justify-content: stretch;
+}
+
+.stat-card {
+  flex: 1;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.stat-label {
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-secondary);
+}
+
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Action Row ─────────────────────────────────────────────────────────── */
+
+.summary-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+}
+
+.btn--full {
+  flex: 1 1 100%;
+}
+
+.btn--half {
+  flex: 1 1 calc(50% - var(--space-3) / 2);
+}
+
+.btn--accent {
+  background: var(--color-accent);
+  color: #000000;
+  font-weight: 700;
+  border-radius: var(--radius-lg);
+  min-height: var(--space-16);
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+}
+
+.btn--danger {
+  background: var(--color-stop);
+  color: var(--color-text-primary);
+  font-weight: 700;
+  border-radius: var(--radius-lg);
+  min-height: var(--space-12);
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+}
+
+.btn--ghost {
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  font-weight: 600;
+  border-radius: var(--radius-lg);
+  min-height: var(--space-12);
+  font-size: 1rem;
+  cursor: pointer;
+}

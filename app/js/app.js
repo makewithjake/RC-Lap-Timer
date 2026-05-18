@@ -1,5 +1,8 @@
 import { showScreen } from './router.js';
 import { initHome } from './home.js';
+import { initSummary } from './summary.js';
+import { initHistory } from './history.js';
+import { initSettings } from './settings.js';
 import { stopCamera } from './camera.js';
 import {
   releaseWakeLock,
@@ -66,6 +69,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 4. Initialise Home Screen logic
   initHome();
+
+  // 5. Initialise Phase 6 screens
+  initSummary();
+  initHistory();
+  initSettings();
 
   // ── Phase 3: Calibration slider wiring ────────────────────────────────────
 
@@ -362,7 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 5. Clean up camera + wake lock when user leaves the page
+  // 6. Clean up camera + wake lock when user leaves the page
   window.addEventListener('pagehide', () => {
     stopCamera();
     releaseWakeLock();

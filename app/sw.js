@@ -21,6 +21,13 @@ const PRECACHE_URLS = [
   'js/session.js',
   'js/countdown.js',
   'js/dashboard.js',
+  'js/storage.js',
+  'js/summary.js',
+  'js/history.js',
+  'js/settings.js',
+  'styles/summary.css',
+  'styles/history.css',
+  'styles/settings.css',
 ];
 
 // Install: pre-cache all shell assets

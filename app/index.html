@@ -20,6 +20,9 @@
     <link rel="stylesheet" href="styles/viewfinder.css" />
     <link rel="stylesheet" href="styles/countdown.css" />
     <link rel="stylesheet" href="styles/dashboard.css" />
+    <link rel="stylesheet" href="styles/summary.css">
+    <link rel="stylesheet" href="styles/history.css">
+    <link rel="stylesheet" href="styles/settings.css">
 
     <title>RC Lap Timer</title>
   </head>
@@ -318,22 +321,108 @@
         </div>
       </section>
 
-      <!-- ── Screen 5: History ──────────────────────────────────────────── -->
-      <section id="screen-history" hidden>
-        <header class="stub-header">
-          <button id="btn-history-back" type="button" class="stub-back-btn" aria-label="Back to home">← Back</button>
-          <h1 class="stub-title">History</h1>
+      <!-- ── Screen 6: History ─────────────────────────────────────────── -->
+      <section id="screen-history" class="screen" hidden>
+        <header class="history-header">
+          <button id="btn-history-back" class="btn-icon" aria-label="Back to home">&#8592;</button>
+          <h1 class="history-title">History</h1>
         </header>
-        <p class="stub-body">Session history coming soon.</p>
+
+        <div class="history-search-bar">
+          <input type="search" id="history-search"
+                 placeholder="Filter by driver or car…"
+                 autocomplete="off" autocorrect="off" spellcheck="false">
+        </div>
+
+        <div id="history-list-container" class="history-list-container">
+          <ul id="history-list" class="history-list" role="list"></ul>
+          <p id="history-empty" class="history-empty" hidden>
+            No sessions yet. Complete a race to see results here.
+          </p>
+        </div>
+
+        <div id="delete-confirm-chip" class="delete-chip" hidden role="alertdialog" aria-modal="true">
+          <span class="delete-chip__label">Delete this session?</span>
+          <button id="btn-delete-confirm" class="btn btn--danger btn--sm">Delete</button>
+          <button id="btn-delete-cancel" class="btn btn--ghost btn--sm">Cancel</button>
+        </div>
       </section>
 
-      <!-- ── Screen 6: Settings ─────────────────────────────────────────── -->
-      <section id="screen-settings" hidden>
-        <header class="stub-header">
-          <button id="btn-settings-back" type="button" class="stub-back-btn" aria-label="Back to home">← Back</button>
-          <h1 class="stub-title">Settings</h1>
+      <!-- ── Screen 7: Settings ────────────────────────────────────────── -->
+      <section id="screen-settings" class="screen" hidden>
+        <header class="settings-header">
+          <button id="btn-settings-back" class="btn-icon" aria-label="Back to home">&#8592;</button>
+          <h1 class="settings-title">Settings</h1>
         </header>
-        <p class="stub-body">Settings coming soon.</p>
+
+        <div class="settings-body">
+
+          <div class="settings-group">
+            <label class="settings-label" for="setting-countdown">
+              Default Countdown (seconds)
+            </label>
+            <input type="number" id="setting-countdown" class="settings-input"
+                   min="1" max="60" value="10" inputmode="numeric">
+          </div>
+
+          <div class="settings-group">
+            <label class="settings-label" for="setting-tts-voice">Announcer Voice</label>
+            <select id="setting-tts-voice" class="settings-select"></select>
+          </div>
+
+          <div class="settings-group">
+            <label class="settings-label" for="setting-tts-pitch">
+              Voice Pitch <span id="label-pitch">1.0</span>
+            </label>
+            <input type="range" id="setting-tts-pitch"
+                   min="0.5" max="2.0" step="0.1" value="1.0">
+          </div>
+
+          <div class="settings-group">
+            <label class="settings-label" for="setting-tts-volume">
+              Voice Volume <span id="label-volume">1.0</span>
+            </label>
+            <input type="range" id="setting-tts-volume"
+                   min="0" max="1" step="0.1" value="1.0">
+          </div>
+
+          <div class="settings-group">
+            <span class="settings-label" id="label-units">Units</span>
+            <div class="toggle-group" role="group" aria-labelledby="label-units">
+              <button class="toggle-btn toggle-btn--active" data-value="metric">Metric</button>
+              <button class="toggle-btn" data-value="imperial">Imperial</button>
+            </div>
+          </div>
+
+          <div class="settings-group settings-group--danger">
+            <button id="btn-clear-data" class="btn btn--danger btn--full">Clear All Data</button>
+          </div>
+
+          <div class="settings-group settings-about">
+            <p class="about-version">RC Lap Timer &middot; v1.0.0</p>
+            <p class="about-offline" id="about-offline-status">Checking offline status&hellip;</p>
+          </div>
+
+        </div>
+
+        <!-- Confirmation modal -->
+        <div id="clear-data-modal" class="modal-overlay" hidden
+             role="alertdialog" aria-modal="true"
+             aria-labelledby="modal-title" aria-describedby="modal-body">
+          <div class="modal-card">
+            <h2 class="modal-title" id="modal-title">Clear All Data?</h2>
+            <p class="modal-body" id="modal-body">
+              This permanently deletes all sessions, profiles, and settings.
+              This cannot be undone.
+            </p>
+            <div class="modal-actions">
+              <button id="btn-clear-confirm" class="btn btn--danger btn--full">
+                Yes, Clear Everything
+              </button>
+              <button id="btn-clear-cancel" class="btn btn--ghost btn--full">Cancel</button>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- ── Screen 4: Race Dashboard ─────────────────────────────────── -->
@@ -399,6 +488,40 @@
           >RESET</button>
         </div>
 
+      </section>
+
+      <!-- ── Screen 5: Post-Session Summary ───────────────────────────── -->
+      <section id="screen-summary" class="screen" hidden>
+        <header class="summary-header">
+          <h1 class="summary-title">Session Complete</h1>
+          <p class="summary-meta" id="summary-meta"></p>
+        </header>
+
+        <div class="summary-chart-container" aria-hidden="true">
+          <svg id="summary-chart" class="lap-chart" role="img"
+               aria-label="Line chart of lap times"></svg>
+        </div>
+
+        <div class="summary-stats-row" role="region" aria-label="Session statistics">
+          <div class="stat-card">
+            <span class="stat-label">Fastest Lap</span>
+            <span class="stat-value" id="stat-fastest" aria-live="polite">–</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Average Lap</span>
+            <span class="stat-value" id="stat-avg" aria-live="polite">–</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Consistency</span>
+            <span class="stat-value" id="stat-consistency" aria-live="polite">–</span>
+          </div>
+        </div>
+
+        <div class="summary-action-row">
+          <button id="btn-save-session" class="btn btn--accent btn--full">Save to History</button>
+          <button id="btn-restart-session" class="btn btn--ghost btn--half">Restart</button>
+          <button id="btn-discard-session" class="btn btn--danger btn--half">Discard</button>
+        </div>
       </section>
     </main>
 

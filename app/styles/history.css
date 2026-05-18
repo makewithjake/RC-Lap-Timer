@@ -1,0 +1,181 @@
+/* history.css — Session History Screen (Screen 6) */
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+
+.history-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  color: var(--color-text-primary);
+  font-size: 1.5rem;
+  padding: var(--space-2);
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.history-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-primary);
+}
+
+/* ── Search Bar ─────────────────────────────────────────────────────────── */
+
+.history-search-bar {
+  padding: var(--space-3) var(--space-4);
+}
+
+#history-search {
+  width: 100%;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text-primary);
+  font-size: 1rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+#history-search:focus {
+  border-color: var(--color-accent);
+}
+
+/* ── Session List ───────────────────────────────────────────────────────── */
+
+.history-list-container {
+  overflow-y: auto;
+  flex: 1;
+  padding: 0 var(--space-4) var(--space-4);
+}
+
+.history-date-header {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  padding: var(--space-4) 0 var(--space-2);
+  margin: 0;
+}
+
+.history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.session-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  gap: var(--space-1) var(--space-4);
+  touch-action: none;
+  user-select: none;
+}
+
+.session-card__primary {
+  grid-column: 1;
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+}
+
+.session-card__car {
+  font-weight: 700;
+  color: var(--color-text-primary);
+  font-size: 1rem;
+}
+
+.session-card__driver {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+}
+
+.session-card__secondary {
+  grid-column: 1;
+  display: flex;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+}
+
+.session-card__best {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.session-card__best-label {
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-best-lap);
+}
+
+.session-card__best-time {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-best-lap);
+  font-variant-numeric: tabular-nums;
+}
+
+.history-empty {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  padding: var(--space-12) var(--space-4);
+}
+
+/* ── Delete Chip ────────────────────────────────────────────────────────── */
+
+.delete-chip {
+  position: fixed;
+  bottom: calc(var(--space-8) + env(safe-area-inset-bottom));
+  left: var(--space-4);
+  right: var(--space-4);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  z-index: 50;
+}
+
+.delete-chip__label {
+  flex: 1;
+  font-size: 0.875rem;
+  color: var(--color-text-primary);
+}
+
+.btn--sm {
+  min-height: var(--space-12);
+  padding: 0 var(--space-4);
+  font-size: 0.875rem;
+}

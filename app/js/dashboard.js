@@ -31,6 +31,7 @@ import {
 } from './audio.js';
 
 import { showScreen } from './router.js';
+import { showSummary } from './summary.js';
 
 // ── Time Formatting ───────────────────────────────────────────────────────────
 
@@ -243,7 +244,7 @@ function _handleStop(frozenTime) {
     timestamp:     Date.now(),
   };
 
-  setTimeout(() => showScreen('home'), 1500);
+  showSummary(window.__rcSession.result);
 }
 
 function _handleReset(roi, detectionSettings) {

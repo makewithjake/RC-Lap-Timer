@@ -1,5 +1,7 @@
 import { showScreen } from './router.js';
 import { startCamera } from './camera.js';
+import { showHistory } from './history.js';
+import { showSettings } from './settings.js';
 import { acquireWakeLock, lockCameraSettings } from './wakeLock.js';
 import { resizeCanvas } from './viewfinder.js';
 
@@ -46,13 +48,7 @@ export function initHome() {
     }
   });
 
-  document.getElementById('btn-view-history').addEventListener('click', () => {
-    console.log('Navigate to: history');
-    showScreen('history');
-  });
+  document.getElementById('btn-view-history').addEventListener('click', showHistory);
 
-  document.getElementById('btn-settings').addEventListener('click', () => {
-    console.log('Navigate to: settings');
-    showScreen('settings');
-  });
+  document.getElementById('btn-settings').addEventListener('click', showSettings);
 }
