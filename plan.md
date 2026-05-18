@@ -34,13 +34,13 @@ Phase 4 – Motion Detection Engine
 ## Phase 4: Motion Detection Engine (The Core)
 _Goal: The most critical phase — turning pixels into data._
 
-- [ ] **4.1 Frame Differencing Logic**
+- [ x] **4.1 Frame Differencing Logic**
   - Create a hidden canvas to sample pixel data from the ROI only (never the full frame).
   - Implement Luminance Differencing: compare the brightness of current pixels in the ROI vs. the previous frame.
-- [ ] **4.2 Detection Logic**
+- [ x] **4.2 Detection Logic**
   - Apply the Sensitivity threshold from the calibration slider.
   - Apply Debounce logic (ignore all triggers for N seconds after a hit) using the Debounce slider value.
-- [ ] **4.3 Virtual LED Test Mode** – Flash a corner Virtual LED element green and play an audible beep on each trigger without starting a real race, enabling hands-free calibration on the Viewfinder (Screen 2).
+- [x ] **4.3 Virtual LED Test Mode** – Flash a corner Virtual LED element green and play an audible beep on each trigger without starting a real race, enabling hands-free calibration on the Viewfinder (Screen 2).
 
 > **Milestone:** Move your hand across the drawn line; the app beeps and the Virtual LED flashes every time motion is detected within the zone.
 
