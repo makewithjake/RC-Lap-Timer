@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 1. Register Service Worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker
-      .register('/app/sw.js', { scope: '/app/' })
+      .register('./sw.js')
       .then((registration) => {
         console.log('[SW] Registered, scope:', registration.scope);
       })

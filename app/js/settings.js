@@ -169,8 +169,25 @@ function _initClearDataFlow() {
 function _updateOfflineBadge() {
   const badge = document.getElementById('about-offline-status');
   if (!badge) return;
-  const isControlled = !!navigator.serviceWorker?.controller;
-  badge.textContent = isControlled ? '✓ Offline Ready' : 'Connecting…';
+
+  const sw = navigator.serviceWorker;
+  if (!sw) {
+    badge.textContent = 'Not supported';
+    return;
+  }
+
+  const refresh = () => {
+    badge.textContent = sw.controller ? '✓ Offline Ready' : 'Connecting…';
+  };
+
+  refresh();
+
+  // Update badge if the SW takes control after this call
+  sw.addEventListener('controllerchange', refresh, { once: true });
+
+  // Also detect when a waiting SW finishes installing and activates
+  if (sw.controller) return;
+  sw.ready.then(() => refresh());
 }
 
 // ── D6 — Screen Initialization ────────────────────────────────────────────────
