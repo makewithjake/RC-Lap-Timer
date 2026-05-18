@@ -9,6 +9,7 @@
 import { getSettings, saveSettings, clearAllData } from './storage.js';
 import { getAvailableVoices, setPreferredVoice }   from './audio.js';
 import { showScreen } from './router.js';
+import { showHome } from './home.js';
 
 // ── D1 — Settings Form Hydration ──────────────────────────────────────────────
 
@@ -156,7 +157,7 @@ function _initClearDataFlow() {
       clearAllData();
       modal.setAttribute('hidden', '');
       modal.setAttribute('aria-hidden', 'true');
-      showScreen('home');
+      showHome(); // re-reads localStorage (now empty) so inputs are blank
       // Re-hydrate form with defaults for next open
       _hydrateForm(getSettings());
     });

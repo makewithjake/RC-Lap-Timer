@@ -52,3 +52,19 @@ export function initHome() {
 
   document.getElementById('btn-settings').addEventListener('click', showSettings);
 }
+
+/**
+ * Re-reads home screen inputs from localStorage and shows the home screen.
+ * Call this after clearAllData() so inputs reflect the wiped state.
+ */
+export function showHome() {
+  const driverInput   = document.getElementById('input-driver-name');
+  const carInput      = document.getElementById('input-car-name');
+  const locationInput = document.getElementById('input-location');
+
+  if (driverInput)   driverInput.value   = localStorage.getItem(STORAGE_KEYS.driverName) ?? '';
+  if (carInput)      carInput.value      = localStorage.getItem(STORAGE_KEYS.carName)    ?? '';
+  if (locationInput) locationInput.value = localStorage.getItem(STORAGE_KEYS.location)   ?? '';
+
+  showScreen('home');
+}

@@ -93,7 +93,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const debounceDisplay    = document.getElementById('debounce-value');
     const zoneWidthDisplay   = document.getElementById('zone-width-value');
 
-    // Initial fill sync (mirrors the HTML default values)
+    // Restore persisted calibration values from localStorage (rc_sensitivity, rc_debounce, rc_zoneWidth)
+    const storedSensitivity = localStorage.getItem('rc_sensitivity');
+    const storedDebounce    = localStorage.getItem('rc_debounce');
+    const storedZoneWidth   = localStorage.getItem('rc_zoneWidth');
+
+    if (storedSensitivity !== null) {
+      const v = parseInt(storedSensitivity, 10);
+      setSensitivity(v);
+      sliderSensitivity.value = v;
+      if (sensitivityDisplay) sensitivityDisplay.textContent = `${v}%`;
+      sliderSensitivity.setAttribute('aria-valuenow', v);
+    }
+    if (storedDebounce !== null) {
+      const v = parseFloat(storedDebounce);
+      setDebounce(v);
+      sliderDebounce.value = v;
+      if (debounceDisplay) debounceDisplay.textContent = `${v.toFixed(1)}s`;
+      sliderDebounce.setAttribute('aria-valuenow', v.toFixed(1));
+    }
+    if (storedZoneWidth !== null) {
+      const v = parseInt(storedZoneWidth, 10);
+      setZoneWidth(v);
+      setCanvasZoneWidth(v);
+      sliderZoneWidth.value = v;
+      if (zoneWidthDisplay) zoneWidthDisplay.textContent = `${v}px`;
+      sliderZoneWidth.setAttribute('aria-valuenow', v);
+    }
+
+    // Initial fill sync (uses current slider values, restored or default)
     _syncSliderFill(sliderSensitivity);
     _syncSliderFill(sliderDebounce);
     _syncSliderFill(sliderZoneWidth);
@@ -104,6 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
       sensitivityDisplay.textContent = `${v}%`;
       sliderSensitivity.setAttribute('aria-valuenow', v);
       _syncSliderFill(sliderSensitivity);
+      localStorage.setItem('rc_sensitivity', String(v));
       _restartDetectionIfActive(); // Phase 4
     });
 
@@ -113,6 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
       debounceDisplay.textContent = `${v}s`;
       sliderDebounce.setAttribute('aria-valuenow', v);
       _syncSliderFill(sliderDebounce);
+      localStorage.setItem('rc_debounce', v);
       _restartDetectionIfActive(); // Phase 4
     });
 
@@ -123,6 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
       zoneWidthDisplay.textContent = `${v}px`;
       sliderZoneWidth.setAttribute('aria-valuenow', v);
       _syncSliderFill(sliderZoneWidth);
+      localStorage.setItem('rc_zoneWidth', String(v));
       _restartDetectionIfActive(); // Phase 4 (zone width changes ROI geometry)
     });
   }

@@ -35,9 +35,12 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
   );
+  // Take control immediately on install so navigator.serviceWorker.controller
+  // is non-null on the current page without requiring a reload.
+  self.skipWaiting();
 });
 
-// Activate: delete any outdated cache versions
+// Activate: delete any outdated cache versions, then claim all clients
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) =>
@@ -46,7 +49,7 @@ self.addEventListener('activate', (event) => {
           .filter((name) => name !== CACHE_NAME)
           .map((name) => caches.delete(name))
       )
-    )
+    ).then(() => self.clients.claim())
   );
 });
 
