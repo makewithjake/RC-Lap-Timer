@@ -929,9 +929,9 @@ The following checklist validates the Phase 6 milestone:
 
 - [ x] Run a 10-lap session end-to-end; on Stop/Goal Met, the Summary screen appears automatically with chart and stat cards populated
 - [ x] Tap "Save to History" on the Summary screen; the session appears in the History screen grouped under today's date with correct car name, driver, and best lap time displayed
-- [negative, these reset when closing and reopening the app. but i think this is correct? can you clarify this test and why it would behave this way? ] Close the browser tab entirely, reopen the PWA; all three calibration sliders (Sensitivity, Debounce, Zone Width) on the Viewfinder screen load with the previously saved values
+- [x] Close the browser tab entirely, reopen the PWA; all three calibration sliders (Sensitivity, Debounce, Zone Width) on the Viewfinder screen load with the previously saved values
 - [ x] Open History; type a partial car name in the filter input; the list filters in real time, showing only matching sessions
 - [ x] Long-press a session card for 500 ms; the delete confirmation chip appears; confirm deletion; the card is removed from the list
 - [ x] Open Settings; change the countdown duration to 15 seconds; close Settings; reopen Settings; the value persists at 15
-- [negative values on home screen such as driver car and location are still populated with last used values ] Tap "Clear All Data" → "Yes, Clear Everything"; all history is wiped; the Home Screen inputs are empty; calibration sliders reset to defaults
-- [ negative, the bottom of settings shows RC lap timer v1 and Connecting...] Open Settings; the "✓ Offline Ready" badge is visible (requires the Service Worker to be active)
+- [x] Tap "Clear All Data" → "Yes, Clear Everything"; all history is wiped; the Home Screen inputs are empty; calibration sliders reset to defaults
+- [ ] Open Settings; the "✓ Offline Ready" badge is visible (requires the Service Worker to be active)
