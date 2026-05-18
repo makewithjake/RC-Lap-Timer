@@ -300,13 +300,13 @@ Final gate (H6 audit) waits for A, B, C, D, E, F, G all complete.
 
 ## 7. Acceptance Criteria
 
-- [ ] Page scores ≥ 90 on Lighthouse Performance, Accessibility, Best Practices, SEO
+- [x] Page scores ≥ 90 on Lighthouse Performance, Accessibility, Best Practices, SEO
 - [ ] PWA install prompt fires correctly on Android Chrome and is suppressed gracefully on iOS
-- [ ] All 6 feature cards, 3 how-it-works steps, and all sections render correctly at 375px, 768px, and 1440px
-- [ ] Electric Lime (`#C6FF00`) is the only non-white foreground color used on headings/CTAs
-- [ ] Circuit board overlay visible on hero and install section backgrounds, absent inside the app
-- [ ] Navigation collapses to hamburger at ≤ 768px with full ARIA support
-- [ ] `prefers-reduced-motion` disables all scroll animations
-- [ ] Clicking "Install Free App" on a supported browser triggers the native install prompt
-- [ ] App loads correctly from `/app/` path after restructure (service worker scope verified)
-- [ ] GitHub Pages deployment confirmed live at `https://username.github.io/repo-name`
+- [ x] All 6 feature cards, 3 how-it-works steps, and all sections render correctly at 375px, 768px, and 1440px
+- [ x] Electric Lime (`#C6FF00`) is the only non-white foreground color used on headings/CTAs
+- [ x] Circuit board overlay visible on hero and install section backgrounds, absent inside the app
+- [ x] Navigation collapses to hamburger at ≤ 768px with full ARIA support
+- [ x] `prefers-reduced-motion` disables all scroll animations
+- [ x] Clicking "Install Free App" on a supported browser triggers the native install prompt
+- [ x] App loads correctly from `/app/` path after restructure (service worker scope verified)
+- [x ] GitHub Pages deployment confirmed live at `https://username.github.io/repo-name`

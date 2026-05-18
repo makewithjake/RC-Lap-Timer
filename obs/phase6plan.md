@@ -10,42 +10,72 @@
 
 ## Phase 5 Prerequisite Checklist
 
-These deliverables from Phase 5 must be complete before Phase 6 begins. Agents should verify their existence and structure.
+These deliverables from Phases 5 and 5-2 must be complete before Phase 6 begins. Agents should verify their existence and structure.
 
 | Deliverable | File/Location | Notes |
 |---|---|---|
-| Countdown overlay screen | `index.html` (`#screen-countdown`) | Screen 3 — animated digits, Cancel button |
-| Race Dashboard screen | `index.html` (`#screen-dashboard`) | Screen 4 — Big Clock, Lap Table, Status Bar, STOP/RESET buttons |
-| Session management module | `js/session.js` | Exports `startSession()`, `stopSession()`, `recordTrigger()`, `getSessionData()`, `resetSession()` |
-| `window.__rcSession` contract | Set by `session.js` on stop | Object must include `laps[]` (each with `lapNumber`, `lapTimeMs`, `gapMs`), `totalTimeMs`, `driverName`, `carName`, `location`, `lapGoal`, `calibration` |
-| TTS lap announcements wired | `js/audio.js` → `js/session.js` | `announceLap()` called on each trigger after lap 1 |
-| Service Worker version | `sw.js` | `CACHE_NAME = 'rc-timer-v5'`; pre-caches all Phase 1–5 assets |
+| Countdown overlay screen | `app/index.html` (`#screen-countdown`) | Screen 3 — animated digits, Cancel button |
+| Race Dashboard screen | `app/index.html` (`#screen-dashboard`) | Screen 4 — Big Clock, Lap Table, Status Bar, STOP/RESET buttons |
+| Session management module | `app/js/session.js` | Exports `startSession()`, `stopSession()`, `getLaps()`, `getBestLapIndex()`, `resetSession()` |
+| `window.__rcSession` contract | Set by `app.js` on confirm, extended by `dashboard.js` on stop | See data contract table below |
+| TTS lap announcements wired | `app/js/audio.js` → `app/js/dashboard.js` | `announceLap()` called on each `onLap` callback |
+| Phase 5-2 bug fixes applied | `app/sw.js`, `app/js/viewfinder.js`, `app/styles/viewfinder.css` | Canvas resize fix, calibration toggle CSS, SW cache purge |
+| Service Worker version | `app/sw.js` | `CACHE_NAME = 'rc-timer-v7'`; pre-caches all Phase 1–5 assets |
 
-> **Agent Rule:** Before beginning any work in Task Groups B, C, or D, confirm that `window.__rcSession` is populated with a `laps` array containing at least one object with `lapNumber`, `lapTimeMs`, and `gapMs` fields. Do not build against mocked or placeholder data.
+**`window.__rcSession` data contract:**
+
+At session start (`app.js` Confirm handler), `window.__rcSession` is initialised with:
+```js
+{
+  roi,           // ROI geometry
+  settings,      // detection settings { sensitivity, debounce, zoneWidth }
+  goalLaps,      // number | null
+  delayedStart,  // boolean
+  meta: { driverName, carName, location },  // strings
+}
+```
+
+At session stop (`dashboard.js._handleStop()`), `window.__rcSession.result` is **added** to the existing object:
+```js
+window.__rcSession.result = {
+  laps,          // getLaps() → Array<{ lapNumber: number, lapTime: number, totalTime: number }>
+  bestLapIndex,  // getBestLapIndex() → 0-based index into laps[]
+  totalTime,     // number — total elapsed time in ms at moment of stop
+  driverName,    // string (from meta)
+  carName,       // string (from meta)
+  location,      // string (from meta)
+  timestamp,     // Date.now()
+};
+```
+
+> **Field naming note:** `session.js`'s `getLaps()` uses `lapTime` (not `lapTimeMs`) and `totalTime` (running total, not lap duration). `buildSessionRecord()` in Task Group A is responsible for mapping these to the canonical storage schema (`lapTimeMs`, `gapMs`).
+
+> **Agent Rule:** Before beginning any work in Task Groups B, C, or D, confirm that `window.__rcSession.result` is populated with a `laps` array and `totalTime`. Do not build against mocked or placeholder data.
 
 ---
 
 ## File Structure – New Files Created in Phase 6
 
 ```
-js/
+app/js/
   storage.js        ← Task Group A  (new — localStorage schema & CRUD layer)
   summary.js        ← Task Group B  (new — post-session stats & chart)
   history.js        ← Task Group C  (new — session archive rendering)
   settings.js       ← Task Group D  (new — global settings panel)
-styles/
+app/styles/
   summary.css       ← Task Group E  (new — Screen 5 styles)
   history.css       ← Task Group E  (new — Screen 6 styles)
   settings.css      ← Task Group E  (new — Screen 7 styles)
 ```
 
-> **Directories:** `js/` and `styles/` already exist. No new directories are needed.
+> **Directories:** `app/js/` and `app/styles/` already exist. No new directories are needed.
 
-**Modified files (additive — no existing code deleted):**
-- `index.html` — add Screen 5 (`#screen-summary`), Screen 6 (`#screen-history`), Screen 7 (`#screen-settings`) `<section>` elements; add three new stylesheet `<link>` tags
-- `js/app.js` — wire summary screen into post-session stop flow
-- `js/home.js` — wire gear icon → Settings screen; wire History button → History screen
-- `sw.js` — bump `CACHE_NAME` to `'rc-timer-v6'`; add 7 new assets to pre-cache list
+**Modified files (additive unless noted):**
+- `app/index.html` — add Screen 5 (`#screen-summary`) after `#screen-dashboard`; **replace** Screen 6 and 7 stub sections (`#screen-history`, `#screen-settings`) with full content; add three new stylesheet `<link>` tags
+- `app/js/app.js` — add imports and `init*` calls for the three new modules
+- `app/js/dashboard.js` — replace `setTimeout(() => showScreen('home'), …)` with `showSummary(window.__rcSession.result)` in `_handleStop()`
+- `app/js/home.js` — replace bare `showScreen('history')` / `showScreen('settings')` calls with module entry functions
+- `app/sw.js` — bump `CACHE_NAME` to `'rc-timer-v8'`; add 7 new `/app/`-prefixed assets to pre-cache list
 
 ---
 
@@ -157,10 +187,14 @@ const DEFAULT_SETTINGS = Object.freeze({
 
 Implement and export the following functions. All writes must wrap the JSON serialization in a `try/catch`; on `QuotaExceededError` log a warning to `console.warn` and surface the error to the caller by returning `false` from `saveSession`.
 
-- **`buildSessionRecord(rawSession)`** — accepts `window.__rcSession` as input; computes `bestLapMs`, `avgLapMs`, `consistencyScore` (population standard deviation), and `id` / `date`; returns a complete `Session` object. This is a pure function — it does not write to localStorage.
-  - `bestLapMs`: `Math.min(...laps.map(l => l.lapTimeMs))`
-  - `avgLapMs`: `Math.round(totalTimeMs / lapCount)`
-  - `consistencyScore`: population std deviation — `Math.round(Math.sqrt(laps.reduce((acc, l) => acc + (l.lapTimeMs - avgLapMs) ** 2, 0) / lapCount))`
+- **`buildSessionRecord(rawSession)`** — accepts `window.__rcSession.result` as input (not `window.__rcSession`). Maps source field names to the canonical storage schema and computes derived fields. Returns a complete `Session` object. This is a pure function — it does not write to localStorage.
+  - **Input field mapping:** source `lapTime` → stored `lapTimeMs`; source `totalTime` → stored `totalTimeMs`; `gapMs` must be computed (it is not present in the source data)
+  - `bestLapMs`: `Math.min(...laps.map(l => l.lapTime))`
+  - `avgLapMs`: `Math.round(rawSession.totalTime / laps.length)`
+  - `gapMs` per lap: `lap.lapTime - bestLapMs` (0 for the fastest lap)
+  - `consistencyScore`: population std deviation — `Math.round(Math.sqrt(laps.reduce((acc, l) => acc + (l.lapTime - avgLapMs) ** 2, 0) / laps.length))`
+  - `calibration`: read from `window.__rcSession.settings` (available on the parent object alongside `.result`)
+  - `lapGoal`: read from `window.__rcSession.goalLaps`
   - `id`: `(typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Date.now().toString()`
 
 - **`saveSession(sessionRecord)`** — prepends the session record to the existing `rc_sessions` array (newest first) and serializes to localStorage. Returns `true` on success, `false` on quota error.
@@ -240,9 +274,10 @@ Pure function — no DOM access, no imports. Exported so Group F can pass comput
 export function computeStats(laps, totalTimeMs) { … }
 ```
 
-- `bestLapMs`: min of all `lapTimeMs`
+- `bestLapMs`: `Math.min(...laps.map(l => l.lapTime))` — note: source laps use `lapTime`, not `lapTimeMs`
 - `avgLapMs`: `Math.round(totalTimeMs / laps.length)`
-- `consistencyScore`: population std deviation in ms (same formula as `buildSessionRecord` in A2 — they must produce identical results for the same input)
+- `consistencyScore`: population std deviation in ms — `Math.round(Math.sqrt(laps.reduce((acc, l) => acc + (l.lapTime - avgLapMs) ** 2, 0) / laps.length))`
+- Must produce identical results to `buildSessionRecord`'s calculations for the same input
 
 #### B3 — SVG Performance Chart (`renderChart`)
 
@@ -288,7 +323,7 @@ Called from `js/app.js` when a session ends (stop or goal met).
 
 ```js
 /**
- * @param {Object} rawSession  — window.__rcSession at time of stop
+ * @param {Object} rawSession  — window.__rcSession.result at time of stop
  */
 export function showSummary(rawSession) { … }
 ```
@@ -537,7 +572,7 @@ export {
 
 #### E1 — HTML: Screen 5 — Post-Session Summary (`#screen-summary`)
 
-Add inside `index.html` after `#screen-dashboard`, before `</main>`:
+> **Status: genuinely new.** This section does not yet exist in `app/index.html`. Add inside `index.html` after `#screen-dashboard`, before `</main>`:
 
 ```html
 <section id="screen-summary" class="screen" hidden>
@@ -576,6 +611,8 @@ Add inside `index.html` after `#screen-dashboard`, before `</main>`:
 
 #### E2 — HTML: Screen 6 — Session History (`#screen-history`)
 
+> **Status: stub exists.** `#screen-history` was added to `app/index.html` as a minimal placeholder (back button only) during Phase 5-2. **Replace the entire stub `<section>` with the full content below** — do not append after it.
+
 ```html
 <section id="screen-history" class="screen" hidden>
   <header class="history-header">
@@ -605,6 +642,8 @@ Add inside `index.html` after `#screen-dashboard`, before `</main>`:
 ```
 
 #### E3 — HTML: Screen 7 — Global Settings (`#screen-settings`)
+
+> **Status: stub exists.** `#screen-settings` was added to `app/index.html` as a minimal placeholder (back button only) during Phase 5-2. **Replace the entire stub `<section>` with the full content below** — do not append after it.
 
 ```html
 <section id="screen-settings" class="screen" hidden>
@@ -819,50 +858,65 @@ initHistory();
 initSettings();
 ```
 
-In the session stop handler (where `session.js` fires when STOP is pressed or lap goal is met), add:
+#### F1b — `js/dashboard.js` Stop Routing (modify)
+
+`_handleStop()` in `dashboard.js` currently ends with:
 
 ```js
-showSummary(window.__rcSession);
+setTimeout(() => showScreen('home'), 1500);
 ```
 
-This call replaces whatever `showScreen('home')` call currently exists at session end — the summary screen is now the mandatory stop before returning home.
+**Replace** this with a direct call to `showSummary` (import it at the top of `dashboard.js`):
 
-#### F2 — `js/home.js` Wiring (additive)
+```js
+import { showSummary } from './summary.js';
 
-Wire the gear icon and History button. These elements already exist in `#screen-home` from Phase 1; only the click handlers are new.
+// In _handleStop(), replace the setTimeout/showScreen call:
+showSummary(window.__rcSession.result);
+```
+
+This makes the Summary screen the mandatory step after a session ends instead of jumping directly to Home. Remove the `setTimeout` — `showSummary()` handles the screen transition immediately.
+
+> **Note:** `window.__rcSession.result` is set earlier in the same `_handleStop()` function, so it is guaranteed to be populated by the time `showSummary()` is called.
+
+#### F2 — `js/home.js` Wiring (partial — navigation already exists)
+
+`home.js` already calls `showScreen('history')` and `showScreen('settings')` via the router. These bare router calls must be **replaced** with calls to the proper module entry functions so that history loads its session list and settings hydrates its form on each entry:
 
 ```js
 import { showHistory }  from './history.js';
 import { showSettings } from './settings.js';
 
-// In the home screen init function (additive — do not replace existing listeners):
+// Replace existing bare showScreen('history') call:
+document.getElementById('btn-view-history').addEventListener('click', showHistory);
+
+// Replace existing bare showScreen('settings') call:
 document.getElementById('btn-settings').addEventListener('click', showSettings);
-document.getElementById('btn-history').addEventListener('click', showHistory);
 ```
 
-> **Note:** Confirm the IDs `btn-settings` (gear icon) and `btn-history` match the actual IDs in `index.html`. If Phase 1 used different IDs, use the correct IDs — do not rename existing elements.
+> **Note:** `#btn-history-back` and `#btn-settings-back` back-button handlers are already wired in `app.js` (added during Phase 5-2). Do not duplicate them.
 
-#### F3 — `sw.js` Service Worker Bump (additive)
+#### F3 — `app/sw.js` Service Worker Bump (additive)
 
 Update the cache name and add 7 new assets to the pre-cache list. Change only the `CACHE_NAME` constant and the assets array:
 
 ```js
 // Change:
-const CACHE_NAME = 'rc-timer-v5';
+const CACHE_NAME = 'rc-timer-v7';
 // To:
-const CACHE_NAME = 'rc-timer-v6';
+const CACHE_NAME = 'rc-timer-v8';
 ```
 
-Add to the pre-cache assets array:
+Add to the pre-cache assets array (use the `/app/` path prefix that matches all existing entries):
 
 ```js
-'js/storage.js',
-'js/summary.js',
-'js/history.js',
-'js/settings.js',
-'styles/summary.css',
-'styles/history.css',
-'styles/settings.css',
+'/app/js/storage.js',
+'/app/js/summary.js',
+'/app/js/history.js',
+'/app/js/settings.js',
+'/app/styles/summary.css',
+'/app/styles/history.css',
+'/app/styles/settings.css',
 ```
 
 No other changes to `sw.js`.
