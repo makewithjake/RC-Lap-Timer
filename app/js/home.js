@@ -3,7 +3,7 @@ import { startCamera } from './camera.js';
 import { showHistory } from './history.js';
 import { showSettings } from './settings.js';
 import { acquireWakeLock, lockCameraSettings } from './wakeLock.js';
-import { resizeCanvas } from './viewfinder.js';
+import { clearLine, resizeCanvas } from './viewfinder.js';
 
 const STORAGE_KEYS = {
   driverName: 'rc_driverName',
@@ -34,6 +34,7 @@ export function initHome() {
 
   // Navigation
   document.getElementById('btn-start-session').addEventListener('click', async () => {
+    clearLine();
     showScreen('viewfinder');
     resizeCanvas();
 

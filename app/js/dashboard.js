@@ -373,6 +373,8 @@ function _beginSession(roi, detectionSettings) {
 
 // ── Public API ────────────────────────────────────────────────────────────────
 
+let _dashAbortController = null;
+
 /**
  * Initialise the Race Dashboard screen.
  * Call once per entry into Screen 4 (called from app.js Confirm handler).
@@ -385,20 +387,42 @@ function _beginSession(roi, detectionSettings) {
 export function initDashboard(config) {
   const { roi, detectionSettings } = config;
 
+  // Remove any listeners wired by a previous session
+  if (_dashAbortController) _dashAbortController.abort();
+  _dashAbortController = new AbortController();
+  const { signal } = _dashAbortController;
+
+  // Clean up leftover state from the previous session
+  _stopClockRaf();
+  _teardownDetectionVideo();
+  resetSession();
+
+  // Clear lap table DOM
+  const tbody = document.getElementById('dash-lap-tbody');
+  if (tbody) tbody.innerHTML = '';
+
+  // Reset clock displays
+  const bigClock  = document.getElementById('dash-big-clock');
+  const totalTime = document.getElementById('dash-total-time');
+  if (bigClock)  bigClock.textContent  = '0:00.00';
+  if (totalTime) totalTime.textContent = '0:00.00';
+
+  _setSystemStatus(false);
+
   const stopBtn = document.getElementById('btn-dash-stop');
   if (stopBtn) {
     stopBtn.addEventListener('click', () => {
       const totalMs = getTotalElapsed();
       const lapMs   = getCurrentLapElapsed();
       _handleStop({ lapMs, totalMs });
-    }, { once: true });
+    }, { signal });
   }
 
   const resetBtn = document.getElementById('btn-dash-reset');
   if (resetBtn) {
     resetBtn.addEventListener('click', () => {
       _handleReset(roi, detectionSettings);
-    });
+    }, { signal });
   }
 
   acquireWakeLock();
