@@ -1,26 +1,26 @@
-const CACHE_NAME = 'rc-timer-v7';
+const CACHE_NAME = 'rc-timer-v8';
 
 const PRECACHE_URLS = [
-  '/app/index.html',
-  '/app/manifest.json',
-  '/app/styles/tokens.css',
-  '/app/styles/global.css',
-  '/app/styles/home.css',
-  '/app/styles/viewfinder.css',
-  '/app/js/app.js',
-  '/app/js/router.js',
-  '/app/js/home.js',
-  '/app/js/camera.js',
-  '/app/js/wakeLock.js',
-  '/app/js/audio.js',
-  '/app/js/viewfinder.js',
-  '/app/js/calibration.js',
-  '/app/js/detector.js',   // ← Phase 4 addition
-  '/app/styles/countdown.css',
-  '/app/styles/dashboard.css',
-  '/app/js/session.js',
-  '/app/js/countdown.js',
-  '/app/js/dashboard.js',
+  'index.html',
+  'manifest.json',
+  'styles/tokens.css',
+  'styles/global.css',
+  'styles/home.css',
+  'styles/viewfinder.css',
+  'js/app.js',
+  'js/router.js',
+  'js/home.js',
+  'js/camera.js',
+  'js/wakeLock.js',
+  'js/audio.js',
+  'js/viewfinder.js',
+  'js/calibration.js',
+  'js/detector.js',
+  'styles/countdown.css',
+  'styles/dashboard.css',
+  'js/session.js',
+  'js/countdown.js',
+  'js/dashboard.js',
 ];
 
 // Install: pre-cache all shell assets
