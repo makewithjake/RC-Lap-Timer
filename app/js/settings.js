@@ -18,14 +18,11 @@ import { showHome } from './home.js';
  * @param {import('./storage.js').Settings} settings
  */
 function _hydrateForm(settings) {
-  const countdownEl = document.getElementById('setting-countdown');
   const pitchEl     = document.getElementById('setting-tts-pitch');
   const pitchLabel  = document.getElementById('label-pitch');
   const volumeEl    = document.getElementById('setting-tts-volume');
   const volumeLabel = document.getElementById('label-volume');
   const voiceEl     = document.getElementById('setting-tts-voice');
-
-  if (countdownEl) countdownEl.value = settings.countdownDuration;
 
   if (pitchEl) {
     pitchEl.value = settings.ttsPitch;
@@ -84,13 +81,6 @@ async function _populateVoiceList() {
 // ── D3 — Live Input Listeners ─────────────────────────────────────────────────
 
 function _bindLiveListeners() {
-  const countdownEl = document.getElementById('setting-countdown');
-  if (countdownEl) {
-    countdownEl.addEventListener('change', () => {
-      saveSettings({ countdownDuration: Number(countdownEl.value) });
-    });
-  }
-
   const pitchEl    = document.getElementById('setting-tts-pitch');
   const pitchLabel = document.getElementById('label-pitch');
   if (pitchEl) {

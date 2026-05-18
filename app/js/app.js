@@ -1,4 +1,5 @@
 import { showScreen } from './router.js';
+import { getSettings, saveSettings } from './storage.js';
 import { initHome } from './home.js';
 import { initSummary } from './summary.js';
 import { initHistory } from './history.js';
@@ -299,6 +300,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ── Countdown duration input (viewfinder) ───────────────────────────────────
+  const _countdownInput = document.getElementById('input-countdown-duration');
+  if (_countdownInput) {
+    // Hydrate from stored settings
+    _countdownInput.value = getSettings().countdownDuration;
+    // Persist on change
+    _countdownInput.addEventListener('change', () => {
+      const v = Math.max(1, Math.min(60, parseInt(_countdownInput.value, 10) || 10));
+      _countdownInput.value = v;
+      saveSettings({ countdownDuration: v });
+    });
+  }
+
   const _goalLapsInput = document.getElementById('input-goal-laps');
   const _goalLapsLabel = document.getElementById('goal-laps-value');
 
@@ -365,7 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const digitEl = document.getElementById('countdown-digit');
 
     startCountdown({
-      duration: 10,
+      duration: parseInt(document.getElementById('input-countdown-duration')?.value, 10) || getSettings().countdownDuration,
       onTick: (n) => {
         if (!digitEl) return;
         digitEl.classList.add('is-ticking');

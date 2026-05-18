@@ -212,7 +212,7 @@
             />
           </div>
 
-          <!-- Delayed Start Toggle -->
+          <!-- Delayed Start Toggle + Countdown Duration -->
           <div class="calibration-row calibration-row--toggle">
             <label for="toggle-delayed-start" class="calibration-label">
               Delayed Start
@@ -223,12 +223,22 @@
               type="button"
               role="switch"
               aria-checked="false"
-              aria-label="Enable 10-second countdown before race begins"
+              aria-label="Enable countdown before race begins"
               class="calibration-toggle"
               data-active="false"
             >
               <span class="calibration-toggle-thumb"></span>
             </button>
+            <input
+              type="number"
+              id="input-countdown-duration"
+              class="calibration-number-input"
+              min="1"
+              max="60"
+              value="10"
+              inputmode="numeric"
+              aria-label="Countdown duration in seconds"
+            />
           </div>
 
           <!-- Goal Laps Input -->
@@ -356,14 +366,6 @@
         </header>
 
         <div class="settings-body">
-
-          <div class="settings-group">
-            <label class="settings-label" for="setting-countdown">
-              Default Countdown (seconds)
-            </label>
-            <input type="number" id="setting-countdown" class="settings-input"
-                   min="1" max="60" value="10" inputmode="numeric">
-          </div>
 
           <div class="settings-group">
             <label class="settings-label" for="setting-tts-voice">Announcer Voice</label>
