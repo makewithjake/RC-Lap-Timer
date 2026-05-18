@@ -58,6 +58,7 @@
 
 .history-list-container {
   overflow-y: auto;
+  overscroll-behavior: contain;
   flex: 1;
   padding: 0 var(--space-4) var(--space-4);
 }

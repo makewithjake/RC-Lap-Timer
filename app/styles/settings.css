@@ -22,6 +22,7 @@
 
 .settings-body {
   overflow-y: auto;
+  overscroll-behavior: contain;
   flex: 1;
   padding: var(--space-4);
   display: flex;
