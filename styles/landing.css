@@ -737,6 +737,35 @@ ul[role="list"] {
   line-height: 1.6;
 }
 
+/* Inline screenshot thumbnails within each How It Works step */
+.step-screenshot {
+  margin-top: 1.5rem;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #2A2A2A;
+  max-width: 200px;
+  margin-left: auto;
+  margin-right: auto;
+  transition: border-color var(--transition);
+}
+
+.step-screenshot:hover {
+  border-color: rgba(198, 255, 0, 0.3);
+}
+
+.step-screenshot img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+
+/* Step 2 reuses the viewfinder screenshot but crops to the calibration panel */
+.step-screenshot--calibration img {
+  object-position: bottom center;
+}
+
 @media (max-width: 768px) {
   .steps-grid {
     grid-template-columns: 1fr;
@@ -771,6 +800,13 @@ ul[role="list"] {
 
   .step-body {
     grid-column: 2;
+  }
+
+  .step-screenshot {
+    grid-column: 2;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
   }
 }
 

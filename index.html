@@ -99,11 +99,11 @@
           </div>
           <div class="hero-mockup" aria-hidden="true">
             <img
-              src="Assets/app-screenshot.png"
-              alt="RC Timer dashboard showing active lap timing session"
+              src="Assets/screenshots/Screenshot_dashboard_v1.png"
+              alt="RC Timer dashboard showing an active race on Lap 5 with live lap times and a highlighted best lap"
               loading="eager"
-              width="320"
-              height="580"
+              width="864"
+              height="1939"
             />
           </div>
         </div>
@@ -219,14 +219,22 @@
           <h2 id="hiw-heading" class="section-heading" data-animate="fade-up">
             Three Steps to Your First Lap
           </h2>
-          <div class="steps-container">
-            <div class="steps-track" aria-hidden="true"></div>
+          <div class="steps-grid">
 
             <!-- Step 1 -->
             <article class="step" data-animate="fade-up">
               <div class="step-number" aria-hidden="true">01</div>
               <h3 class="step-title">Point &amp; Draw</h3>
               <p class="step-body">Open the app, aim the camera at your finish line, drag to draw your Trigger Zone on the live feed.</p>
+              <div class="step-screenshot">
+                <img
+                  src="Assets/screenshots/Screenshot_viewfinder_v1.png"
+                  alt="RC Timer viewfinder showing a live camera feed with an Electric Lime trigger zone line drawn across the finish line"
+                  loading="lazy"
+                  width="864"
+                  height="1939"
+                />
+              </div>
             </article>
 
             <!-- Step 2 -->
@@ -234,6 +242,15 @@
               <div class="step-number" aria-hidden="true">02</div>
               <h3 class="step-title">Lock &amp; Calibrate</h3>
               <p class="step-body">Freeze exposure, test sensitivity with the Virtual LED indicator, set your debounce window.</p>
+              <div class="step-screenshot step-screenshot--calibration">
+                <img
+                  src="Assets/screenshots/Screenshot_viewfinder_v1.png"
+                  alt="RC Timer viewfinder calibration panel showing Sensitivity, Debounce, and Zone Width sliders"
+                  loading="lazy"
+                  width="864"
+                  height="1939"
+                />
+              </div>
             </article>
 
             <!-- Step 3 -->
@@ -241,6 +258,15 @@
               <div class="step-number" aria-hidden="true">03</div>
               <h3 class="step-title">Race</h3>
               <p class="step-body">Hit Start. The timer runs automatically every time your car crosses the Trigger Zone.</p>
+              <div class="step-screenshot">
+                <img
+                  src="Assets/screenshots/Screenshot_dashboard_v1.png"
+                  alt="RC Timer race dashboard on Lap 5 showing live lap times with the best lap highlighted in Electric Lime"
+                  loading="lazy"
+                  width="864"
+                  height="1939"
+                />
+              </div>
             </article>
 
           </div>
@@ -328,33 +354,51 @@
             See It in Action
           </h2>
           <div class="screenshots-strip" role="region" aria-label="App screenshots">
-            <div class="screenshot-frame" data-animate="fade-up">
+
+            <figure class="screenshot-frame" data-animate="fade-up">
               <img
-                src="Assets/screenshot-viewfinder.png"
-                alt="RC Timer viewfinder screen showing the camera feed with a drawn Trigger Zone across the finish line"
+                src="Assets/screenshots/Screenshot_viewfinder_v1.png"
+                alt="RC Timer viewfinder screen showing a live camera feed with an Electric Lime trigger zone line drawn diagonally across the finish line"
                 loading="lazy"
-                width="280"
-                height="500"
+                width="864"
+                height="1939"
               />
-            </div>
-            <div class="screenshot-frame" data-animate="fade-up">
+              <figcaption class="screenshot-caption">Draw Your Finish Line</figcaption>
+            </figure>
+
+            <figure class="screenshot-frame" data-animate="fade-up">
               <img
-                src="Assets/screenshot-dashboard.png"
-                alt="RC Timer dashboard with an active race showing lap times, current lap counter, and best lap"
+                src="Assets/screenshots/Screenshot_dashboard_v1.png"
+                alt="RC Timer race dashboard on Lap 5 showing the current lap time, total time, and a live lap table with the best lap highlighted in Electric Lime"
                 loading="lazy"
-                width="280"
-                height="500"
+                width="864"
+                height="1939"
               />
-            </div>
-            <div class="screenshot-frame" data-animate="fade-up">
+              <figcaption class="screenshot-caption">Race in Real Time</figcaption>
+            </figure>
+
+            <figure class="screenshot-frame" data-animate="fade-up">
               <img
-                src="Assets/screenshot-history.png"
-                alt="RC Timer session history screen showing a lap time chart and full lap table with personal best highlighted"
+                src="Assets/screenshots/Screenshot_sessioncomplete_v1.png"
+                alt="RC Timer session complete screen showing a lap time bar chart and stat tiles for Fastest Lap, Average, and Consistency"
                 loading="lazy"
-                width="280"
-                height="500"
+                width="864"
+                height="1939"
               />
-            </div>
+              <figcaption class="screenshot-caption">Review Every Run</figcaption>
+            </figure>
+
+            <figure class="screenshot-frame" data-animate="fade-up">
+              <img
+                src="Assets/screenshots/Screenshot_history_v1.png"
+                alt="RC Timer history screen showing a list of past sessions with best-lap times highlighted in Electric Lime"
+                loading="lazy"
+                width="864"
+                height="1939"
+              />
+              <figcaption class="screenshot-caption">Track Your Progress</figcaption>
+            </figure>
+
           </div>
         </div>
       </section>
