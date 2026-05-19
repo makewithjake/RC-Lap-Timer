@@ -30,7 +30,12 @@ A standalone marketing landing page for the RC Lap Timer PWA, designed to be hos
 ├── Assets/
 │   ├── icons/
 │   ├── circuit-overlay.svg ← Circuit board background SVG (NEW)
-│   └── app-screenshot.png  ← App mockup/screenshot for hero (NEW or existing)
+│   └── screenshots/        ← Real app screenshots (MOVED from /Screenshots/)
+│       ├── Screenshot_dashboard_v1.png      ← Hero image + How It Works Step 3
+│       ├── Screenshot_viewfinder_v1.png     ← Screenshots strip + How It Works Step 1
+│       ├── Screenshot_sessioncomplete_v1.png ← Screenshots strip
+│       ├── Screenshot_history_v1.png        ← Screenshots strip
+│       └── Screenshot_home_v1.png           ← Screenshots strip (optional / 4th slot)
 ├── app/                    ← PWA app relocated here
 │   ├── index.html          ← (was root index.html)
 │   ├── manifest.json
@@ -39,6 +44,8 @@ A standalone marketing landing page for the RC Lap Timer PWA, designed to be hos
 │   └── styles/
 └── CNAME                   ← Optional: custom domain (e.g., rctimer.app)
 ```
+
+> **Screenshot migration note:** The five PNG files currently in `/Screenshots/` must be moved to `/Assets/screenshots/` before implementation begins. This keeps all static assets under the single `/Assets/` tree and avoids a second top-level folder cluttering the repo root.
 
 ### GitHub Pages Config
 
@@ -89,7 +96,7 @@ Follows [style_guide.md](style_guide.md) exactly. Key marketing-page rules:
 - Subheadline: 1–2 lines of supporting copy (~16px, `--color-text-secondary`)
 - **Primary CTA:** Electric Lime button — `Install Free App` (triggers PWA install prompt)
 - **Secondary CTA:** Ghost button — `See How It Works` (smooth-scrolls to How It Works section)
-- App screenshot/mockup image (phone frame with dashboard screenshot), positioned right on desktop, below text on mobile
+- App screenshot image: **`Assets/screenshots/Screenshot_dashboard_v1.png`** — the active-race dashboard (Lap 5, live lap table, STOP/RESET buttons) is the most immediately compelling view of the app and communicates the core value proposition at a glance. Positioned right column on desktop, below text on mobile. Shown inside a thin phone-chrome frame with the radial lime glow behind it.
 
 ### Section 3: Feature Highlights
 - Section heading: `BUILT FOR THE TRACK` (Barlow Condensed, 2rem, `--color-text-primary`)
@@ -113,8 +120,11 @@ Follows [style_guide.md](style_guide.md) exactly. Key marketing-page rules:
 - Horizontal 3-step flow (desktop), vertical stack (mobile)
 - Each step: large step number in Electric Lime, step title, description, optional inline illustration/icon
   1. **Point & Draw** — Open the app, aim the camera at your finish line, drag to draw your Trigger Zone.
+     - *Inline image:* `Assets/screenshots/Screenshot_viewfinder_v1.png` (shows the live camera feed with the diagonal Electric Lime trigger zone line and two endpoint handles drawn across the frame)
   2. **Lock & Calibrate** — Freeze exposure, test sensitivity with the Virtual LED, set your debounce window.
+     - *Inline image:* `Assets/screenshots/Screenshot_viewfinder_v1.png` (reuse, cropped/focused on the lower calibration panel showing Sensitivity 81%, Debounce 3.2s, Zone Width sliders)
   3. **Race** — Hit Start. The timer runs automatically every time your car crosses the line.
+     - *Inline image:* `Assets/screenshots/Screenshot_dashboard_v1.png` (shows Lap 5 active, live lap table with Best lap highlighted in Electric Lime)
 - Connecting line/arrow between steps on desktop
 
 ### Section 5: PWA Install Section
@@ -129,9 +139,18 @@ Follows [style_guide.md](style_guide.md) exactly. Key marketing-page rules:
 - "Or open in browser" link as a ghost button
 
 ### Section 6: App Screenshots Strip
-- Horizontal scrollable strip (or static grid) of 2–3 app screenshots with thin `#2A2A2A` borders
-- Optional: subtle phone frame around each
-- Screenshots: Viewfinder (trigger zone drawn), Dashboard (active race), Post-Session chart
+- Horizontal scrollable strip (or static grid) of app screenshots with thin `#2A2A2A` borders
+- Subtle phone frame around each; Electric Lime caption label below each frame
+- **Screenshot slots (in display order):**
+  1. **Viewfinder / Setup** — `Assets/screenshots/Screenshot_viewfinder_v1.png`
+     Caption: `"Draw Your Finish Line"` — shows the live camera feed with the diagonal trigger zone drawn and the calibration sliders below
+  2. **Dashboard / Active Race** — `Assets/screenshots/Screenshot_dashboard_v1.png`
+     Caption: `"Race in Real Time"` — shows Lap 5, live lap table with Best lap highlighted in Electric Lime
+  3. **Session Complete** — `Assets/screenshots/Screenshot_sessioncomplete_v1.png`
+     Caption: `"Review Every Run"` — shows the post-session lap chart, Fastest Lap / Average / Consistency stat tiles, and Save to History CTA
+  4. **History** — `Assets/screenshots/Screenshot_history_v1.png`
+     Caption: `"Track Your Progress"` — shows the session list with best-lap callouts in Electric Lime
+- `Screenshot_home_v1.png` is held in reserve; it is not used in the strip (too similar to a generic form screen) but may be repurposed for the OG social card or blog assets
 
 ### Section 7: Footer
 - `RC TIMER` wordmark in Electric Lime
@@ -214,7 +233,7 @@ The tasks below are organized into independent workstreams that can be assigned 
 **Tasks:**
 - [ ] C1: Author Hero section HTML markup (`<section id="hero">`) with eyebrow, headline, subheadline, two CTAs
 - [ ] C2: Style hero layout: full-viewport, flexbox centered, circuit overlay, radial lime glow
-- [ ] C3: Position app screenshot/mockup image (right column desktop, below text mobile)
+- [ ] C3: Position app screenshot image — `Assets/screenshots/Screenshot_dashboard_v1.png` — inside a thin phone chrome frame with radial Electric Lime glow behind it; right column desktop, below text mobile; `loading="eager"` since it is above the fold
 - [ ] C4: Implement scroll-triggered fade-in animation (respects `prefers-reduced-motion`)
 - [ ] C5: Ensure hero CTA button is wired to the `installPrompt` stash in `landing.js` (coordinate with F)
 
@@ -226,7 +245,10 @@ The tasks below are organized into independent workstreams that can be assigned 
 **Tasks:**
 - [ ] D1: Author Features section HTML with 6 feature cards and Heroicons/Phosphor outlined SVG icons
 - [ ] D2: Implement 3-column → 1-column responsive CSS grid for feature cards
-- [ ] D3: Author How It Works section HTML with 3-step flow and step numbers
+- [ ] D3: Author How It Works section HTML with 3-step flow and step numbers; include inline `<img>` per step:
+  - Step 1: `Assets/screenshots/Screenshot_viewfinder_v1.png` (full viewfinder)
+  - Step 2: `Assets/screenshots/Screenshot_viewfinder_v1.png` (same image, CSS `object-position` crops to calibration panel)
+  - Step 3: `Assets/screenshots/Screenshot_dashboard_v1.png`
 - [ ] D4: Implement desktop horizontal layout with connecting accent line; mobile vertical stack
 - [ ] D5: Implement scroll-triggered stagger animation for card/step entrance
 
@@ -236,8 +258,13 @@ The tasks below are organized into independent workstreams that can be assigned 
 *Depends on B (CSS tokens). Can run in parallel with C, D, F, G after B is delivered.*
 
 **Tasks:**
-- [ ] E1: Author Screenshots section HTML — horizontal scroll strip with 2–3 app screenshots
-- [ ] E2: Style screenshot containers with `#2A2A2A` borders, optional phone frame, `border-radius: 12px`
+- [ ] E0: Move all five PNG files from `/Screenshots/` into `/Assets/screenshots/` (no renames needed — filenames stay as-is)
+- [ ] E1: Author Screenshots section HTML — horizontal scroll strip with 4 screenshot slots (all visible on all screen sizes); use `<figure>` + `<figcaption>` per slot
+  - Slot 1: `Assets/screenshots/Screenshot_viewfinder_v1.png` — caption "Draw Your Finish Line"
+  - Slot 2: `Assets/screenshots/Screenshot_dashboard_v1.png` — caption "Race in Real Time"
+  - Slot 3: `Assets/screenshots/Screenshot_sessioncomplete_v1.png` — caption "Review Every Run"
+  - Slot 4nshots/Screenshot_history_v1.png` — caption "Track Your Progress"
+- [ ] E2: Style screenshot containers with `#2A2A2A` borders, phone chrome frame, `border-radius: 12px`; add Electric Lime caption label below each frame
 - [ ] E3: Author Footer HTML with wordmark, nav links, copyright, tagline
 - [ ] E4: Style footer layout (flex, centered on mobile, spaced on desktop)
 
