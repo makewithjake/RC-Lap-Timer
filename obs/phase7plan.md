@@ -63,16 +63,16 @@ Eight targeted changes spanning navigation, data capture, calibration UX, and au
 
 ---
 
-### 7.4 – Reorder Calibration Sliders (Sensitivity → Debounce → Zone Width)
-**Problem:** The current slider order places Zone Width in a position that disrupts calibration workflow. The correct order is Sensitivity → Debounce → Zone Width.
+### 7.4 – Reorder Calibration Sliders (Sensitivity → Zone Width → Debounce)
+**Problem:** The current slider order places Zone Width below Debounce, disrupting the calibration workflow. The correct order is Sensitivity → Zone Width → Debounce.
 
-**Note on current order:** The stated desired order is **Sensitivity → Debounce → Zone Width** (Zone Width moves to the bottom of the slider group).
+**Note on current order:** The stated desired order is **Sensitivity → Zone Width → Debounce** (Zone Width moves above Debounce).
 
 **Implementation:**
 - In `app/index.html`, reorder the three slider `<div>` blocks inside `.calibration-panel` so they appear in this order:
   1. `#slider-sensitivity` group
-  2. `#slider-debounce` group
-  3. `#slider-zone-width` group
+  2. `#slider-zone-width` group
+  3. `#slider-debounce` group
 - No JavaScript changes are required — slider IDs and JS logic are order-independent.
 - No CSS changes are required.
 - **Files touched:** `app/index.html` only.
@@ -88,7 +88,7 @@ Eight targeted changes spanning navigation, data capture, calibration UX, and au
   - **Title:** "How to Set Up"
   - **Step list:**
     1. Tap two points on the screen to draw your start/finish line.
-    2. Drive your car through the line and adjust Sensitivity, Debounce, and Zone Width until the screen flashes green on each pass.
+    2. Drive your car through the line and adjust Sensitivity, Zone Width, and Debounce until the screen flashes green on each pass.
     3. Set Delayed Start duration and Goal Laps (optional).
     4. Tap **Confirm** to start the race!
   - **Close button:** Dismisses the modal (id `btn-help-close`).
@@ -204,8 +204,8 @@ These changes are independent of each other and can be implemented simultaneousl
 - [ ] Long-press delete still works and does not conflict with the tap-to-view gesture.
 - [ ] Sessions recorded before Setup Notes was added display gracefully (no crash, shows "No notes").
 
-### 7.4 – Slider Order (Sensitivity → Debounce → Zone Width)
-- [ ] On the Viewfinder screen, the calibration panel shows sliders in this top-to-bottom order: Sensitivity, Debounce, Zone Width.
+### 7.4 – Slider Order (Sensitivity → Zone Width → Debounce)
+- [ ] On the Viewfinder screen, the calibration panel shows sliders in this top-to-bottom order: Sensitivity, Zone Width, Debounce.
 - [ ] All three sliders still function correctly after reordering.
 - [ ] Slider values persist and reload correctly.
 
