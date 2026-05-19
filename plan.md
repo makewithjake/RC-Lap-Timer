@@ -23,11 +23,13 @@ Phases 1–6 are complete. Key architecture decisions locked in:
 
 ## Current Focus – Next Sprint
 
-All phases through Phase 6 are complete. See Future Tasks below for upcoming work.
+- ~~when viewfinder page opens, help popup should open automatically~~ ✓
 
 ---
 
 ## Future Tasks
+
+
 
 ### Potential Future Features / Bugs
 - Web Worker offload for pixel math if UI feels sluggish during detection

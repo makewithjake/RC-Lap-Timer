@@ -41,6 +41,7 @@ export function initHome() {
     clearLine();
     showScreen('viewfinder');
     history.pushState({ screen: 'viewfinder' }, '');
+    document.getElementById('viewfinder-help-modal')?.removeAttribute('hidden');
     resizeCanvas();
 
     const videoEl = document.getElementById('viewfinder-video');
