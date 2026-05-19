@@ -150,6 +150,7 @@ let _pendingDeleteId   = null;
 let _longPressTimer    = null;
 let _startPointerX     = 0;
 let _startPointerY     = 0;
+let _pointerMoved      = false;
 
 function _showDeleteChip() {
   const chip = document.getElementById('delete-confirm-chip');
@@ -180,6 +181,7 @@ function _bindLongPressDelete() {
 
     _startPointerX = e.clientX;
     _startPointerY = e.clientY;
+    _pointerMoved  = false;
 
     _pendingDeleteId = card.dataset.sessionId;
     _longPressTimer  = setTimeout(() => {
@@ -188,8 +190,17 @@ function _bindLongPressDelete() {
     }, 500);
   });
 
-  listEl.addEventListener('pointerup', () => {
+  listEl.addEventListener('pointerup', (e) => {
+    const wasTap = _longPressTimer !== null;
     _cancelLongPress();
+    if (wasTap && !_pointerMoved) {
+      const deleteChip = document.getElementById('delete-confirm-chip');
+      const chipVisible = deleteChip && !deleteChip.hasAttribute('hidden');
+      if (!chipVisible) {
+        const card = e.target.closest('.session-card');
+        if (card) _openSessionDetail(card.dataset.sessionId);
+      }
+    }
   });
 
   listEl.addEventListener('pointerleave', () => {
@@ -201,9 +212,63 @@ function _bindLongPressDelete() {
     const dx = e.clientX - _startPointerX;
     const dy = e.clientY - _startPointerY;
     if (Math.sqrt(dx * dx + dy * dy) > 8) {
+      _pointerMoved = true;
       _cancelLongPress();
     }
   });
+}
+
+// ── C4b — Session Detail Modal ────────────────────────────────────────────────
+
+function _openSessionDetail(sessionId) {
+  const session = getHistory().find((s) => s.id === sessionId);
+  if (!session) return;
+
+  const modal = document.getElementById('session-detail-modal');
+  if (!modal) return;
+
+  document.getElementById('session-detail-title').textContent = session.carName || '—';
+  document.querySelector('#session-detail-modal .session-detail-subtitle').textContent =
+    session.driverName || '';
+
+  document.getElementById('detail-date').textContent = new Date(session.date).toLocaleDateString(
+    'en-US',
+    { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' }
+  );
+  document.getElementById('detail-location').textContent = session.location || '—';
+
+  const notesEl = document.getElementById('detail-setup-notes');
+  if (session.setupNotes) {
+    notesEl.textContent = session.setupNotes;
+    notesEl.classList.remove('is-empty');
+  } else {
+    notesEl.textContent = 'No notes';
+    notesEl.classList.add('is-empty');
+  }
+
+  document.getElementById('detail-best-lap').textContent  = _formatLapTime(session.bestLapMs);
+  document.getElementById('detail-avg-lap').textContent   = _formatLapTime(session.avgLapMs);
+  document.getElementById('detail-total-time').textContent = _formatLapTime(session.totalTimeMs);
+
+  const tbody = document.getElementById('detail-lap-tbody');
+  tbody.innerHTML = '';
+  (session.laps ?? []).forEach((lap) => {
+    const tr = document.createElement('tr');
+    if (lap.gapMs === 0) tr.setAttribute('data-best', 'true');
+    const gapText = lap.gapMs === 0 ? 'Best' : '+' + _formatLapTime(lap.gapMs);
+    const tdLap  = document.createElement('td');
+    const tdTime = document.createElement('td');
+    const tdGap  = document.createElement('td');
+    tdLap.textContent  = lap.lapNumber;
+    tdTime.textContent = _formatLapTime(lap.lapTimeMs);
+    tdGap.textContent  = gapText;
+    tr.appendChild(tdLap);
+    tr.appendChild(tdTime);
+    tr.appendChild(tdGap);
+    tbody.appendChild(tr);
+  });
+
+  modal.removeAttribute('hidden');
 }
 
 function _bindDeleteChipButtons() {
@@ -246,6 +311,10 @@ export function initHistory() {
   if (backBtn) {
     backBtn.addEventListener('click', () => showScreen('home'));
   }
+
+  document.getElementById('btn-detail-close')?.addEventListener('click', () => {
+    document.getElementById('session-detail-modal')?.setAttribute('hidden', '');
+  });
 }
 
 // ── C6 — Screen Entry ─────────────────────────────────────────────────────────

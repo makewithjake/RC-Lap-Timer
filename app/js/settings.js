@@ -43,6 +43,11 @@ function _hydrateForm(settings) {
   document.querySelectorAll('.toggle-btn[data-value]').forEach((btn) => {
     btn.classList.toggle('toggle-btn--active', btn.dataset.value === settings.units);
   });
+
+  const lapStartAudioEl = document.getElementById('setting-lap-start-audio');
+  if (lapStartAudioEl) {
+    lapStartAudioEl.value = localStorage.getItem('rc_lapStartAudio') ?? "Let's Go!";
+  }
 }
 
 // ── D2 — Voice Selector Population ───────────────────────────────────────────
@@ -118,6 +123,13 @@ function _bindLiveListeners() {
       saveSettings({ units: btn.dataset.value });
     });
   });
+
+  const lapStartAudioEl = document.getElementById('setting-lap-start-audio');
+  if (lapStartAudioEl) {
+    lapStartAudioEl.addEventListener('input', () => {
+      localStorage.setItem('rc_lapStartAudio', lapStartAudioEl.value);
+    });
+  }
 }
 
 // ── D4 — Clear All Data Flow ──────────────────────────────────────────────────

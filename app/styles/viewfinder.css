@@ -326,38 +326,6 @@
 }
 
 /* ----------------------------------------------------------
-   C5 — Virtual LED
-   Activation logic (data-active toggling) added in Phase 4.
-   bottom stacks: 64px (Confirm) + 12px (gap) + safe-area
-   ---------------------------------------------------------- */
-.virtual-led {
-  position: absolute;
-  bottom: calc(var(--space-16) + var(--space-3) + env(safe-area-inset-bottom, 0px));
-  right: var(--space-4);
-  z-index: 21;
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-circle);
-  background: var(--color-surface-raised);
-  border: 2px solid var(--color-border);
-  transition: background 80ms ease, box-shadow 80ms ease, border-color 80ms ease;
-}
-
-/* Detection running but no motion — amber ring */
-.virtual-led[data-state="active"] {
-  background: var(--color-surface-raised);
-  border-color: #F59E0B;
-  box-shadow: 0 0 8px 2px rgba(245, 158, 11, 0.35);
-}
-
-/* Motion detected — bright green flash */
-.virtual-led[data-state="triggered"] {
-  background: var(--color-best-lap);
-  border-color: var(--color-best-lap);
-  box-shadow: 0 0 16px 6px var(--color-accent-glow);
-}
-
-/* ----------------------------------------------------------
    C6 — Clear drawn line button (shown by JS via .is-visible)
    Positioned below HUD bar (~56px from top)
    ---------------------------------------------------------- */
@@ -460,4 +428,93 @@
 .calibration-number-input:focus {
   outline: 2px solid var(--color-accent);
   outline-offset: 1px;
+}
+
+/* ----------------------------------------------------------
+   Phase 7.5 — Viewfinder Help Popup
+   ---------------------------------------------------------- */
+
+.viewfinder-help-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+  font-weight: 700;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+}
+
+.viewfinder-help-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+}
+
+.viewfinder-help-modal[hidden] {
+  display: none;
+}
+
+.viewfinder-help-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.viewfinder-help-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.viewfinder-help-steps {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  counter-reset: step-counter;
+}
+
+.viewfinder-help-steps li {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  font-size: 0.9375rem;
+  color: var(--color-text-primary);
+  line-height: 1.5;
+  counter-increment: step-counter;
+}
+
+.viewfinder-help-steps li::before {
+  content: counter(step-counter);
+  min-width: 24px;
+  height: 24px;
+  background: var(--color-accent);
+  color: #000;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }

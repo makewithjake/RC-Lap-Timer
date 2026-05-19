@@ -1,4 +1,4 @@
-import { showScreen } from './router.js';
+import { showScreen, currentScreen } from './router.js';
 import { getSettings, saveSettings } from './storage.js';
 import { initHome } from './home.js';
 import { initSummary } from './summary.js';
@@ -186,14 +186,12 @@ document.addEventListener('DOMContentLoaded', () => {
           debounce:    settings.debounce,
           onTrigger:   _onDetectionTrigger,
         });
-        if (_ledEl) _ledEl.dataset.state = 'active';
         if (_motionChipEl) {
           _motionChipEl.dataset.state = 'active';
           _motionChipEl.textContent   = '● Motion: ON';
         }
       } else {
         stopDetection();
-        if (_ledEl) _ledEl.dataset.state = 'idle';
         if (_motionChipEl) {
           _motionChipEl.dataset.state = 'idle';
           _motionChipEl.textContent   = '● Motion: OFF';
@@ -210,17 +208,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ── Phase 4: Virtual LED flash ────────────────────────────────────────────
-  const _ledEl        = document.getElementById('virtual-led');
   const _motionChipEl = document.getElementById('status-motion');
   const _flashEl      = document.getElementById('detection-flash');
   let _ledFlashTimer = null;
 
   function _activateVirtualLED() {
-    if (!_ledEl) return;
     if (_ledFlashTimer !== null) clearTimeout(_ledFlashTimer);
 
-    // LED circle
-    _ledEl.dataset.state = 'triggered';
     // HUD chip
     if (_motionChipEl) {
       _motionChipEl.dataset.state = 'triggered';
@@ -232,7 +226,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     _ledFlashTimer = setTimeout(() => {
-      _ledEl.dataset.state = 'active';
       if (_motionChipEl) {
         _motionChipEl.dataset.state = 'active';
         _motionChipEl.textContent   = '● Motion: ON';
@@ -263,7 +256,6 @@ document.addEventListener('DOMContentLoaded', () => {
       debounce:    settings.debounce,
       onTrigger:   _onDetectionTrigger,
     });
-    if (_ledEl) _ledEl.dataset.state = 'active';
     if (_motionChipEl) {
       _motionChipEl.dataset.state = 'active';
       _motionChipEl.textContent   = '● Motion: ON';
@@ -350,11 +342,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const _enterDashboard = () => {
         showScreen('dashboard');
+        history.pushState({ screen: 'dashboard' }, '');
         initDashboard({ roi, detectionSettings: settings });
       };
 
       if (delayedStart) {
         showScreen('countdown');
+        history.pushState({ screen: 'countdown' }, '');
         _runCountdown(_enterDashboard);
       } else {
         _enterDashboard();
@@ -373,7 +367,13 @@ document.addEventListener('DOMContentLoaded', () => {
       cancelCountdown();
     });
   }
-
+  // ── Phase 7.5: Viewfinder help popup ───────────────────────────────────────
+  document.getElementById('btn-viewfinder-help')?.addEventListener('click', () => {
+    document.getElementById('viewfinder-help-modal')?.removeAttribute('hidden');
+  });
+  document.getElementById('btn-help-close')?.addEventListener('click', () => {
+    document.getElementById('viewfinder-help-modal')?.setAttribute('hidden', '');
+  });
   // ── Phase 5: Countdown helper ───────────────────────────────────────────────
   function _runCountdown(onComplete) {
     const digitEl = document.getElementById('countdown-digit');
@@ -398,6 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
       },
       onCancel: () => {
         showScreen('viewfinder');
+        history.pushState({ screen: 'viewfinder' }, '');
         const roi      = getROI();
         const settings = getAllSettings();
         if (roi && hasCompleteLine()) {
@@ -409,13 +410,26 @@ document.addEventListener('DOMContentLoaded', () => {
             debounce:    settings.debounce,
             onTrigger:   _onDetectionTrigger,
           });
-          if (_ledEl) _ledEl.dataset.state = 'active';
         }
       },
     });
   }
 
-  // 6. Clean up camera + wake lock when user leaves the page
+  // 6. Handle back swipe / device back button
+  window.addEventListener('popstate', () => {
+    const screen = currentScreen();
+    if (screen === 'viewfinder') {
+      stopDetection();
+      clearLine();
+      stopCamera();
+      releaseWakeLock();
+      showScreen('home');
+    } else if (screen === 'countdown' || screen === 'dashboard') {
+      history.pushState({ screen }, '');
+    }
+  });
+
+  // 7. Clean up camera + wake lock when user leaves the page
   window.addEventListener('pagehide', () => {
     stopCamera();
     releaseWakeLock();

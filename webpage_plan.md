@@ -148,7 +148,7 @@ Follows [style_guide.md](style_guide.md) exactly. Key marketing-page rules:
      Caption: `"Race in Real Time"` — shows Lap 5, live lap table with Best lap highlighted in Electric Lime
   3. **Session Complete** — `Assets/screenshots/Screenshot_sessioncomplete_v1.png`
      Caption: `"Review Every Run"` — shows the post-session lap chart, Fastest Lap / Average / Consistency stat tiles, and Save to History CTA
-  4. **History** — `Assets/screenshots/Screenshot_history_v1.png`
+  4. **History** — `Assets/screenshots/Screenshot_history_v1.png` *(optional 4th slot on wider viewports only; hidden on mobile to keep strip tight)*
      Caption: `"Track Your Progress"` — shows the session list with best-lap callouts in Electric Lime
 - `Screenshot_home_v1.png` is held in reserve; it is not used in the strip (too similar to a generic form screen) but may be repurposed for the OG social card or blog assets
 

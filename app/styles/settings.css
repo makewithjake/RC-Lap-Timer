@@ -54,6 +54,13 @@
   min-height: var(--space-12);
 }
 
+.settings-hint {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
 .settings-select {
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border);

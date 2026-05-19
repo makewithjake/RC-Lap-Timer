@@ -96,6 +96,18 @@
               spellcheck="false"
             />
           </div>
+
+          <div class="home-field">
+            <label for="input-setup-notes">Setup Notes</label>
+            <input
+              type="text"
+              id="input-setup-notes"
+              name="setupNotes"
+              placeholder="e.g., 17.5T motor, stock springs"
+              autocomplete="off"
+              spellcheck="false"
+            />
+          </div>
         </div>
 
         <div class="home-nav">
@@ -133,15 +145,6 @@
           aria-label="Clear the drawn trigger line and start over"
         >Clear</button>
 
-        <!-- Phase 3: Virtual LED indicator — activated by Phase 4 detection engine (Task 4.3) -->
-        <div
-          id="virtual-led"
-          class="virtual-led"
-          role="status"
-          aria-label="Motion detection indicator"
-          data-state="idle"
-        ></div>
-
         <!-- Phase 3: Calibration tools panel (Task 3.3) -->
         <div class="calibration-panel" id="calibration-panel" aria-label="Detection calibration controls">
 
@@ -163,6 +166,27 @@
               aria-valuemax="100"
               aria-valuenow="75"
               aria-label="Detection sensitivity: 75 percent"
+            />
+          </div>
+
+          <!-- Zone Width Slider -->
+          <div class="calibration-row">
+            <label for="slider-zone-width" class="calibration-label">
+              Zone Width
+              <span id="zone-width-value" class="calibration-value">20px</span>
+            </label>
+            <input
+              type="range"
+              id="slider-zone-width"
+              class="calibration-slider"
+              min="10"
+              max="100"
+              value="20"
+              step="2"
+              aria-valuemin="10"
+              aria-valuemax="100"
+              aria-valuenow="20"
+              aria-label="Detection zone width: 20 pixels"
             />
           </div>
 
@@ -189,27 +213,6 @@
               <span>1.0s</span>
               <span>5.0s</span>
             </div>
-          </div>
-
-          <!-- Zone Width Slider -->
-          <div class="calibration-row">
-            <label for="slider-zone-width" class="calibration-label">
-              Zone Width
-              <span id="zone-width-value" class="calibration-value">20px</span>
-            </label>
-            <input
-              type="range"
-              id="slider-zone-width"
-              class="calibration-slider"
-              min="10"
-              max="100"
-              value="20"
-              step="2"
-              aria-valuemin="10"
-              aria-valuemax="100"
-              aria-valuenow="20"
-              aria-label="Detection zone width: 20 pixels"
-            />
           </div>
 
           <!-- Delayed Start Toggle + Countdown Duration -->
@@ -264,8 +267,24 @@
         <!-- Detection flash overlay — full-screen green pulse on each trigger -->
         <div id="detection-flash" class="detection-flash" aria-hidden="true"></div>
 
+        <!-- Viewfinder Help Modal (Phase 7.5) -->
+        <div id="viewfinder-help-modal" class="viewfinder-help-modal" hidden
+             role="dialog" aria-modal="true" aria-labelledby="viewfinder-help-title">
+          <div class="viewfinder-help-card">
+            <h2 class="viewfinder-help-title" id="viewfinder-help-title">How to Set Up</h2>
+            <ol class="viewfinder-help-steps">
+              <li>Tap two points on the screen to draw your start/finish line.</li>
+              <li>Drive your car through the line and adjust Sensitivity, Zone Width, and Debounce until the screen flashes green on each pass.</li>
+              <li>Set Delayed Start duration and Goal Laps (optional).</li>
+              <li>Tap <strong>Confirm</strong> to start the race!</li>
+            </ol>
+            <button id="btn-help-close" class="btn btn--full" type="button">Got it</button>
+          </div>
+        </div>
+
         <!-- HUD status bar — Wake Lock chip (B2) + Camera Lock chip (B4) + Motion chip -->
         <div class="viewfinder-hud" aria-label="Status indicators">
+          <button id="btn-viewfinder-help" class="viewfinder-help-btn" aria-label="Show setup help" type="button">?</button>
           <span
             id="status-wake-lock"
             class="viewfinder-status-chip"
@@ -356,6 +375,54 @@
           <button id="btn-delete-confirm" class="btn btn--danger btn--sm">Delete</button>
           <button id="btn-delete-cancel" class="btn btn--ghost btn--sm">Cancel</button>
         </div>
+
+        <!-- Session Detail Modal (Phase 7.3) -->
+        <div id="session-detail-modal" class="session-detail-modal modal-overlay" hidden
+             role="dialog" aria-modal="true" aria-labelledby="session-detail-title">
+          <div class="session-detail-card">
+            <div class="session-detail-header">
+              <div>
+                <h2 class="session-detail-title" id="session-detail-title"></h2>
+                <p class="session-detail-subtitle"></p>
+              </div>
+              <button id="btn-detail-close" class="btn-icon" aria-label="Close detail view">✕</button>
+            </div>
+            <div class="session-detail-meta">
+              <span class="session-detail-meta-item" id="detail-date"></span>
+              <span class="session-detail-meta-item" id="detail-location"></span>
+            </div>
+            <div class="session-detail-notes">
+              <span class="session-detail-notes-label">Setup Notes</span>
+              <p id="detail-setup-notes" class="session-detail-notes-text"></p>
+            </div>
+            <div class="session-detail-stats">
+              <div class="session-detail-stat">
+                <span class="session-detail-stat-label">BEST LAP</span>
+                <span class="session-detail-stat-value" id="detail-best-lap"></span>
+              </div>
+              <div class="session-detail-stat">
+                <span class="session-detail-stat-label">AVG LAP</span>
+                <span class="session-detail-stat-value" id="detail-avg-lap"></span>
+              </div>
+              <div class="session-detail-stat">
+                <span class="session-detail-stat-label">TOTAL TIME</span>
+                <span class="session-detail-stat-value" id="detail-total-time"></span>
+              </div>
+            </div>
+            <div class="session-detail-lap-table-wrap">
+              <table class="session-detail-lap-table">
+                <thead>
+                  <tr>
+                    <th>Lap</th>
+                    <th>Time</th>
+                    <th>Gap</th>
+                  </tr>
+                </thead>
+                <tbody id="detail-lap-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- ── Screen 7: Settings ────────────────────────────────────────── -->
@@ -386,6 +453,14 @@
             </label>
             <input type="range" id="setting-tts-volume"
                    min="0" max="1" step="0.1" value="1.0">
+          </div>
+
+          <div class="settings-group">
+            <label class="settings-label" for="setting-lap-start-audio">Lap Start Audio</label>
+            <input type="text" id="setting-lap-start-audio" class="settings-input"
+                   maxlength="80" placeholder="Spoken when timer starts"
+                   autocomplete="off" spellcheck="false" />
+            <p class="settings-hint">Spoken aloud when the timer starts. Default: &ldquo;Let&#39;s Go!&rdquo;</p>
           </div>
 
           <div class="settings-group">

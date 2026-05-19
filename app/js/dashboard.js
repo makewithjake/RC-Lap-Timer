@@ -28,6 +28,7 @@ import {
 import {
   playLapBeep,
   announceLap,
+  speak,
 } from './audio.js';
 
 import { showScreen } from './router.js';
@@ -279,6 +280,8 @@ function _beginSession(roi, detectionSettings) {
       _startClockRaf();
       _updateLapCounter(0, goalLaps);
       _flashTriggerIndicator();
+      const lapStartPhrase = localStorage.getItem('rc_lapStartAudio') ?? "Let's Go!";
+      speak(lapStartPhrase);
     },
     onLap: (lap, allLaps) => {
       playLapBeep();

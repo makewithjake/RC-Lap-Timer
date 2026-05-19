@@ -104,6 +104,7 @@ export function buildSessionRecord(rawSession) {
     driverName:       rawSession.driverName ?? '',
     carName:          rawSession.carName    ?? '',
     location:         rawSession.location   ?? '',
+    setupNotes:       localStorage.getItem('rc_setupNotes') || '',
     laps:             lapRecords,
     lapCount:         laps.length,
     bestLapMs,
@@ -179,6 +180,8 @@ export function clearAllData() {
     'rc_sensitivity',
     'rc_debounce',
     'rc_zoneWidth',
+    'rc_setupNotes',
+    'rc_lapStartAudio',
   ].forEach((key) => localStorage.removeItem(key));
 }
 
