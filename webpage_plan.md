@@ -43,6 +43,7 @@ Standalone marketing landing page hosted via GitHub Pages (root of repo). Showca
 - Cross-browser QA: Chrome, Safari iOS, Firefox at 375px / 768px / 1440px
 - Confirm PWA install prompt fires on Android Chrome; graceful fallback on iOS
 - Create `og-image.png` social card (1200×630) matching brand aesthetic
+- `Screenshot_home_v1.png` should be added to carousel at bottom of page in slot 1
 
 ---
 
@@ -62,4 +63,4 @@ Standalone marketing landing page hosted via GitHub Pages (root of repo). Showca
 ### Bugs / Watch Items
 - `beforeinstallprompt` is not fired on iOS Safari — confirm fallback instructions accordion displays correctly
 - Verify `CNAME` custom domain does not break `/app/` service worker scope on first deploy
-- `Screenshot_home_v1.png` held in reserve — not displayed on page; repurpose for OG social card or future blog assets
+
