@@ -23,12 +23,21 @@ Phases 1–6 are complete. Key architecture decisions locked in:
 
 ## Current Focus – Next Sprint
 
-- ~~when viewfinder page opens, help popup should open automatically~~ ✓
+- bug: Changing volume in settings does not have an effect on TTS. Keep the volume adjuster, but add on off toggle for TTS. default TTS should be OFF
+- bug: TTS language selection box does not change the tts language
+- bug: once history page is full, new sessions push old sessions off the screen. Also, it's next day and new sessions are being put under yesterday's date, even though there is a section for today date. Deleting sessions does allow old sessions to become visible again. So there are there, just getting pushed off screen. History page should allow scrolling to see full list and sessions should be placed within 
+- bug: add lap graph when viewing sessions from history. 
+- bug: formatting issue on homepage title (RC Timer) is not centered on the screen.  possibly it is shifted due to interaction with the gear/settings icon?
+- feature: add a small "Clear" button on home page that clears the driver, car, location, and notes fields.
+
 
 ---
 
 ## Future Tasks
-
+- case: when viewing from a low angle, the fnish line (eg, phone is next to a residential sized road) and finish line is drawn across the entire road, car is not detected when at the far side of the finish line/road which is also near the edge of the finish line.  Assumption was that car was too small at this distance, however, if phone setup is kept the same, and line is drawn shorter, only including the far side of the road, car is detected reliably. Is the finish line getting compressed or scaled in some way that it cant see small objects when line is large?  is a smaller line providing higher fidelity?
+- need a contact/bug report page/form
+- confirm battery life tests.  does app stay low power or is it burning battery?  initial tests seemed to make the phone slightly warm.  will need to track some telemetry from phone to best understand this to make sure we have no memory leaks.
+- 
 
 
 ### Potential Future Features / Bugs
@@ -37,3 +46,5 @@ Phases 1–6 are complete. Key architecture decisions locked in:
 - Export session data (CSV or share sheet)
 - Distance tracking (metric/imperial) once sensor data supports it
 - tags that can be applied to laps on post session page. these could allow user to ignore laps if car flips, etc.
+- manual focus? or tappable focus zones?
+-
