@@ -29,6 +29,11 @@ Phases 1–6 are complete. Key architecture decisions locked in:
 - bug: add lap graph when viewing sessions from history. 
 - bug: formatting issue on homepage title (RC Timer) is not centered on the screen.  possibly it is shifted due to interaction with the gear/settings icon?
 - feature: add a small "Clear" button on home page that clears the driver, car, location, and notes fields.
+- run a code check to verify code uses best practices, identify and remove unecessary, reduntant, or unused code. refine and prepare for public deplayment
+- need a contact/bug report page/form.  For now, use simple link that opens users email client and sends an email to jake@makewithjake.net. locate this on the settings page towards the bottom
+- rebrand to LapTrack.  replace all references to RC Timer within the app.  New domain is LapTrack.app.
+- include a copywrite Make with Jake LLC at the bottom of the settings page.
+- cleanup file structure. move files in folders based on common best practices. move unused/redundtant, unnecessary files to the Obs folder for future deletion.
 
 
 ---
@@ -37,7 +42,7 @@ Phases 1–6 are complete. Key architecture decisions locked in:
 - case: when viewing from a low angle, the fnish line (eg, phone is next to a residential sized road) and finish line is drawn across the entire road, car is not detected when at the far side of the finish line/road which is also near the edge of the finish line.  Assumption was that car was too small at this distance, however, if phone setup is kept the same, and line is drawn shorter, only including the far side of the road, car is detected reliably. Is the finish line getting compressed or scaled in some way that it cant see small objects when line is large?  is a smaller line providing higher fidelity?
 - need a contact/bug report page/form
 - confirm battery life tests.  does app stay low power or is it burning battery?  initial tests seemed to make the phone slightly warm.  will need to track some telemetry from phone to best understand this to make sure we have no memory leaks.
-- 
+
 
 
 ### Potential Future Features / Bugs

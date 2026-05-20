@@ -9,7 +9,7 @@ Point your phone at the finish line and draw a **Trigger Zone** across the track
 ## Features
 
 - **Camera-based detection** — uses your phone's rear camera as a virtual finish line sensor
-- **Trigger Zone drawing** — tap and drag to place a two-point line over the track; drag handles to reposition
+- **Trigger Zone drawing** — tap to place a two-point line over the track; drag handles to reposition
 - **Luminance frame differencing** — brightness-based motion detection that resists color-shifting sunlight
 - **Calibration controls** — adjustable sensitivity, debounce delay (1–5 s), and zone width sliders
 - **Virtual LED test mode** — hands-free calibration with a visual flash and audible beep before racing
@@ -37,8 +37,7 @@ Point your phone at the finish line and draw a **Trigger Zone** across the track
 
 1. Open the app and enter driver name, car name, and location.
 2. On the **Viewfinder** screen, draw a line across the finish line.
-3. Adjust sensitivity and debounce; use **Test Mode** to verify detection.
-4. Enable **Wake Lock** and optionally lock camera exposure/focus.
-5. Toggle **Delayed Start** if racing solo, then tap **Confirm**.
+3. Adjust sensitivity and debounce; verify detection live.
+4. Toggle **Delayed Start** if racing solo, then tap **Confirm**.
 6. Cross the line to start the master timer — every subsequent crossing records a lap.
 7. Tap **Stop** when finished; review the session summary and lap chart.
