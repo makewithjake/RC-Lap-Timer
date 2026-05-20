@@ -171,6 +171,50 @@ if (hamburger && navLinks) {
   });
 }
 
+// ─── Mobile Swipe Gesture for Nav Drawer ─────────────────────────────────────
+(function () {
+  let touchStartX = 0;
+  let touchStartY = 0;
+
+  function openMenu() {
+    if (!hamburger || !navLinks) return;
+    hamburger.setAttribute('aria-expanded', 'true');
+    navLinks.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeMenu() {
+    if (!hamburger || !navLinks) return;
+    hamburger.setAttribute('aria-expanded', 'false');
+    navLinks.classList.remove('is-open');
+    document.body.style.overflow = '';
+  }
+
+  document.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+
+  document.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+
+    // Only handle predominantly horizontal swipes
+    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+
+    const menuOpen = navLinks && navLinks.classList.contains('is-open');
+
+    if (dx > 0 && touchStartX <= 40 && !menuOpen) {
+      // Right swipe from left edge → open menu
+      openMenu();
+    } else if (dx < 0 && menuOpen) {
+      // Left swipe while menu open → close and scroll to top
+      closeMenu();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, { passive: true });
+}());
+
 // ─── Active Nav Link on Scroll ─────────────────────────────────────────────────
 
 const sections = document.querySelectorAll('section[id]');
