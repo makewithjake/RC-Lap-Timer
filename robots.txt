@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-# Sitemap: add once a domain is confirmed
+Sitemap: https://laptrack.app/sitemap.xml

@@ -42,7 +42,7 @@ Standalone marketing landing page hosted via GitHub Pages (root of repo). Showca
 - `Screenshot_home_v1.png` should be added to carousel at bottom of page in slot 1
 - bug: webpage on mobile issue. when hamburger menu is selected, drop down menu apperas but with transparent background, and overlays existing text, making it difficult to read.  background of this menu should be solid black.
 - bug: on mobile when swiping right to hamburger/drop down menu after scrolling to bottom of page, user must scroll back upwards before reaching the menu.  swipe right should expose the menu immediately, and then if user swips left/back, should return to top of the page.
-- udpate marketing copy and domain info with laptrack.app for domain and LapTrack wherever RC Timer is used.
+- ~~udpate marketing copy and domain info with laptrack.app for domain and LapTrack wherever RC Timer is used.~~
 
 ---
 
