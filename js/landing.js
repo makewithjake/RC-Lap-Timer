@@ -175,6 +175,7 @@ if (hamburger && navLinks) {
 (function () {
   let touchStartX = 0;
   let touchStartY = 0;
+  let touchStartTarget = null;
 
   function openMenu() {
     if (!hamburger || !navLinks) return;
@@ -193,6 +194,7 @@ if (hamburger && navLinks) {
   document.addEventListener('touchstart', (e) => {
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
+    touchStartTarget = e.target;
   }, { passive: true });
 
   document.addEventListener('touchend', (e) => {
@@ -202,10 +204,13 @@ if (hamburger && navLinks) {
     // Only handle predominantly horizontal swipes
     if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
 
+    // Don't intercept swipes that start inside a horizontally scrollable area
+    if (touchStartTarget && touchStartTarget.closest('.screenshots-strip')) return;
+
     const menuOpen = navLinks && navLinks.classList.contains('is-open');
 
-    if (dx > 0 && touchStartX <= 40 && !menuOpen) {
-      // Right swipe from left edge → open menu
+    if (dx > 0 && !menuOpen) {
+      // Right swipe from anywhere → open menu
       openMenu();
     } else if (dx < 0 && menuOpen) {
       // Left swipe while menu open → close and scroll to top

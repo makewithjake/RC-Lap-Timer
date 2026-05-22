@@ -56,14 +56,16 @@
             <line x1="3" y1="18" x2="21" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
           </svg>
         </button>
-        <ul class="nav-links" id="nav-links" role="list">
-          <li><a href="#features">Features</a></li>
-          <li><a href="#how-it-works">How It Works</a></li>
-          <li><a href="#install">Install</a></li>
-          <li><a href="app/" class="btn-ghost btn-sm">Launch App</a></li>
-        </ul>
       </div>
     </nav>
+
+    <!-- Mobile nav overlay — lives outside the sticky nav to avoid backdrop-filter stacking context -->
+    <ul class="nav-links" id="nav-links" role="list" aria-label="Navigation menu">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#how-it-works">How It Works</a></li>
+      <li><a href="#install">Install</a></li>
+      <li><a href="app/" class="btn-ghost btn-sm">Launch App</a></li>
+    </ul>
 
     <main id="main-content">
 
