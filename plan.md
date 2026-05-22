@@ -23,17 +23,16 @@ Phases 1–6 are complete. Key architecture decisions locked in:
 
 ## Current Focus – Next Sprint
 
-- bug: Changing volume in settings does not have an effect on TTS. Keep the volume adjuster, but add on off toggle for TTS. default TTS should be OFF
-- bug: TTS language selection box does not change the tts language
-- bug: once history page is full, new sessions push old sessions off the screen. Also, it's next day and new sessions are being put under yesterday's date, even though there is a section for today date. Deleting sessions does allow old sessions to become visible again. So there are there, just getting pushed off screen. History page should allow scrolling to see full list and sessions should be placed within 
-- bug: add lap graph when viewing sessions from history. 
-- bug: formatting issue on homepage title (RC Timer) is not centered on the screen.  possibly it is shifted due to interaction with the gear/settings icon?
-- feature: add a small "Clear" button on home page that clears the driver, car, location, and notes fields.
-- run a code check to verify code uses best practices, identify and remove unecessary, reduntant, or unused code. refine and prepare for public deplayment
-- need a contact/bug report page/form.  For now, use simple link that opens users email client and sends an email to jake@makewithjake.net. locate this on the settings page towards the bottom
-- rebrand to LapTrack.  replace all references to RC Timer within the app.  New domain is LapTrack.app.
-- include a copywrite Make with Jake LLC at the bottom of the settings page.
-- cleanup file structure. move files in folders based on common best practices. move unused/redundtant, unnecessary files to the Obs folder for future deletion.
+> Phase 8 in progress. See `obs/phase8plan.md` for full task breakdown, sub-agent assignments, and test plan.
+
+- [ ] Group A — TTS fixes (volume, on/off toggle default OFF, voice persistence)
+- [ ] Group B — History page scrolling + date grouping bug
+- [ ] Group C — Lap graph in history session detail modal
+- [ ] Group D — Home title centering + Clear button
+- [ ] Group E — Settings: contact/bug report link + copyright notice
+- [ ] Group F — Rebrand to LapTrack / LapTrack.app
+- [ ] Group G — Code quality pass + deployment prep
+
 
 
 ---
@@ -42,7 +41,7 @@ Phases 1–6 are complete. Key architecture decisions locked in:
 - case: when viewing from a low angle, the fnish line (eg, phone is next to a residential sized road) and finish line is drawn across the entire road, car is not detected when at the far side of the finish line/road which is also near the edge of the finish line.  Assumption was that car was too small at this distance, however, if phone setup is kept the same, and line is drawn shorter, only including the far side of the road, car is detected reliably. Is the finish line getting compressed or scaled in some way that it cant see small objects when line is large?  is a smaller line providing higher fidelity?
 - need a contact/bug report page/form
 - confirm battery life tests.  does app stay low power or is it burning battery?  initial tests seemed to make the phone slightly warm.  will need to track some telemetry from phone to best understand this to make sure we have no memory leaks.
-
+- cleanup file structure. move files in folders based on common best practices. move unused/redundtant, unnecessary files to the Obs folder for future deletion.
 
 
 ### Potential Future Features / Bugs
