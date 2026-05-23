@@ -23,15 +23,19 @@ Phases 1–6 are complete. Key architecture decisions locked in:
 
 ## Current Focus – Next Sprint
 
-> Phase 8 in progress. See `obs/phase8plan.md` for full task breakdown, sub-agent assignments, and test plan.
+> No active sprint. Phase 8 is complete. See Future Tasks below for upcoming work.
 
-- [ ] Group A — TTS fixes (volume, on/off toggle default OFF, voice persistence)
-- [ ] Group B — History page scrolling + date grouping bug
-- [ ] Group C — Lap graph in history session detail modal
-- [ ] Group D — Home title centering + Clear button
-- [ ] Group E — Settings: contact/bug report link + copyright notice
-- [ ] Group F — Rebrand to LapTrack / LapTrack.app
-- [ ] Group G — Code quality pass + deployment prep
+## Completed — Phase 8
+
+> Phase 8 fully implemented and verified. See `obs/phase8plan.md` for full task breakdown and test plan.
+
+- [x] Group A — TTS fixes (volume, on/off toggle default OFF, voice persistence, iOS VoiceOver safety, iOS unlock gesture)
+- [x] Group B — History page scrolling + date grouping bug
+- [x] Group C — Lap graph in history session detail modal
+- [x] Group D — Home title centering + Clear button
+- [x] Group E — Settings: contact/bug report link + copyright notice
+- [x] Group F — Rebrand to LapTrack / LapTrack.app
+- [x] Group G — Code quality pass + deployment prep (console warnings, SW cache bump, meta tags, favicon 404)
 
 
 

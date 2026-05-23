@@ -694,13 +694,13 @@ Work through this checklist top-to-bottom after all code is deployed. Test on a 
 
 ### G — Code Quality & Deployment
 
-- [ ] **G-1 No console errors on load:** Open the app in Chrome with DevTools open. Console is clean — no red errors, no uncaught promise rejections on page load.
-- [ ] **G-2 No console errors during session:** Run a complete session (start → detect laps → end → view summary). Console stays clean throughout.
-- [ ] **G-3 No verbose debug logs:** Console does not spam per-frame or per-lap `console.log` messages during normal use.
-- [ ] **G-4 SW cache bumped:** Open DevTools → Application → Service Workers. Confirm the new service worker has activated (not waiting). If prompted, click "Skip Waiting" or reload twice.
-- [ ] **G-5 Offline works:** Load the app, then go to DevTools → Network → Offline. Reload the page. The app still loads fully from the service worker cache.
-- [ ] **G-6 Meta description present:** View Page Source (`⌘U` in Chrome). Confirm a `<meta name="description">` tag is present with LapTrack content.
-- [ ] **G-7 Apple PWA meta tags present:** In Page Source, confirm `apple-mobile-web-app-capable`, `apple-mobile-web-app-title`, and `apple-mobile-web-app-status-bar-style` are all present.
+- [x ] **G-1 No console errors on load:** Open the app in Chrome with DevTools open. Console is clean — no red errors, no uncaught promise rejections on page load.
+- [ x] **G-2 No console errors during session:** Run a complete session (start → detect laps → end → view summary). Console stays clean throughout.
+- [ x] **G-3 No verbose debug logs:** Console does not spam per-frame or per-lap `console.log` messages during normal use.
+- [ x] **G-4 SW cache bumped:** Open DevTools → Application → Service Workers. Confirm the new service worker has activated (not waiting). If prompted, click "Skip Waiting" or reload twice.
+- [x ] **G-5 Offline works:** Load the app, then go to DevTools → Network → Offline. Reload the page. The app still loads fully from the service worker cache.
+- [ x] **G-6 Meta description present:** View Page Source (`⌘U` in Chrome). Confirm a `<meta name="description">` tag is present with LapTrack content.
+- [ x] **G-7 Apple PWA meta tags present:** In Page Source, confirm `apple-mobile-web-app-capable`, `apple-mobile-web-app-title`, and `apple-mobile-web-app-status-bar-style` are all present.
 
 ---
 
@@ -708,15 +708,15 @@ Work through this checklist top-to-bottom after all code is deployed. Test on a 
 
 Run these after all group-specific checks pass.
 
-- [ ] **R-1 Session start to finish:** Draw finish line → calibrate → Confirm → drive car through line (or LED test) → laps count correctly → End Session → Summary appears with correct data.
-- [ ] **R-2 Summary data correct:** Summary shows correct lap count, best lap time, average lap time, and a chart with one dot per lap.
-- [ ] **R-3 History from summary:** Tap "View History" on the Summary screen. The just-completed session appears at the top of the History list.
-- [ ] **R-4 Session detail from history:** Tap the new session in History. The detail modal opens showing stats, a chart, and a lap-by-lap table — all with correct values.
-- [ ] **R-5 Settings round-trip:** Change every setting (sensitivity, debounce, TTS toggle, volume, pitch, voice, beep). Close Settings. Reopen Settings. All values are exactly what you set.
-- [ ] **R-6 Clear All Data:** Settings → Clear All Data → Confirm. Return to Home. All fields are blank. Open History — it is empty. Open Settings — all values are back to defaults (TTS off, volume 1.0, pitch 1.0, system default voice).
-- [ ] **R-7 Wake lock:** Start a session. The screen does not dim or lock during active detection (wake lock is active).
-- [ ] **R-8 Navigation:** Tap through every screen (Home → Session → Dashboard → Summary → History → Settings) and back. No broken navigation, no blank screens, no JS errors.
-- [ ] **R-9 Back navigation from History:** Open a session detail modal. Tap the close/back control. You are returned to the History list with the correct scroll position.
-- [ ] **R-10 Reload recovery:** Start a session, then hard-reload the page (`⌘R`). App returns to the Home screen cleanly — no frozen UI, no error overlays, no JS exceptions.
-- [ ] **R-11 PWA install + offline:** Install as PWA. Disconnect from network. Open the installed app. Full functionality works (camera, lap detection, history all local — no server needed).
-- [ ] **R-12 Zero unhandled errors:** Run the entire regression pass with DevTools Console open. At the end, confirm zero unhandled errors and zero uncaught promise rejections were logged.
+- [ x] **R-1 Session start to finish:** Draw finish line → calibrate → Confirm → drive car through line (or LED test) → laps count correctly → End Session → Summary appears with correct data.
+- [ x] **R-2 Summary data correct:** Summary shows correct lap count, best lap time, average lap time, and a chart with one dot per lap.
+- [x ] **R-3 History from summary:** Tap "View History" on the Summary screen. The just-completed session appears at the top of the History list.
+- [x ] **R-4 Session detail from history:** Tap the new session in History. The detail modal opens showing stats, a chart, and a lap-by-lap table — all with correct values.
+- [x] **R-5 Settings round-trip:** Change every setting (sensitivity, debounce, TTS toggle, volume, pitch, voice, beep). Close Settings. Reopen Settings. All values are exactly what you set.
+- [ x] **R-6 Clear All Data:** Settings → Clear All Data → Confirm. Return to Home. All fields are blank. Open History — it is empty. Open Settings — all values are back to defaults (TTS off, volume 1.0, pitch 1.0, system default voice).
+- [ x] **R-7 Wake lock:** Start a session. The screen does not dim or lock during active detection (wake lock is active).
+- [ x] **R-8 Navigation:** Tap through every screen (Home → Session → Dashboard → Summary → History → Settings) and back. No broken navigation, no blank screens, no JS errors.
+- [ x] **R-9 Back navigation from History:** Open a session detail modal. Tap the close/back control. You are returned to the History list with the correct scroll position.
+- [x ] **R-10 Reload recovery:** Start a session, then hard-reload the page (`⌘R`). App returns to the Home screen cleanly — no frozen UI, no error overlays, no JS exceptions.
+- [x ] **R-11 PWA install + offline:** Install as PWA. Disconnect from network. Open the installed app. Full functionality works (camera, lap detection, history all local — no server needed).
+- [ x] **R-12 Zero unhandled errors:** Run the entire regression pass with DevTools Console open. At the end, confirm zero unhandled errors and zero uncaught promise rejections were logged.
