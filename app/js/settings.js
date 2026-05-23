@@ -52,6 +52,7 @@ function _hydrateForm(settings) {
   const ttsToggleLbl   = document.getElementById('label-tts-enabled');
   if (ttsToggleEl) {
     const enabled = Boolean(settings.ttsEnabled);
+    console.log('[settings] _hydrateForm: ttsEnabled =', settings.ttsEnabled, '→ enabled =', enabled);
     ttsToggleEl.setAttribute('aria-checked', String(enabled));
     ttsToggleEl.dataset.active = String(enabled);
     if (ttsToggleLbl) ttsToggleLbl.textContent = enabled ? 'On' : 'Off';
@@ -123,12 +124,15 @@ function _bindLiveListeners() {
   const ttsToggleLbl = document.getElementById('label-tts-enabled');
   if (ttsToggleEl) {
     ttsToggleEl.addEventListener('click', () => {
-      const isActive = ttsToggleEl.getAttribute('aria-checked') === 'true';
-      const next     = !isActive;
+      // Read from settings (authoritative source) rather than DOM attribute
+      const current = getSettings().ttsEnabled;
+      const next    = !current;
+      console.log('[settings] toggle click: current ttsEnabled =', current, '→ next =', next);
       ttsToggleEl.setAttribute('aria-checked', String(next));
       ttsToggleEl.dataset.active = String(next);
       if (ttsToggleLbl) ttsToggleLbl.textContent = next ? 'On' : 'Off';
       saveSettings({ ttsEnabled: next });
+      console.log('[settings] after save, ttsEnabled =', getSettings().ttsEnabled);
       if (next) {
         _populateVoiceList();
       }

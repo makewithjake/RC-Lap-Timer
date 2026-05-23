@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rc-timer-v11';
+const CACHE_NAME = 'rc-timer-v12';
 
 const PRECACHE_URLS = [
   'index.html',

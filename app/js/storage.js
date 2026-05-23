@@ -198,7 +198,9 @@ export function getSettings() {
     const raw = localStorage.getItem(KEY_SETTINGS);
     if (!raw) return { ...DEFAULT_SETTINGS };
     const parsed = JSON.parse(raw);
-    return { ...DEFAULT_SETTINGS, ...parsed };
+    const result = { ...DEFAULT_SETTINGS, ...parsed };
+    console.log('[storage] getSettings →', JSON.stringify(result));
+    return result;
   } catch (err) {
     console.warn('[storage] getSettings parse error:', err);
     return { ...DEFAULT_SETTINGS };
@@ -234,6 +236,7 @@ export function saveSettings(partial) {
     merged.ttsEnabled = Boolean(partial.ttsEnabled);
   }
 
+  console.log('[storage] saveSettings partial:', JSON.stringify(partial), '→ writing:', JSON.stringify(merged));
   try {
     localStorage.setItem(KEY_SETTINGS, JSON.stringify(merged));
   } catch (err) {
