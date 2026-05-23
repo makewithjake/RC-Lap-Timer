@@ -375,3 +375,113 @@ After each group is implemented and tested, move the corresponding item from "Cu
 8. Copyright on settings → after Group E
 9. Rebrand to LapTrack / LapTrack.app → after Group F
 10. Code quality pass → after Group G
+
+---
+
+## Phase 8 Verification Checklist
+
+Work through this checklist top-to-bottom after all code is deployed. Test on a real iOS device (Safari PWA) as the primary target. Use Chrome DevTools mobile simulation for a secondary pass. Check each box only when you have personally observed the expected behaviour.
+
+**Before starting:** Go to Settings → Clear All Data to ensure a fresh state.
+
+---
+
+### A — TTS
+
+- [ x] **A-1 Default off:** Fresh install (or after Clear All Data). Open Settings → TTS section. The TTS toggle reads "Off" and is visually inactive.
+- [ x] **A-2 No speech when off:** With TTS off, complete a 3-lap session. Zero voice announcements at any point.
+- [ ] **A-3 Toggle persists:** Enable TTS in Settings. Close Settings. Re-open Settings. Toggle still reads "On."
+- [ ] **A-4 Toggle persists across reload:** Enable TTS. Kill the app and reopen. Open Settings. Toggle is still "On."
+- [ ] **A-5 Announcements play:** With TTS on, complete a lap. You hear a spoken announcement (lap number and/or time).
+- [ ] **A-6 Volume setting works:** Set Voice Volume to 0.3. Complete a lap. Announcement is clearly quieter than at 1.0.
+- [ ] **A-7 Pitch setting works:** Set Voice Pitch to 0.5. Complete a lap. Announcement voice is noticeably lower-pitched than at 1.0.
+- [ ] **A-8 Voice selection persists:** Select a non-default voice. Close Settings. Complete a lap. The announcement uses that voice. Kill and reopen the app — the same voice is still selected in Settings.
+- [ ] **A-9 System default voice:** Select "System Default." Complete a lap. No errors; default system voice speaks.
+- [ ] **A-10 Volume/pitch sliders always visible:** Whether TTS is on or off, the volume slider and pitch slider are visible and adjustable (they are not hidden behind the toggle state).
+
+---
+
+### B — History Page
+
+- [ ] **B-1 List scrolls:** Record 10+ sessions (or use the dev console to seed fake history). Open History. All sessions appear; the list scrolls smoothly inside the screen — the page itself does not scroll.
+- [ ] **B-2 No sessions pushed off-screen:** The last session in the list is reachable by scrolling within the list container.
+- [ x] **B-3 Today's date correct:** Record a session right now. Open History. The session appears under today's calendar date (e.g., "May 23") — not yesterday.
+- [ x] **B-4 Newest-first order:** The most recent session is at the top of the list; the oldest is at the bottom.
+- [ ] **B-5 Newest date group at top:** If you have sessions from multiple days, the most recent date heading is the first one you see.
+- [x ] **B-6 Delete removes session:** Tap a session → Delete. The session is gone from the list. All remaining sessions are still fully visible.
+- [ ] **B-7 No orphaned date headers after delete:** After deleting the only session in a date group, that date heading is also removed. No stale `h2` elements linger.
+- [ ] **B-8 Delete last session in list:** Delete the very last remaining session. History shows an empty state (no broken UI, no empty `ul` with a dangling header).
+- [ x] **B-9 Search filter:** Type a driver name in the search bar. Only matching sessions show. Scroll still works with the filtered list.
+- [ x] **B-10 Clear search:** Clear the search bar. All sessions re-appear.
+
+---
+
+### C — Lap Graph in Session Detail
+
+- [ x] **C-1 Chart appears:** Record a session with 3+ laps. Open History. Tap the session card. The session detail modal opens and shows a lap time chart above the lap table.
+- [ x] **C-2 Best lap highlighted:** In the chart, the dot for the best lap is visually distinct (accent color / different size).
+- [ x] **C-3 Chart fills container:** The chart spans the full width of the modal card. It does not overflow or get clipped.
+- [ x] **C-4 Single-lap session:** Open a session with only 1 lap. Chart renders a single dot without errors. No JS exceptions in the console.
+- [ ] **C-5 No duplicate elements:** Close the modal and reopen the same session. The chart renders correctly — it does not stack a second SVG on top of the first.
+- [ ] **C-6 Different session back-to-back:** Open session A, close the modal, open session B. Session B's chart reflects session B's data, not session A's.
+
+---
+
+### D — Home Screen
+
+- [x ] **D-1 Title centered:** Open the home screen. "LapTrack" title text is horizontally centered on screen — not shifted to the left.
+- [ x] **D-2 Gear icon does not overlap title:** On the narrowest test device (or DevTools at 320px wide), the gear icon in the top-right corner does not visually overlap the title text.
+- [ x] **D-3 Clear button visible:** Below the form fields and above the nav buttons, a "Clear" button is visible. It is smaller/subordinate in style compared to the primary "Start New Session" button.
+- [ x] **D-4 Clear wipes all fields:** Enter text in Driver, Car, Location, and Notes fields. Tap "Clear." All four fields are empty immediately.
+- [ x] **D-5 Clear wipes localStorage:** After tapping "Clear," reload the page. All four fields are still empty (values are not restored from storage).
+- [ x] **D-6 Session after clear works:** Tap "Start New Session" after clearing. The session starts normally — no errors from blank fields.
+
+---
+
+### E — Settings Additions
+
+- [ x] **E-1 Bug report link visible:** Scroll to the bottom of the Settings screen. A "Report a Bug / Contact" link (or button-style link) is visible above the about section.
+- [ x] **E-2 Bug report link works:** Tap the link. Your device's email client opens with `jake@makewithjake.net` pre-filled in the To field and a subject line mentioning LapTrack.
+- [x ] **E-3 Copyright text visible:** At the very bottom of Settings, "© Make with Jake LLC" is displayed in small, muted text.
+- [x ] **E-4 Copyright text style:** The copyright text is noticeably smaller and more muted in color than the primary body text — it should feel like a footer note.
+
+---
+
+### F — Rebrand
+
+- [x ] **F-1 Home title:** The home screen title reads "LapTrack" — not "RC Timer," "RC Lap Timer," or any variant.
+- [ x] **F-2 Browser tab / PWA title bar:** The browser tab (or PWA window title bar) reads "LapTrack."
+- [ x] **F-3 Settings about text:** The about section in Settings reads "LapTrack · v1.0.0" (or current version number).
+- [ x] **F-4 PWA install name:** Install the app via "Add to Home Screen" (iOS) or the install prompt (Chrome). The home screen icon label reads "LapTrack."
+- [ x] **F-5 No old brand names in source:** Open DevTools → Sources (or do a file search) and confirm zero occurrences of "RC Timer" or "RC Lap Timer" in any file under `app/`.
+
+---
+
+### G — Code Quality & Deployment
+
+- [ ] **G-1 No console errors on load:** Open the app in Chrome with DevTools open. Console is clean — no red errors, no uncaught promise rejections on page load.
+- [ ] **G-2 No console errors during session:** Run a complete session (start → detect laps → end → view summary). Console stays clean throughout.
+- [ ] **G-3 No verbose debug logs:** Console does not spam per-frame or per-lap `console.log` messages during normal use.
+- [ ] **G-4 SW cache bumped:** Open DevTools → Application → Service Workers. Confirm the new service worker has activated (not waiting). If prompted, click "Skip Waiting" or reload twice.
+- [ ] **G-5 Offline works:** Load the app, then go to DevTools → Network → Offline. Reload the page. The app still loads fully from the service worker cache.
+- [ ] **G-6 Meta description present:** View Page Source (`⌘U` in Chrome). Confirm a `<meta name="description">` tag is present with LapTrack content.
+- [ ] **G-7 Apple PWA meta tags present:** In Page Source, confirm `apple-mobile-web-app-capable`, `apple-mobile-web-app-title`, and `apple-mobile-web-app-status-bar-style` are all present.
+
+---
+
+### Full Regression Pass
+
+Run these after all group-specific checks pass.
+
+- [ ] **R-1 Session start to finish:** Draw finish line → calibrate → Confirm → drive car through line (or LED test) → laps count correctly → End Session → Summary appears with correct data.
+- [ ] **R-2 Summary data correct:** Summary shows correct lap count, best lap time, average lap time, and a chart with one dot per lap.
+- [ ] **R-3 History from summary:** Tap "View History" on the Summary screen. The just-completed session appears at the top of the History list.
+- [ ] **R-4 Session detail from history:** Tap the new session in History. The detail modal opens showing stats, a chart, and a lap-by-lap table — all with correct values.
+- [ ] **R-5 Settings round-trip:** Change every setting (sensitivity, debounce, TTS toggle, volume, pitch, voice, beep). Close Settings. Reopen Settings. All values are exactly what you set.
+- [ ] **R-6 Clear All Data:** Settings → Clear All Data → Confirm. Return to Home. All fields are blank. Open History — it is empty. Open Settings — all values are back to defaults (TTS off, volume 1.0, pitch 1.0, system default voice).
+- [ ] **R-7 Wake lock:** Start a session. The screen does not dim or lock during active detection (wake lock is active).
+- [ ] **R-8 Navigation:** Tap through every screen (Home → Session → Dashboard → Summary → History → Settings) and back. No broken navigation, no blank screens, no JS errors.
+- [ ] **R-9 Back navigation from History:** Open a session detail modal. Tap the close/back control. You are returned to the History list with the correct scroll position.
+- [ ] **R-10 Reload recovery:** Start a session, then hard-reload the page (`⌘R`). App returns to the Home screen cleanly — no frozen UI, no error overlays, no JS exceptions.
+- [ ] **R-11 PWA install + offline:** Install as PWA. Disconnect from network. Open the installed app. Full functionality works (camera, lap detection, history all local — no server needed).
+- [ ] **R-12 Zero unhandled errors:** Run the entire regression pass with DevTools Console open. At the end, confirm zero unhandled errors and zero uncaught promise rejections were logged.
