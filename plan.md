@@ -42,6 +42,7 @@ Phases 1–6 are complete. Key architecture decisions locked in:
 - need a contact/bug report page/form
 - confirm battery life tests.  does app stay low power or is it burning battery?  initial tests seemed to make the phone slightly warm.  will need to track some telemetry from phone to best understand this to make sure we have no memory leaks.
 - cleanup file structure. move files in folders based on common best practices. move unused/redundtant, unnecessary files to the Obs folder for future deletion.
+- Bug: when starting new session, and hitting STOP before a lap is incremented, we sometimes see a graph displaying the last session where laps were counted. More specific: if user hits STOP before the timer starts, or, after the timer starts but BEFORE the min lap length (debounce), then the graph displayed shows that last sessions graph data.
 
 
 ### Potential Future Features / Bugs
