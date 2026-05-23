@@ -10,7 +10,7 @@ import {
   setWakeLockStatusCallback,
   setCameraLockStatusCallback,
 } from './wakeLock.js';
-import { playBeep, speak } from './audio.js';
+import { playBeep, speak, unlockTTS } from './audio.js';
 import {
   initCanvas,
   clearLine,
@@ -339,6 +339,12 @@ document.addEventListener('DOMContentLoaded', () => {
         delayedStart,
         meta: { driverName, carName, location },
       };
+
+      // Unlock iOS Speech Synthesis inside this user gesture so subsequent
+      // programmatic speak() calls from the detector/rAF chain will work.
+      if (getSettings().ttsEnabled) {
+        unlockTTS();
+      }
 
       const _enterDashboard = () => {
         showScreen('dashboard');

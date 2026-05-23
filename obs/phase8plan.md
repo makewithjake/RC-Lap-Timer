@@ -105,6 +105,64 @@ Observed: with TTS enabled, completing a lap produced no beep sound and no TTS a
 2. Instead, resolve the voice lazily inside `speak()`: at the top of `speak()`, if `preferredVoice` is null and `getSettings().ttsVoiceName` is non-empty, call `setPreferredVoice()` once to populate the cached voice (this still happens asynchronously, so the first utterance after a reload may use the system default, but subsequent ones use the correct voice).
 3. Alternatively, store `preferredVoice` resolution inside `announceLap()` by reading `getSettings().ttsVoiceName` each time and passing it as the `voice` option to `speak()` so no startup initialization is needed.
 
+### A4 — Fix TTS: no speech, only a pop sound (A-5 checklist failure)
+
+**Symptom (device test):** With TTS enabled, completing a lap produces a brief "pop" sound but no voice announcement.
+
+**Root causes identified (two independent bugs):**
+
+**Bug 1 — Pop from unconditional `speechSynthesis.cancel()`:**
+`speak()` in `audio.js` calls `window.speechSynthesis.cancel()` unconditionally before every utterance. On iOS Safari (and some browsers), calling `cancel()` when nothing is actively speaking still produces an audible audio click/pop as the audio session is reset. Because Bug 2 then causes the utterance to be silently dropped, the cancel pop is the only sound the user hears.
+
+**Bug 2 — iOS user-gesture requirement not met (no speech):**
+iOS Safari requires `speechSynthesis.speak()` to be called **synchronously within a user gesture event handler** (a `click` or `touchstart`). When called outside of a user gesture context, iOS silently drops the utterance with no error.
+
+The entire TTS call chain during a session is outside user gesture context:
+1. The detector fires from a `requestAnimationFrame` loop (camera frame analysis — not a gesture).
+2. `recordTrigger()` → `onLap()` → `announceLap()` → `setTimeout(() => speak(), 350)`.
+3. By the time `speechSynthesis.speak()` executes, we are at minimum three async hops from any user gesture.
+
+`onFirstCross` has the same problem — it calls `speak()` directly, but it is also reached through the detector rAF chain, not a user gesture.
+
+**The fix — "unlock" the Speech Synthesis API during a user gesture:**
+
+The standard iOS workaround is to call `speechSynthesis.speak(new SpeechSynthesisUtterance(''))` **synchronously inside a user gesture handler** before the session begins. This brief silent utterance causes iOS to "unlock" the Speech Synthesis audio session for the page. After this unlock, subsequent programmatic `speak()` calls from timer/rAF callbacks will work for the lifetime of the page.
+
+**Files:** `app/js/audio.js`, `app/js/app.js`
+
+**Plan:**
+
+1. **`audio.js` — add `unlockTTS()` export:**
+   ```js
+   export function unlockTTS() {
+     if (!('speechSynthesis' in window)) return;
+     const utterance = new SpeechSynthesisUtterance('');
+     utterance.volume = 0;
+     window.speechSynthesis.speak(utterance);
+   }
+   ```
+   This must be called synchronously from a user gesture handler — document it clearly.
+
+2. **`audio.js` — fix the `cancel()` pop:**
+   In `speak()`, replace the unconditional `window.speechSynthesis.cancel()` with a guarded call:
+   ```js
+   if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+     window.speechSynthesis.cancel();
+   }
+   ```
+   This prevents the audio pop when nothing is queued.
+
+3. **`app.js` — call `unlockTTS()` in the `confirmBtn` click handler:**
+   Import `unlockTTS` from `audio.js`. In the `confirmBtn` `'click'` handler, immediately after reading `getSettings()`, add:
+   ```js
+   if (getSettings().ttsEnabled) {
+     unlockTTS();
+   }
+   ```
+   This call is synchronous and inside the click handler, satisfying iOS's user-gesture requirement. The unlock runs once per session entry, just before the camera and detection chain start.
+
+**Why this placement works:** The `confirmBtn` click (or the viewfinder Confirm tap on iOS) is the last user gesture before the session begins. Unlocking here means the Web Speech API is primed before the first possible lap trigger.
+
 ---
 
 ## Task Group B — History Page Fixes
@@ -446,8 +504,8 @@ Work through this checklist top-to-bottom after all code is deployed. Test on a 
 
 - [ x] **A-1 Default off:** Fresh install (or after Clear All Data). Open Settings → TTS section. The TTS toggle reads "Off" and is visually inactive.
 - [ x] **A-2 No speech when off:** With TTS off, complete a 3-lap session. Zero voice announcements at any point.
-- [ ] **A-3 Toggle persists:** Enable TTS in Settings. Close Settings. Re-open Settings. Toggle still reads "On."
-- [ ] **A-4 Toggle persists across reload:** Enable TTS. Kill the app and reopen. Open Settings. Toggle is still "On."
+- [ x] **A-3 Toggle persists:** Enable TTS in Settings. Close Settings. Re-open Settings. Toggle still reads "On."
+- [ x] **A-4 Toggle persists across reload:** Enable TTS. Kill the app and reopen. Open Settings. Toggle is still "On."
 - [ ] **A-5 Announcements play:** With TTS on, complete a lap. You hear a spoken announcement (lap number and/or time).
 - [ ] **A-6 Volume setting works:** Set Voice Volume to 0.3. Complete a lap. Announcement is clearly quieter than at 1.0.
 - [ ] **A-7 Pitch setting works:** Set Voice Pitch to 0.5. Complete a lap. Announcement voice is noticeably lower-pitched than at 1.0.

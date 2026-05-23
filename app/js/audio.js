@@ -77,6 +77,20 @@ export function playLapBeep() {
 // C2 — Speech Synthesis (TTS) Wrapper
 // ---------------------------------------------------------------------------
 
+/**
+ * Unlock the Speech Synthesis API for the current page session.
+ * iOS Safari requires speechSynthesis.speak() to be called synchronously
+ * within a user gesture handler before any programmatic (non-gesture) speak()
+ * calls will work. Call this once inside a click/tap event handler.
+ * @returns {void}
+ */
+export function unlockTTS() {
+  if (!('speechSynthesis' in window)) return;
+  const utterance = new SpeechSynthesisUtterance('');
+  utterance.volume = 0;
+  window.speechSynthesis.speak(utterance);
+}
+
 /** @type {SpeechSynthesisVoice|null} */
 let preferredVoice = null;
 
@@ -102,7 +116,9 @@ export function speak(text, options = {}) {
     }
   }
 
-  window.speechSynthesis.cancel();
+  if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+    window.speechSynthesis.cancel();
+  }
 
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.rate   = options.rate   ?? 1.0;
