@@ -517,8 +517,8 @@ Work through this checklist top-to-bottom after all code is deployed. Test on a 
 
 ### B — History Page
 
-- [ ] **B-1 List scrolls:** Record 10+ sessions (or use the dev console to seed fake history). Open History. All sessions appear; the list scrolls smoothly inside the screen — the page itself does not scroll.
-- [ ] **B-2 No sessions pushed off-screen:** The last session in the list is reachable by scrolling within the list container.
+- [ x] **B-1 List scrolls:** Record 10+ sessions (or use the dev console to seed fake history). Open History. All sessions appear; the list scrolls smoothly inside the screen — the page itself does not scroll.
+- [ x] **B-2 No sessions pushed off-screen:** The last session in the list is reachable by scrolling within the list container.
 - [ x] **B-3 Today's date correct:** Record a session right now. Open History. The session appears under today's calendar date (e.g., "May 23") — not yesterday.
 - [ x] **B-4 Newest-first order:** The most recent session is at the top of the list; the oldest is at the bottom.
 - [ ] **B-5 Newest date group at top:** If you have sessions from multiple days, the most recent date heading is the first one you see.
@@ -536,8 +536,8 @@ Work through this checklist top-to-bottom after all code is deployed. Test on a 
 - [ x] **C-2 Best lap highlighted:** In the chart, the dot for the best lap is visually distinct (accent color / different size).
 - [ x] **C-3 Chart fills container:** The chart spans the full width of the modal card. It does not overflow or get clipped.
 - [ x] **C-4 Single-lap session:** Open a session with only 1 lap. Chart renders a single dot without errors. No JS exceptions in the console.
-- [ ] **C-5 No duplicate SVG elements on re-open:** Open any session in History and confirm its chart appears. Tap the **×** button (or back) to close the modal. Immediately tap the **same session card** again to reopen it. Look at the chart — it should appear identical to the first open. To verify: in Safari DevTools (or Chrome DevTools with Remote Debugging), open the Elements panel and inspect the `#detail-chart` element. It must contain exactly **one** `<svg>` child. If two SVGs are stacked, you will see the chart lines doubled or offset, indicating the old SVG was not cleared before re-rendering.
-- [ ] **C-6 Different sessions show different data:** You need at least two sessions with different lap counts or clearly different best-lap times. Open session A's detail modal and note: (1) the number of dots on the chart, (2) which dot is highlighted as best lap, (3) the best-lap time shown in the stats. Close the modal. Now open session B's detail modal. Verify: (1) the dot count matches session B's lap count, (2) the highlighted dot matches session B's best lap, (3) all stats reflect session B. No data from session A should appear in session B's view.
+- [ x] **C-5 No duplicate SVG elements on re-open:** Open any session in History and confirm its chart appears. Tap the **×** button (or back) to close the modal. Immediately tap the **same session card** again to reopen it. Look at the chart — it should appear identical to the first open. To verify: in Safari DevTools (or Chrome DevTools with Remote Debugging), open the Elements panel and inspect the `#detail-chart` element. It must contain exactly **one** `<svg>` child. If two SVGs are stacked, you will see the chart lines doubled or offset, indicating the old SVG was not cleared before re-rendering.
+- [x] **C-6 Different sessions show different data:** You need at least two sessions with different lap counts or clearly different best-lap times. Open session A's detail modal and note: (1) the number of dots on the chart, (2) which dot is highlighted as best lap, (3) the best-lap time shown in the stats. Close the modal. Now open session B's detail modal. Verify: (1) the dot count matches session B's lap count, (2) the highlighted dot matches session B's best lap, (3) all stats reflect session B. No data from session A should appear in session B's view.
 
 ---
 
