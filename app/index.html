@@ -3,10 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="LapTrack — precision lap timer for RC car racing. Track sessions, log lap times, and review your performance history." />
     <meta name="theme-color" content="#C6FF00" />
 
     <!-- Apple PWA meta tags -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="LapTrack" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <link rel="apple-touch-icon" href="Assets/icons/icon-180.png" />
 
@@ -24,7 +26,7 @@
     <link rel="stylesheet" href="styles/history.css">
     <link rel="stylesheet" href="styles/settings.css">
 
-    <title>RC Lap Timer</title>
+    <title>LapTrack</title>
   </head>
   <body>
     <main>
@@ -57,7 +59,7 @@
         </button>
 
         <div class="home-title-area">
-          <h1 class="home-title">RC Timer</h1>
+          <h1 class="home-title">LapTrack</h1>
         </div>
 
         <div class="home-form">
@@ -109,6 +111,8 @@
             />
           </div>
         </div>
+
+        <button id="btn-clear-fields" type="button">Clear</button>
 
         <div class="home-nav">
           <button id="btn-start-session" class="btn-start-session" type="button">
@@ -409,6 +413,7 @@
                 <span class="session-detail-stat-value" id="detail-total-time"></span>
               </div>
             </div>
+            <svg id="detail-chart" class="summary-chart"></svg>
             <div class="session-detail-lap-table-wrap">
               <table class="session-detail-lap-table">
                 <thead>
@@ -433,6 +438,24 @@
         </header>
 
         <div class="settings-body">
+
+          <div class="settings-group">
+            <label class="settings-label" for="toggle-tts-enabled">
+              Lap Announcements
+              <span id="label-tts-enabled">Off</span>
+            </label>
+            <button
+              id="toggle-tts-enabled"
+              type="button"
+              role="switch"
+              aria-checked="false"
+              aria-label="Enable spoken lap announcements"
+              class="calibration-toggle"
+              data-active="false"
+            >
+              <span class="calibration-toggle-thumb"></span>
+            </button>
+          </div>
 
           <div class="settings-group">
             <label class="settings-label" for="setting-tts-voice">Announcer Voice</label>
@@ -475,9 +498,14 @@
             <button id="btn-clear-data" class="btn btn--danger btn--full">Clear All Data</button>
           </div>
 
+          <div class="settings-group settings-group--contact">
+            <a href="mailto:jake@makewithjake.net?subject=LapTrack%20Bug%20Report" class="settings-contact-link">Report a Bug / Contact</a>
+          </div>
+
           <div class="settings-group settings-about">
-            <p class="about-version">RC Lap Timer &middot; v1.0.0</p>
+            <p class="about-version">LapTrack &middot; v1.0.0</p>
             <p class="about-offline" id="about-offline-status">Checking offline status&hellip;</p>
+            <p class="about-copyright">&copy; Make with Jake LLC</p>
           </div>
 
         </div>

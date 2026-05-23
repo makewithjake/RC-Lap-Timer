@@ -19,6 +19,7 @@ const KEY_SETTINGS = 'rc_settings';  // JSON string — Settings
 /**
  * @typedef {Object} Settings
  * @property {number}      countdownDuration — seconds (1–60); default 10
+ * @property {boolean}     ttsEnabled        — true to speak lap announcements; default false
  * @property {string|null} ttsVoiceName      — SpeechSynthesisVoice.name or null (system default)
  * @property {number}      ttsPitch          — 0.5–2.0; default 1.0
  * @property {number}      ttsVolume         — 0–1; default 1.0
@@ -27,6 +28,7 @@ const KEY_SETTINGS = 'rc_settings';  // JSON string — Settings
 
 const DEFAULT_SETTINGS = Object.freeze({
   countdownDuration: 10,
+  ttsEnabled:        false,
   ttsVoiceName:      null,
   ttsPitch:          1.0,
   ttsVolume:         1.0,
@@ -100,7 +102,7 @@ export function buildSessionRecord(rawSession) {
 
   return {
     id,
-    date:             new Date().toISOString(),
+    date:             new Date().toLocaleDateString('en-CA'),
     driverName:       rawSession.driverName ?? '',
     carName:          rawSession.carName    ?? '',
     location:         rawSession.location   ?? '',

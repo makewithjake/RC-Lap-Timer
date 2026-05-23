@@ -1,4 +1,16 @@
 /* history.css — Session History Screen (Screen 6) */
+/* ── Screen layout (B1 — fix scrolling) ────────────────────────────────── */
+
+#screen-history {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* ── Detail Chart ───────────────────────────────────────────────────────── */
+
+#detail-chart { width: 100%; max-height: 180px; }
 
 /* ── Header ─────────────────────────────────────────────────────────────── */
 

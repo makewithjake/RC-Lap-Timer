@@ -11,6 +11,8 @@
  * is allowed.
  */
 
+import { getSettings } from './storage.js';
+
 // ---------------------------------------------------------------------------
 // C1 — Web Audio API Beep Generator
 // ---------------------------------------------------------------------------
@@ -85,6 +87,7 @@ let preferredVoice = null;
  * @param {{ rate?: number, pitch?: number, volume?: number, voice?: SpeechSynthesisVoice|null }} [options]
  */
 export function speak(text, options = {}) {
+  if (!getSettings().ttsEnabled) return;
   if (!('speechSynthesis' in window)) {
     console.warn('[audio] Speech Synthesis not supported on this device.');
     return;
@@ -201,5 +204,6 @@ export function announceLap(lapNumber, lapTimeMs) {
   }
 
   const lapWord = lapNumber === 1 ? 'one' : numberToWords(lapNumber);
-  speak(`Lap ${lapWord}: ${timePhrase}`);
+  const { ttsVolume, ttsPitch } = getSettings();
+  speak(`Lap ${lapWord}: ${timePhrase}`, { volume: ttsVolume, pitch: ttsPitch });
 }

@@ -1,6 +1,6 @@
 /* ============================================================
    wakeLock.js — Wake Lock & Camera Stabilization
-   RC Lap Timer · Phase 2 · Task Group B
+   LapTrack · Phase 2 · Task Group B
    ============================================================ */
 
 /* ── Internal state ──────────────────────────────────────── */

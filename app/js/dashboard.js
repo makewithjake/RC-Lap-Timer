@@ -33,6 +33,7 @@ import {
 
 import { showScreen } from './router.js';
 import { showSummary } from './summary.js';
+import { getSettings } from './storage.js';
 
 // ── Time Formatting ───────────────────────────────────────────────────────────
 
@@ -281,7 +282,8 @@ function _beginSession(roi, detectionSettings) {
       _updateLapCounter(0, goalLaps);
       _flashTriggerIndicator();
       const lapStartPhrase = localStorage.getItem('rc_lapStartAudio') ?? "Let's Go!";
-      speak(lapStartPhrase);
+      const { ttsVolume, ttsPitch } = getSettings();
+      speak(lapStartPhrase, { volume: ttsVolume, pitch: ttsPitch });
     },
     onLap: (lap, allLaps) => {
       playLapBeep();
@@ -332,14 +334,6 @@ function _beginSession(roi, detectionSettings) {
   document.body.appendChild(_detectionVideoEl);
 
   const _doStartDetection = () => {
-    console.log(
-      `[dashboard] starting detection: videoW=${_detectionVideoEl.videoWidth}` +
-      ` videoH=${_detectionVideoEl.videoHeight}` +
-      ` readyState=${_detectionVideoEl.readyState}` +
-      ` paused=${_detectionVideoEl.paused}` +
-      ` canvasW=${canvasEl ? canvasEl.width : 'null'}` +
-      ` canvasH=${canvasEl ? canvasEl.height : 'null'}`
-    );
     startDetection({
       videoEl:     _detectionVideoEl,
       canvasEl,

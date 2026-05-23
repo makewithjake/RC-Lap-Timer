@@ -44,6 +44,15 @@ function _hydrateForm(settings) {
     btn.classList.toggle('toggle-btn--active', btn.dataset.value === settings.units);
   });
 
+  const ttsToggleEl    = document.getElementById('toggle-tts-enabled');
+  const ttsToggleLbl   = document.getElementById('label-tts-enabled');
+  if (ttsToggleEl) {
+    const enabled = Boolean(settings.ttsEnabled);
+    ttsToggleEl.setAttribute('aria-checked', String(enabled));
+    ttsToggleEl.dataset.active = String(enabled);
+    if (ttsToggleLbl) ttsToggleLbl.textContent = enabled ? 'On' : 'Off';
+  }
+
   const lapStartAudioEl = document.getElementById('setting-lap-start-audio');
   if (lapStartAudioEl) {
     lapStartAudioEl.value = localStorage.getItem('rc_lapStartAudio') ?? "Let's Go!";
@@ -103,6 +112,19 @@ function _bindLiveListeners() {
       const val = Number(volumeEl.value);
       if (volumeLabel) volumeLabel.textContent = val.toFixed(1);
       saveSettings({ ttsVolume: val });
+    });
+  }
+
+  const ttsToggleEl  = document.getElementById('toggle-tts-enabled');
+  const ttsToggleLbl = document.getElementById('label-tts-enabled');
+  if (ttsToggleEl) {
+    ttsToggleEl.addEventListener('click', () => {
+      const isActive = ttsToggleEl.getAttribute('aria-checked') === 'true';
+      const next     = !isActive;
+      ttsToggleEl.setAttribute('aria-checked', String(next));
+      ttsToggleEl.dataset.active = String(next);
+      if (ttsToggleLbl) ttsToggleLbl.textContent = next ? 'On' : 'Off';
+      saveSettings({ ttsEnabled: next });
     });
   }
 

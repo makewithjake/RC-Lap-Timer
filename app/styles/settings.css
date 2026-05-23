@@ -127,6 +127,33 @@ input[type="range"] {
   margin-top: var(--space-1);
 }
 
+.about-copyright {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  margin-top: var(--space-1);
+}
+
+/* ── Contact / Bug Report ───────────────────────────────────────────────── */
+
+.settings-group--contact {
+  border-top: 1px solid var(--color-border-subtle);
+  padding-top: var(--space-4);
+}
+
+.settings-contact-link {
+  display: inline-block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.settings-contact-link:hover,
+.settings-contact-link:focus {
+  text-decoration: underline;
+  outline-offset: 2px;
+}
+
 /* ── Modal Overlay ──────────────────────────────────────────────────────── */
 
 .modal-overlay {

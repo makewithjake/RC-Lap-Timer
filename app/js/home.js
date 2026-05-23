@@ -57,6 +57,14 @@ export function initHome() {
 
   document.getElementById('btn-view-history').addEventListener('click', showHistory);
 
+  document.getElementById('btn-clear-fields').addEventListener('click', () => {
+    driverInput.value     = '';
+    carInput.value        = '';
+    locationInput.value   = '';
+    setupNotesInput.value = '';
+    Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
+  });
+
   document.getElementById('btn-settings').addEventListener('click', showSettings);
 }
 

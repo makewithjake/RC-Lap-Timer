@@ -10,7 +10,7 @@ import {
   setWakeLockStatusCallback,
   setCameraLockStatusCallback,
 } from './wakeLock.js';
-import { playBeep, speak } from './audio.js';
+import { playBeep, speak, setPreferredVoice } from './audio.js';
 import {
   initCanvas,
   clearLine,
@@ -53,8 +53,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker
       .register('./sw.js')
-      .then((registration) => {
-        console.log('[SW] Registered, scope:', registration.scope);
+      .then(() => {
+        // Service Worker registered successfully
       })
       .catch((err) => {
         console.error('[SW] Registration failed:', err);
@@ -75,6 +75,12 @@ document.addEventListener('DOMContentLoaded', () => {
   initSummary();
   initHistory();
   initSettings();
+
+  // A3 — Restore preferred TTS voice from saved settings on every page load
+  const _savedVoiceName = getSettings().ttsVoiceName;
+  if (_savedVoiceName) {
+    setPreferredVoice(_savedVoiceName);
+  }
 
   // ── Phase 3: Calibration slider wiring ────────────────────────────────────
 

@@ -9,6 +9,7 @@
 
 import { getHistory, deleteSession } from './storage.js';
 import { showScreen } from './router.js';
+import { renderChart } from './summary.js';
 
 // ── Lap Time Formatter (local copy — identical to summary.js) ─────────────────
 
@@ -32,7 +33,7 @@ function _formatLapTime(ms) {
 function _groupByDate(sessions) {
   const map = new Map();
   sessions.forEach((s) => {
-    const label = new Date(s.date).toLocaleDateString('en-US', {
+    const label = new Date(s.date + 'T00:00:00').toLocaleDateString('en-US', {
       weekday: 'short',
       year:    'numeric',
       month:   'long',
@@ -72,9 +73,12 @@ export function renderSessionList(sessions) {
     return;
   }
 
+  // Ensure newest-first order regardless of caller
+  const sorted = [...sessions].sort((a, b) => b.date.localeCompare(a.date));
+
   if (emptyEl) emptyEl.setAttribute('hidden', '');
 
-  const groups = _groupByDate(sessions);
+  const groups = _groupByDate(sorted);
 
   groups.forEach(({ dateLabel, sessions: groupSessions }) => {
     // Date header
@@ -231,7 +235,7 @@ function _openSessionDetail(sessionId) {
   document.querySelector('#session-detail-modal .session-detail-subtitle').textContent =
     session.driverName || '';
 
-  document.getElementById('detail-date').textContent = new Date(session.date).toLocaleDateString(
+  document.getElementById('detail-date').textContent = new Date(session.date + 'T00:00:00').toLocaleDateString(
     'en-US',
     { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' }
   );
@@ -267,6 +271,16 @@ function _openSessionDetail(sessionId) {
     tr.appendChild(tdGap);
     tbody.appendChild(tr);
   });
+
+  const chartSvg = document.getElementById('detail-chart');
+  if (chartSvg) {
+    chartSvg.innerHTML = '';
+    renderChart(
+      chartSvg,
+      (session.laps ?? []).map((l) => ({ lapTime: l.lapTimeMs, lapNumber: l.lapNumber })),
+      session.bestLapMs
+    );
+  }
 
   modal.removeAttribute('hidden');
 }

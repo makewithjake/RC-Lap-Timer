@@ -191,26 +191,14 @@ function _tick() {
     }
   }
 
-  // Step 7: Trigger decision + throttled diagnostic logging (~1× per second at 60 fps)
-  _debugFrameCount++;
+  // Step 7: Trigger decision
   if (_prevPixels !== null && inZoneCount > 0) {
     const changeRatio = changedCount / inZoneCount;
-    if (_debugFrameCount % 60 === 0) {
-      console.log(
-        `[detector] frame=${_debugFrameCount} ready=${videoEl.readyState}` +
-        ` paused=${videoEl.paused} inZone=${inZoneCount} ratio=${changeRatio.toFixed(3)}`
-      );
-    }
     const now = performance.now();
     if (changeRatio >= TRIGGER_RATIO && (now - _lastTrigger) / 1000 >= debounce) {
       _lastTrigger = now;
       try { onTrigger(); } catch (e) { console.error('[detector] onTrigger threw:', e); }
     }
-  } else if (_debugFrameCount % 60 === 0) {
-    console.log(
-      `[detector] frame=${_debugFrameCount} ready=${videoEl.readyState}` +
-      ` paused=${videoEl.paused} inZone=${inZoneCount} (no prev frame yet)`
-    );
   }
 
   // Step 8: Swap pixel buffers.
@@ -278,15 +266,6 @@ export function startDetection(config) {
   _lastTrigger     = -Infinity; // Ensure the very first detection fires immediately
   _resumeAttempted = false;
   _debugFrameCount = 0;
-
-  console.log(
-    `[detector] startDetection: displayW=${displayW} displayH=${displayH}` +
-    ` roiPx=${JSON.stringify(_roiPx)}` +
-    ` videoEl.readyState=${config.videoEl.readyState}` +
-    ` videoEl.videoWidth=${config.videoEl.videoWidth}` +
-    ` videoEl.paused=${config.videoEl.paused}` +
-    ` srcObject=${config.videoEl.srcObject ? 'set' : 'null'}`
-  );
 
   _rafId = requestAnimationFrame(_tick);
 }

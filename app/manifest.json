@@ -1,6 +1,6 @@
 {
-  "name": "RC Lap Timer",
-  "short_name": "RC Timer",
+  "name": "LapTrack",
+  "short_name": "LapTrack",
   "description": "A precision lap timer for RC car racing — track sessions, log lap times, and review your history.",
   "start_url": "./",
   "scope": "./",

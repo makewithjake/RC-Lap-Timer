@@ -1,6 +1,6 @@
 /* ============================================================
    camera.js — Camera Access Module
-   RC Lap Timer · Phase 2 · Task Group A
+   LapTrack · Phase 2 · Task Group A
    ============================================================ */
 
 /** @type {MediaStream|null} */

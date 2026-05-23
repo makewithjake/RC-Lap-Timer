@@ -1,6 +1,6 @@
 /* ============================================================
    router.js — Screen Navigation
-   RC Lap Timer · Phase 1
+   LapTrack · Phase 1
    Pure DOM state only — no URL/history manipulation.
    ============================================================ */
 
