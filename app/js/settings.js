@@ -39,6 +39,10 @@ function _hydrateForm(settings) {
     if (matching) voiceEl.value = settings.ttsVoiceName;
   }
 
+  if (voiceEl) {
+    voiceEl.disabled = !settings.ttsEnabled;
+  }
+
   // Toggle buttons
   document.querySelectorAll('.toggle-btn[data-value]').forEach((btn) => {
     btn.classList.toggle('toggle-btn--active', btn.dataset.value === settings.units);
@@ -125,6 +129,9 @@ function _bindLiveListeners() {
       ttsToggleEl.dataset.active = String(next);
       if (ttsToggleLbl) ttsToggleLbl.textContent = next ? 'On' : 'Off';
       saveSettings({ ttsEnabled: next });
+      if (next) {
+        _populateVoiceList();
+      }
     });
   }
 
@@ -232,10 +239,6 @@ export function initSettings() {
 
   _bindLiveListeners();
   _initClearDataFlow();
-
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.onvoiceschanged = _populateVoiceList;
-  }
 }
 
 // ── D7 — Screen Entry ─────────────────────────────────────────────────────────
@@ -244,8 +247,11 @@ export function initSettings() {
  * Hydrate form, populate voice list, update offline badge, show screen.
  */
 export function showSettings() {
-  _hydrateForm(getSettings());
-  _populateVoiceList(); // async, non-blocking
+  const settings = getSettings();
+  _hydrateForm(settings);
+  if (settings.ttsEnabled) {
+    _populateVoiceList(); // async, non-blocking — only when TTS is on
+  }
   _updateOfflineBadge();
   showScreen('settings');
 }

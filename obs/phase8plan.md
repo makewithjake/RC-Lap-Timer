@@ -28,6 +28,37 @@ Groups A–E are fully independent and can be assigned to separate sub-agents ru
 - No on/off toggle exists for TTS; the feature is always active.
 - Voice selection: `setPreferredVoice()` works, but the `preferredVoice` module variable is not persisted across page reloads — on reload it resets to `null` before `showSettings()` can repopulate it. The voice needs to be re-applied at app startup from stored settings.
 
+### A0 — CRITICAL: iOS VoiceOver dialog triggered by speechSynthesis startup access
+
+**Symptom observed (device test):** With TTS **OFF**, opening Settings then navigating to the dashboard caused iOS to display a system notification alert: *"VoiceOver would like to send you notifications."* Tapping Allow caused iOS VoiceOver (the full-device screen reader) to activate and narrate every UI element. Dismissing the dialog was impossible while VoiceOver was running; a hard reboot was required.
+
+**Root cause:** iOS Safari treats *any* programmatic access to `window.speechSynthesis` as an accessibility API call. Two code paths access `speechSynthesis` unconditionally at app startup — before any user gesture and regardless of the `ttsEnabled` setting:
+
+1. **`initSettings()` in `settings.js`** (called from `DOMContentLoaded` in `app.js`) sets `window.speechSynthesis.onvoiceschanged = _populateVoiceList` immediately, which registers the app as a speech client with iOS.
+2. **`showSettings()` in `settings.js`** calls `_populateVoiceList()` → `getAvailableVoices()` → `speechSynthesis.getVoices()` every time the Settings screen opens, again without regard for whether TTS is enabled.
+3. **`app.js`** calls `setPreferredVoice(savedVoiceName)` on `DOMContentLoaded` when a voice was previously saved — `setPreferredVoice` calls `getAvailableVoices()` which accesses `speechSynthesis`.
+
+Once iOS shows the VoiceOver system dialog, iOS's built-in screen reader takes over and reads every element on screen including button labels. The JS app cannot intercept or dismiss an OS-level modal, creating the unrecoverable state requiring a reboot.
+
+**Files:** `app/js/settings.js`, `app/js/app.js`
+
+**Plan:**
+1. In `initSettings()`, remove the unconditional `window.speechSynthesis.onvoiceschanged = _populateVoiceList` assignment. Do not touch `speechSynthesis` at startup under any condition.
+2. In `showSettings()`, gate `_populateVoiceList()` behind `getSettings().ttsEnabled` — only populate the voice list when TTS is actually on. When TTS is off, render the voice selector as disabled (or hidden).
+3. In `app.js`, remove the `setPreferredVoice()` call at `DOMContentLoaded`. The preferred voice should be resolved lazily inside `announceLap()` or `speak()` at call time by reading `getSettings().ttsVoiceName` directly — not cached at startup.
+4. Add a guard in `getAvailableVoices()`: check `'speechSynthesis' in window` before accessing any property (already present) but also ensure the function is never called from a non-gesture context when TTS is disabled.
+
+**Secondary fix — iOS audio session conflict (beeps silenced when TTS ON):**
+
+Observed: with TTS enabled, completing a lap produced no beep sound and no TTS announcement. Root cause: on iOS Safari, `speechSynthesis.speak()` claims the device audio session, which suspends the Web Audio `AudioContext`. The `AudioContext` state transitions to `'suspended'` and subsequent `playBeep()` calls are silently dropped (the `resume()` call in `getAudioContext()` is async and may not complete before the oscillator starts).
+
+**Plan:**
+1. In `announceLap()` (or at every `speak()` call site), schedule the `speak()` call after a short delay (e.g., 300 ms) so the synchronous `playBeep()` call completes first.
+2. Add an `onerror` handler to `SpeechSynthesisUtterance` in `speak()` to log iOS-specific failures silently without breaking other audio.
+3. After `speechSynthesis.speak()` completes (use `utterance.onend`), call `audioCtx.resume()` to restore the AudioContext for future beeps.
+
+---
+
 ### A1 — Fix TTS volume and pitch not applying to announcements
 
 **Files:** `app/js/audio.js`, `app/js/storage.js`
@@ -48,13 +79,31 @@ Groups A–E are fully independent and can be assigned to separate sub-agents ru
 4. In `audio.js`, guard `announceLap()` and any other TTS calls: check `getSettings().ttsEnabled` before calling `speak()`. If disabled, skip TTS silently.
 5. Keep the volume slider and pitch slider visible and functional at all times (they're still useful for when TTS is enabled); just gate the actual speech on the toggle.
 
-### A3 — Fix TTS voice selection not persisting across reloads
+### A3 — Fix TTS toggle not persisting (confirmed root cause: missing saveSettings branch)
+
+**Root cause confirmed (code inspection):** `saveSettings()` in `storage.js` has an explicit `if` branch for every setting it handles — `countdownDuration`, `ttsVoiceName`, `ttsPitch`, `ttsVolume`, `units` — but **there is no branch for `ttsEnabled`**. When the toggle click handler calls `saveSettings({ ttsEnabled: next })`, the `ttsEnabled` key is ignored and the stored value is never updated. `getSettings()` then always returns the default (`false`).
+
+**Test observation:** "Opened settings, toggled TTS to ON, closed settings, reopened and toggle was set to OFF" — consistent with `ttsEnabled` being silently discarded on every save.
+
+**Files:** `app/js/storage.js`
+
+**Plan:**
+1. Add a branch in `saveSettings()` for `ttsEnabled`:
+   ```js
+   if (partial.ttsEnabled !== undefined) {
+     merged.ttsEnabled = Boolean(partial.ttsEnabled);
+   }
+   ```
+2. No other changes needed — the toggle's read/write logic in `settings.js` is otherwise correct.
+
+### A3b — Fix TTS voice selection not persisting across reloads
 
 **Files:** `app/js/audio.js`, `app/js/app.js`
 
 **Plan:**
-1. In `app.js` (or wherever init functions are called at startup), after init, call `setPreferredVoice(getSettings().ttsVoiceName)` so the preferred voice is restored from storage at every page load — not just when the user opens Settings.
-2. Verify that `setPreferredVoice()` correctly resolves the voice asynchronously (voices may not be available immediately on page load — the existing `getAvailableVoices()` promise handles this; ensure the call in app.js uses it correctly).
+1. Remove the `setPreferredVoice()` call from `app.js` `DOMContentLoaded` (this is also part of the iOS VoiceOver fix in A0).
+2. Instead, resolve the voice lazily inside `speak()`: at the top of `speak()`, if `preferredVoice` is null and `getSettings().ttsVoiceName` is non-empty, call `setPreferredVoice()` once to populate the cached voice (this still happens asynchronously, so the first utterance after a reload may use the system default, but subsequent ones use the correct voice).
+3. Alternatively, store `preferredVoice` resolution inside `announceLap()` by reading `getSettings().ttsVoiceName` each time and passing it as the `voice` option to `speak()` so no startup initialization is needed.
 
 ---
 
@@ -67,12 +116,14 @@ Groups A–E are fully independent and can be assigned to separate sub-agents ru
 
 ### B1 — Fix history list scrolling
 
-**Files:** `app/styles/history.css`, `app/styles/global.css`
+**Root cause confirmed (code inspection):** `.session-card` in `history.css` has `touch-action: none`. This instructs iOS Safari to hand all touch events entirely to JavaScript and perform no default browser behavior — including no scroll. When the user touches a session card, the browser hands the touch to the JS event handler; the handler doesn't propagate a scroll gesture to the container, so the list cannot scroll via touches on session card elements. Touches in the gaps between cards (or on the screen edges) hit the `.history-list-container` directly and scroll correctly — matching the observed symptom exactly.
+
+**Files:** `app/styles/history.css`
 
 **Plan:**
-1. Ensure `#screen-history` has `display: flex; flex-direction: column; height: 100dvh; overflow: hidden` (check global `.screen` class; add to `history.css` if not set).
-2. Confirm `.history-list-container` has `flex: 1; overflow-y: auto; overscroll-behavior: contain` (already present — verify the parent height constraint is what's missing).
-3. Test: fill history with many sessions and confirm the list scrolls without the page itself scrolling.
+1. Change `touch-action: none` to `touch-action: pan-y` on `.session-card`. This allows vertical panning (scroll) to pass through to the native scroll handler while still letting JS intercept horizontal swipes (for potential swipe-to-delete).
+2. Remove `user-select: none` only if it is not needed for swipe UX — keep it to prevent text selection during swipe gestures.
+3. Verify the swipe-to-delete (long-press / select flow) still works after this change.
 
 ### B2 — Fix date grouping (sessions appearing under wrong date)
 
@@ -177,6 +228,8 @@ Both sub-tasks are independent of each other and can be done in a single pass.
 
 **Files:** `app/index.html`, `app/manifest.json`, `app/sw.js`, `app/js/*.js`, `app/styles/*.css`
 
+**Additional confirmed location (testing):** `styles/landing.css` (root-level, not under `app/`) contains `RC Lap Timer — Marketing Landing Page Stylesheet` in its file header comment (line 2). This is outside the `app/` directory but is part of the public-facing site. Change to `LapTrack — Marketing Landing Page Stylesheet`.
+
 **Plan:**
 1. Perform a full-text search across all `app/` files for the following strings (case-insensitive): `RC Timer`, `RC Lap Timer`, `rc-lap-timer`, `rc_lap_timer`.
 2. Replace with:
@@ -188,6 +241,7 @@ Both sub-tasks are independent of each other and can be done in a single pass.
    - `app/index.html` settings about section: `RC Lap Timer · v1.0.0` → `LapTrack · v1.0.0`
    - `app/manifest.json`: `name`, `short_name` fields
    - Any `console.log` / `console.warn` prefixes using old app name
+   - `styles/landing.css` file header comment (root level, line 2)
 4. Update domain references: replace any instance of the old domain with `LapTrack.app`.
 5. Update the `<meta name="apple-mobile-web-app-title">` tag if present.
 
@@ -287,6 +341,8 @@ Run this checklist after all task groups are implemented. Test on a real mobile 
 | T-C2 | In the session detail modal, verify the best lap dot is visually distinct (highlighted). | Best lap dot uses the `chart-dot--best` style (accent color). |
 | T-C3 | Open a session with only 1 lap. | Chart renders a single centered dot; no errors. |
 | T-C4 | Close and reopen the session detail modal. | Chart renders correctly each time without duplicating SVG elements. |
+| T-C5 | Open a session detail modal so the chart appears. Close the modal with the × button. Immediately tap the **same session card** to reopen it. In DevTools Elements panel, count `<svg>` children inside `#detail-chart`. | Exactly **one** `<svg>` is present. No doubled or offset lines in the chart. The chart looks identical to the first open. |
+| T-C6 | Find two sessions with clearly different lap counts or best-lap times. Open session A — note the dot count, highlighted dot position, and best-lap time. Close. Open session B. | Session B's dot count matches its own lap count; the highlighted dot is session B's best lap; all stats show session B's values. No carryover data from session A. |
 
 ---
 
@@ -422,8 +478,8 @@ Work through this checklist top-to-bottom after all code is deployed. Test on a 
 - [ x] **C-2 Best lap highlighted:** In the chart, the dot for the best lap is visually distinct (accent color / different size).
 - [ x] **C-3 Chart fills container:** The chart spans the full width of the modal card. It does not overflow or get clipped.
 - [ x] **C-4 Single-lap session:** Open a session with only 1 lap. Chart renders a single dot without errors. No JS exceptions in the console.
-- [ ] **C-5 No duplicate elements:** Close the modal and reopen the same session. The chart renders correctly — it does not stack a second SVG on top of the first.
-- [ ] **C-6 Different session back-to-back:** Open session A, close the modal, open session B. Session B's chart reflects session B's data, not session A's.
+- [ ] **C-5 No duplicate SVG elements on re-open:** Open any session in History and confirm its chart appears. Tap the **×** button (or back) to close the modal. Immediately tap the **same session card** again to reopen it. Look at the chart — it should appear identical to the first open. To verify: in Safari DevTools (or Chrome DevTools with Remote Debugging), open the Elements panel and inspect the `#detail-chart` element. It must contain exactly **one** `<svg>` child. If two SVGs are stacked, you will see the chart lines doubled or offset, indicating the old SVG was not cleared before re-rendering.
+- [ ] **C-6 Different sessions show different data:** You need at least two sessions with different lap counts or clearly different best-lap times. Open session A's detail modal and note: (1) the number of dots on the chart, (2) which dot is highlighted as best lap, (3) the best-lap time shown in the stats. Close the modal. Now open session B's detail modal. Verify: (1) the dot count matches session B's lap count, (2) the highlighted dot matches session B's best lap, (3) all stats reflect session B. No data from session A should appear in session B's view.
 
 ---
 

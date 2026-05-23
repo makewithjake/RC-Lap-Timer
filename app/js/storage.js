@@ -230,6 +230,9 @@ export function saveSettings(partial) {
       merged.units = partial.units;
     }
   }
+  if (partial.ttsEnabled !== undefined) {
+    merged.ttsEnabled = Boolean(partial.ttsEnabled);
+  }
 
   try {
     localStorage.setItem(KEY_SETTINGS, JSON.stringify(merged));

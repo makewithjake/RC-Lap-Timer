@@ -93,6 +93,15 @@ export function speak(text, options = {}) {
     return;
   }
 
+  if (!preferredVoice) {
+    const savedName = getSettings().ttsVoiceName;
+    if (savedName) {
+      const voices = window.speechSynthesis.getVoices(); // sync — voices likely available by now
+      const match = voices.find((v) => v.name === savedName) ?? null;
+      if (match) preferredVoice = match;
+    }
+  }
+
   window.speechSynthesis.cancel();
 
   const utterance = new SpeechSynthesisUtterance(text);
@@ -100,6 +109,18 @@ export function speak(text, options = {}) {
   utterance.pitch  = options.pitch  ?? 1.0;
   utterance.volume = options.volume ?? 1.0;
   utterance.voice  = options.voice  ?? preferredVoice ?? null;
+
+  utterance.onend = () => {
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(() => {});
+    }
+  };
+  utterance.onerror = (e) => {
+    console.warn('[audio] SpeechSynthesis error:', e.error);
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(() => {});
+    }
+  };
 
   window.speechSynthesis.speak(utterance);
 }
@@ -205,5 +226,9 @@ export function announceLap(lapNumber, lapTimeMs) {
 
   const lapWord = lapNumber === 1 ? 'one' : numberToWords(lapNumber);
   const { ttsVolume, ttsPitch } = getSettings();
-  speak(`Lap ${lapWord}: ${timePhrase}`, { volume: ttsVolume, pitch: ttsPitch });
+
+  // Delay speech so any beep triggered before this call can finish first
+  setTimeout(() => {
+    speak(`Lap ${lapWord}: ${timePhrase}`, { volume: ttsVolume, pitch: ttsPitch });
+  }, 350);
 }

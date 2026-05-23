@@ -10,7 +10,7 @@ import {
   setWakeLockStatusCallback,
   setCameraLockStatusCallback,
 } from './wakeLock.js';
-import { playBeep, speak, setPreferredVoice } from './audio.js';
+import { playBeep, speak } from './audio.js';
 import {
   initCanvas,
   clearLine,
@@ -75,12 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initSummary();
   initHistory();
   initSettings();
-
-  // A3 — Restore preferred TTS voice from saved settings on every page load
-  const _savedVoiceName = getSettings().ttsVoiceName;
-  if (_savedVoiceName) {
-    setPreferredVoice(_savedVoiceName);
-  }
 
   // ── Phase 3: Calibration slider wiring ────────────────────────────────────
 
