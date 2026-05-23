@@ -132,6 +132,18 @@ export async function lockCameraSettings(stream) {
     return false;
   }
 
+  // Check capabilities before attempting constraints to avoid noisy warnings
+  // on desktop webcams that don't support focus/exposure locking.
+  const capabilities = track.getCapabilities?.() ?? {};
+  const supportsFocus = Array.isArray(capabilities.focusMode) && capabilities.focusMode.length > 0;
+  const supportsExposure = Array.isArray(capabilities.exposureMode) && capabilities.exposureMode.length > 0;
+
+  if (!supportsFocus && !supportsExposure) {
+    _cameraLocked = false;
+    _cameraLockStatusCb?.(false);
+    return false;
+  }
+
   try {
     await track.applyConstraints({
       advanced: [{ focusMode: 'locked', exposureMode: 'locked' }],
@@ -139,7 +151,7 @@ export async function lockCameraSettings(stream) {
     _cameraLocked = true;
   } catch (err) {
     // applyConstraints throws if any advanced constraint is unsupported.
-    // This is expected on desktop webcams and some mobile browsers.
+    // This is expected on some mobile browsers even when capabilities are reported.
     console.warn('[WakeLock] Camera focus/exposure lock not supported:', err);
     _cameraLocked = false;
   }

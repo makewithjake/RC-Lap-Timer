@@ -344,11 +344,132 @@ Both sub-tasks are independent of each other and can be done in a single pass.
 **Files:** `app/index.html`, `app/manifest.json`, `app/sw.js`
 
 **Plan:**
-1. Verify all `<meta>` tags are correct: `theme-color`, `apple-mobile-web-app-capable`, `description`.
+1. Verify all `<meta>` tags are correct: `theme-color`, `apple-mobile-web-app-capable`, `description`. *(See G4 for the `apple-mobile-web-app-capable` deprecation fix.)*
 2. Add `<meta name="description" content="...">` if missing.
 3. Confirm `manifest.json` has correct `start_url`, `display: standalone`, `background_color`, `theme_color`, and all icon sizes.
 4. Bump the SW cache version string so existing installs pick up the new build.
 5. Verify `robots.txt` and `CNAME` are correct for the new LapTrack.app domain.
+
+---
+
+### G4 — Console warning fixes (observed during manual testing)
+
+> **Source of issues:** Discovered during a live test run on macOS Chrome, flowing from the landing page through a full in-app session. All four items below were present in the DevTools console.
+
+---
+
+#### G4-A — `beforeinstallprompt` "Banner not shown" info message *(landing page — no fix required)*
+
+**Observed message:**
+```
+Banner not shown: beforeinstallprompt.preventDefault() called.
+The page must call beforeinstallprompt.prompt() to show the banner.
+```
+
+**Root cause:** Chrome logs this informational message whenever `e.preventDefault()` is called on the `beforeinstallprompt` event. This is the documented pattern for implementing a custom PWA install UI — suppress Chrome's native banner with `preventDefault()`, stash the event, and call `.prompt()` later when the user clicks your own install button. `js/landing.js` does exactly this correctly.
+
+**Verdict:** This is **expected, intentional behavior**. The message is Chrome's way of explaining why it didn't show its own banner. It is not an error and does not affect functionality.
+
+**Action:** No code change required. No fix needed.
+
+---
+
+#### G4-B — `apple-mobile-web-app-capable` deprecation warning *(app/index.html)*
+
+**Observed message:**
+```
+<meta name="apple-mobile-web-app-capable" content="yes"> is deprecated.
+Please include <meta name="mobile-web-app-capable" content="yes">
+```
+
+**Root cause:** `apple-mobile-web-app-capable` is an Apple-proprietary tag originally for iOS Safari fullscreen PWA behavior. Chrome adopted it early on Android but has since introduced its own canonical tag, `mobile-web-app-capable`. Chrome 90+ logs a deprecation warning when it sees only the Apple variant without the Chrome/Android variant. `app/index.html` currently has the Apple tag but not the Chrome one.
+
+**Files:** `app/index.html`
+
+**Plan:**
+1. Add `<meta name="mobile-web-app-capable" content="yes">` immediately after (or before) the existing `<meta name="apple-mobile-web-app-capable" content="yes" />` line.
+2. **Do not remove** `apple-mobile-web-app-capable` — it is still required for iOS Safari and Apple device home screen installs. Both tags must coexist.
+
+**Result:** Chrome deprecation warning is eliminated. iOS Safari behavior is unchanged.
+
+---
+
+#### G4-C — Camera focus/exposure lock `OverconstrainedError` warning *(app/js/wakeLock.js)*
+
+**Observed message:**
+```
+[WakeLock] Camera focus/exposure lock not supported:
+OverconstrainedError: Unsupported constraint
+  lockCameraSettings @ wakeLock.js:143
+```
+
+**Root cause:** `lockCameraSettings()` unconditionally calls `track.applyConstraints({ advanced: [{ focusMode: 'locked', exposureMode: 'locked' }] })` on any active camera track. Desktop webcams (including MacBook's built-in camera) do not support these advanced constraints and throw `OverconstrainedError`. The current code catches the error and degrades gracefully (returns `false`, sets `_cameraLocked = false`), but still emits a `console.warn` that clutters the console on every desktop test session.
+
+The lock is only meaningful on mobile devices where the camera supports manual focus/exposure control. On desktop, the entire attempt is noise.
+
+**Files:** `app/js/wakeLock.js`
+
+**Plan:**
+1. Before calling `applyConstraints`, call `track.getCapabilities()` to retrieve the track's capability set.
+2. Check whether `capabilities.focusMode` or `capabilities.exposureMode` exists and is non-empty. If **neither** capability is advertised, skip `applyConstraints` entirely — return `false` silently without any log output.
+3. Only attempt `applyConstraints` (and only log the `console.warn` on failure) when the capabilities object indicates at least one of the two constraints is supported.
+
+**Code sketch:**
+```js
+async function lockCameraSettings(stream) {
+  // ... existing guard for track ...
+
+  const capabilities = track.getCapabilities?.() ?? {};
+  const supportsFocus = Array.isArray(capabilities.focusMode) && capabilities.focusMode.length > 0;
+  const supportsExposure = Array.isArray(capabilities.exposureMode) && capabilities.exposureMode.length > 0;
+
+  if (!supportsFocus && !supportsExposure) {
+    // Device (e.g., desktop webcam) does not support these constraints — skip silently.
+    _cameraLocked = false;
+    _cameraLockStatusCb?.(false);
+    return false;
+  }
+
+  try {
+    await track.applyConstraints({
+      advanced: [{ focusMode: 'locked', exposureMode: 'locked' }],
+    });
+    _cameraLocked = true;
+  } catch (err) {
+    console.warn('[WakeLock] Camera focus/exposure lock not supported:', err);
+    _cameraLocked = false;
+  }
+
+  _cameraLockStatusCb?.(_cameraLocked);
+  return _cameraLocked;
+}
+```
+
+**Result:** On desktop Chrome/macOS the warning disappears entirely. On a capable mobile device the behavior is unchanged — capabilities are present, the lock is attempted, and a warning is logged only if the attempt fails unexpectedly.
+
+---
+
+#### G4-D — `favicon.ico` 404 *(app/index.html)*
+
+**Observed message:**
+```
+GET https://laptrack.app/favicon.ico 404 (Not Found)
+```
+*(On local dev: `GET http://127.0.0.1:5500/favicon.ico 404 (Not Found)`)*
+
+**Root cause:** Browsers automatically request `/favicon.ico` from the document root whenever a page loads, unless a `<link rel="icon">` element is present in the `<head>`. `app/index.html` has no explicit favicon link, so every page load generates a 404 network request. The app already ships icon PNGs at `app/Assets/icons/icon-192.png` and `app/Assets/icons/icon-512.png` — these just aren't declared as the favicon.
+
+**Files:** `app/index.html`
+
+**Plan:**
+1. Add the following two `<link>` elements to the `<head>` of `app/index.html`, grouped with the existing `<link rel="apple-touch-icon">` line:
+   ```html
+   <link rel="icon" type="image/png" sizes="192x192" href="Assets/icons/icon-192.png" />
+   <link rel="icon" type="image/png" sizes="512x512" href="Assets/icons/icon-512.png" />
+   ```
+2. No new files need to be created — the existing PNG icons are reused.
+
+**Result:** The 404 is eliminated. Browsers use the 192×192 icon as the tab favicon (Chrome picks the best-fit size automatically when multiple `<link rel="icon">` entries are present).
 
 ---
 
@@ -506,12 +627,12 @@ Work through this checklist top-to-bottom after all code is deployed. Test on a 
 - [ x] **A-2 No speech when off:** With TTS off, complete a 3-lap session. Zero voice announcements at any point.
 - [ x] **A-3 Toggle persists:** Enable TTS in Settings. Close Settings. Re-open Settings. Toggle still reads "On."
 - [ x] **A-4 Toggle persists across reload:** Enable TTS. Kill the app and reopen. Open Settings. Toggle is still "On."
-- [ ] **A-5 Announcements play:** With TTS on, complete a lap. You hear a spoken announcement (lap number and/or time).
-- [ ] **A-6 Volume setting works:** Set Voice Volume to 0.3. Complete a lap. Announcement is clearly quieter than at 1.0.
-- [ ] **A-7 Pitch setting works:** Set Voice Pitch to 0.5. Complete a lap. Announcement voice is noticeably lower-pitched than at 1.0.
-- [ ] **A-8 Voice selection persists:** Select a non-default voice. Close Settings. Complete a lap. The announcement uses that voice. Kill and reopen the app — the same voice is still selected in Settings.
-- [ ] **A-9 System default voice:** Select "System Default." Complete a lap. No errors; default system voice speaks.
-- [ ] **A-10 Volume/pitch sliders always visible:** Whether TTS is on or off, the volume slider and pitch slider are visible and adjustable (they are not hidden behind the toggle state).
+- [ x] **A-5 Announcements play:** With TTS on, complete a lap. You hear a spoken announcement (lap number and/or time).
+- [ x] **A-6 Volume setting works:** Set Voice Volume to 0.3. Complete a lap. Announcement is clearly quieter than at 1.0.
+- [ x] **A-7 Pitch setting works:** Set Voice Pitch to 0.5. Complete a lap. Announcement voice is noticeably lower-pitched than at 1.0.
+- [ x] **A-8 Voice selection persists:** Select a non-default voice. Close Settings. Complete a lap. The announcement uses that voice. Kill and reopen the app — the same voice is still selected in Settings.
+- [ x] **A-9 System default voice:** Select "System Default." Complete a lap. No errors; default system voice speaks.
+- [ x] **A-10 Volume/pitch sliders always visible:** Whether TTS is on or off, the volume slider and pitch slider are visible and adjustable (they are not hidden behind the toggle state).
 
 ---
 
@@ -521,7 +642,7 @@ Work through this checklist top-to-bottom after all code is deployed. Test on a 
 - [ x] **B-2 No sessions pushed off-screen:** The last session in the list is reachable by scrolling within the list container.
 - [ x] **B-3 Today's date correct:** Record a session right now. Open History. The session appears under today's calendar date (e.g., "May 23") — not yesterday.
 - [ x] **B-4 Newest-first order:** The most recent session is at the top of the list; the oldest is at the bottom.
-- [ ] **B-5 Newest date group at top:** If you have sessions from multiple days, the most recent date heading is the first one you see.
+- [ x] **B-5 Newest date group at top:** If you have sessions from multiple days, the most recent date heading is the first one you see.
 - [x ] **B-6 Delete removes session:** Tap a session → Delete. The session is gone from the list. All remaining sessions are still fully visible.
 - [ ] **B-7 No orphaned date headers after delete:** After deleting the only session in a date group, that date heading is also removed. No stale `h2` elements linger.
 - [ ] **B-8 Delete last session in list:** Delete the very last remaining session. History shows an empty state (no broken UI, no empty `ul` with a dangling header).
