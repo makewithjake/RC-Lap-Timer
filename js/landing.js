@@ -209,11 +209,11 @@ if (hamburger && navLinks) {
 
     const menuOpen = navLinks && navLinks.classList.contains('is-open');
 
-    if (dx > 0 && !menuOpen) {
-      // Right swipe from anywhere → open menu
+    if (dx < 0 && !menuOpen) {
+      // Left swipe (right-to-left) → open menu
       openMenu();
-    } else if (dx < 0 && menuOpen) {
-      // Left swipe while menu open → close and scroll to top
+    } else if (dx > 0 && menuOpen) {
+      // Right swipe (left-to-right) while menu open → close and scroll to top
       closeMenu();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
