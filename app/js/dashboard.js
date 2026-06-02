@@ -219,27 +219,30 @@ function _teardownDetectionVideo() {
 
 // ── Session Teardown ──────────────────────────────────────────────────────────
 
-/**
- * @param {{ lapMs: number, totalMs: number }} frozenTime
- */
-function _handleStop(frozenTime) {
+function _handleStop() {
+  const laps = getLaps();
+  const lastCompletedLap = laps.length > 0 ? laps[laps.length - 1] : null;
+  const completedLapMs = lastCompletedLap ? lastCompletedLap.lapTime : 0;
+  const completedTotalMs = lastCompletedLap ? lastCompletedLap.totalTime : 0;
+
   stopSession();
   stopDetection();
   _teardownDetectionVideo();
   _stopClockRaf();
-  _freezeClock(frozenTime.lapMs, frozenTime.totalMs);
+  // Freeze UI at completed-only timing values; discard in-progress partial lap.
+  _freezeClock(completedLapMs, completedTotalMs);
   _setSystemStatus(false);
 
   stopCamera();
   releaseWakeLock();
 
-  const laps    = getLaps();
   const bestIdx = getBestLapIndex();
   window.__rcSession = window.__rcSession ?? {};
   window.__rcSession.result = {
     laps,
     bestLapIndex:  bestIdx,
-    totalTime:     frozenTime.totalMs,
+    // Total session time is the last completed crossing total, never stop-instant wall time.
+    totalTime:     completedTotalMs,
     driverName:    window.__rcSession.meta?.driverName ?? '',
     carName:       window.__rcSession.meta?.carName    ?? '',
     location:      window.__rcSession.meta?.location   ?? '',
@@ -293,10 +296,8 @@ function _beginSession(roi, detectionSettings) {
       _updateLapCounter(allLaps.length, goalLaps);
       _flashTriggerIndicator();
     },
-    onGoalMet: (allLaps) => {
-      const lastLap = allLaps[allLaps.length - 1];
-      const totalMs = getTotalElapsed();
-      _handleStop({ lapMs: lastLap.lapTime, totalMs });
+    onGoalMet: () => {
+      _handleStop();
     },
   });
 
@@ -409,9 +410,7 @@ export function initDashboard(config) {
   const stopBtn = document.getElementById('btn-dash-stop');
   if (stopBtn) {
     stopBtn.addEventListener('click', () => {
-      const totalMs = getTotalElapsed();
-      const lapMs   = getCurrentLapElapsed();
-      _handleStop({ lapMs, totalMs });
+      _handleStop();
     }, { signal });
   }
 

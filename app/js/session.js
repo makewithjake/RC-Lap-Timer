@@ -11,8 +11,9 @@ let _lapStartTime    = null;  // performance.now() when the current lap began
 
 // ── Session data ──────────────────────────────────────────────────────────────
 // Each lap record: { lapNumber: number, lapTime: number, totalTime: number }
-// lapTime:  ms for this individual lap (from lap-start to trigger)
-// totalTime: ms from masterStart to this trigger
+// lapTime:   ms for this individual lap (from lap-start to confirmed trigger)
+// totalTime: ms from masterStart to this confirmed trigger
+// Laps are created only by recordTrigger(). stopSession() never creates a lap.
 let _laps = [];
 
 // ── Configuration ─────────────────────────────────────────────────────────────
@@ -85,6 +86,7 @@ export function recordTrigger() {
 /**
  * Manually stop the session. Status → 'stopped'.
  * Does not fire onGoalMet. Idempotent.
+ * Does not create/complete a lap; any in-progress lap segment remains partial.
  */
 export function stopSession() {
   _status = 'stopped';

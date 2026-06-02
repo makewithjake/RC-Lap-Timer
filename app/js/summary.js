@@ -35,18 +35,19 @@ function _formatLapTime(ms) {
 /**
  * Computes session statistics from raw lap data.
  * Source laps use `lapTime` (not `lapTimeMs`) — this matches the session.js contract.
+ * Average is derived from completed lap durations only (not external total time).
  *
  * @param {Array<{ lapTime: number }>} laps
- * @param {number} totalTimeMs
  * @returns {{ bestLapMs: number, avgLapMs: number, consistencyScore: number }}
  */
-export function computeStats(laps, totalTimeMs) {
+export function computeStats(laps) {
   if (!laps || laps.length === 0) {
     return { bestLapMs: 0, avgLapMs: 0, consistencyScore: 0 };
   }
 
   const bestLapMs = Math.min(...laps.map((l) => l.lapTime));
-  const avgLapMs  = Math.round(totalTimeMs / laps.length);
+  const totalLapMs = laps.reduce((acc, l) => acc + l.lapTime, 0);
+  const avgLapMs   = Math.round(totalLapMs / laps.length);
   const consistencyScore = Math.round(
     Math.sqrt(
       laps.reduce((acc, l) => acc + (l.lapTime - avgLapMs) ** 2, 0) / laps.length
@@ -224,10 +225,7 @@ export function showSummary(rawSession) {
   }
 
   // Stats
-  const { bestLapMs, avgLapMs, consistencyScore } = computeStats(
-    rawSession.laps,
-    rawSession.totalTime
-  );
+  const { bestLapMs, avgLapMs, consistencyScore } = computeStats(rawSession.laps);
 
   const fastestEl = document.getElementById('stat-fastest');
   const avgEl     = document.getElementById('stat-avg');

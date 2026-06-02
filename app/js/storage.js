@@ -54,9 +54,9 @@ const DEFAULT_SETTINGS = Object.freeze({
  * @property {LapRecord[]} laps
  * @property {number}      lapCount
  * @property {number}      bestLapMs
- * @property {number}      avgLapMs         — totalTimeMs / lapCount, rounded
+ * @property {number}      avgLapMs         — arithmetic mean of completed lap times, rounded
  * @property {number}      consistencyScore — population std deviation of lap times in ms
- * @property {number}      totalTimeMs
+ * @property {number}      totalTimeMs      — completed session time to last confirmed crossing
  * @property {Object}      calibration      — { sensitivity, debounce, zoneWidth }
  * @property {number|null} lapGoal
  */
@@ -70,13 +70,14 @@ const DEFAULT_SETTINGS = Object.freeze({
  */
 export function buildSessionRecord(rawSession) {
   const laps = rawSession.laps ?? [];
+  const totalLapMs = laps.reduce((acc, l) => acc + l.lapTime, 0);
 
   const bestLapMs = laps.length > 0
     ? Math.min(...laps.map((l) => l.lapTime))
     : 0;
 
   const avgLapMs = laps.length > 0
-    ? Math.round(rawSession.totalTime / laps.length)
+    ? Math.round(totalLapMs / laps.length)
     : 0;
 
   const consistencyScore = laps.length > 0
