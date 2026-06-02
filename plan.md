@@ -42,18 +42,15 @@ Phases 1–6 are complete. Key architecture decisions locked in:
 ---
 
 ## Future Tasks
-- case: when viewing from a low angle, the fnish line (eg, phone is next to a residential sized road) and finish line is drawn across the entire road, car is not detected when at the far side of the finish line/road which is also near the edge of the finish line.  Assumption was that car was too small at this distance, however, if phone setup is kept the same, and line is drawn shorter, only including the far side of the road, car is detected reliably. Is the finish line getting compressed or scaled in some way that it cant see small objects when line is large?  is a smaller line providing higher fidelity?
+- 
 - need a contact/bug report page/form
 - confirm battery life tests.  does app stay low power or is it burning battery?  initial tests seemed to make the phone slightly warm.  will need to track some telemetry from phone to best understand this to make sure we have no memory leaks.
-- cleanup file structure. move files in folders based on common best practices. move unused/redundtant, unnecessary files to the Obs folder for future deletion.
-- Bug: when starting new session, and hitting STOP before a lap is incremented, we sometimes see a graph displaying the last session where laps were counted. More specific: if user hits STOP before the timer starts, or, after the timer starts but BEFORE the min lap length (debounce), then the graph displayed shows that last sessions graph data.
+- 
 
 
 ### Potential Future Features / Bugs
 - Web Worker offload for pixel math if UI feels sluggish during detection
 - Multi-car / multi-driver profile management
 - Export session data (CSV or share sheet)
-- Distance tracking (metric/imperial) once sensor data supports it
-- tags that can be applied to laps on post session page. these could allow user to ignore laps if car flips, etc.
 - manual focus? or tappable focus zones?
 -
