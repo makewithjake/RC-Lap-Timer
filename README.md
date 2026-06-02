@@ -44,6 +44,9 @@ Rule:
 - Do not add duplicate lap timer runtime modules under both app/js and js.
 - Bugfixes and feature changes for race/session behavior must be implemented in app/js.
 
+Guard check:
+- Run `bash scripts/check-runtime-duplicates.sh` before opening a PR to enforce no duplicate runtime modules between app/js and js.
+
 ## Usage
 
 1. Open the app and enter driver name, car name, and location.
