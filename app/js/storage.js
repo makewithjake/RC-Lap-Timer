@@ -102,7 +102,7 @@ export function buildSessionRecord(rawSession) {
 
   return {
     id,
-    date:             new Date().toLocaleDateString('en-CA'),
+    date:             new Date().toISOString().split('T')[0],
     driverName:       rawSession.driverName ?? '',
     carName:          rawSession.carName    ?? '',
     location:         rawSession.location   ?? '',

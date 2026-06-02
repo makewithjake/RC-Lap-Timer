@@ -23,6 +23,26 @@ function _formatLapTime(ms) {
   return `${minutes}:${seconds}`;
 }
 
+function _parseSessionDate(dateValue) {
+  if (!dateValue) return null;
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
+    return new Date(`${dateValue}T00:00:00`);
+  }
+
+  const localDate = new Date(`${dateValue}T00:00:00`);
+  if (!Number.isNaN(localDate.getTime())) {
+    return localDate;
+  }
+
+  const parsed = new Date(dateValue);
+  if (!Number.isNaN(parsed.getTime())) {
+    return parsed;
+  }
+
+  return null;
+}
+
 // ── C1 — Date Grouping Helper ─────────────────────────────────────────────────
 
 /**
@@ -33,12 +53,15 @@ function _formatLapTime(ms) {
 function _groupByDate(sessions) {
   const map = new Map();
   sessions.forEach((s) => {
-    const label = new Date(s.date + 'T00:00:00').toLocaleDateString('en-US', {
-      weekday: 'short',
-      year:    'numeric',
-      month:   'long',
-      day:     'numeric',
-    });
+    const parsed = _parseSessionDate(s.date);
+    const label = parsed
+      ? parsed.toLocaleDateString('en-US', {
+          weekday: 'short',
+          year:    'numeric',
+          month:   'long',
+          day:     'numeric',
+        })
+      : 'Unknown Date';
     if (!map.has(label)) map.set(label, []);
     map.get(label).push(s);
   });
@@ -55,39 +78,50 @@ function _groupByDate(sessions) {
  * @param {import('./storage.js').Session[]} sessions
  */
 export function renderSessionList(sessions) {
-  const listEl  = document.getElementById('history-list');
   const emptyEl = document.getElementById('history-empty');
   const containerEl = document.getElementById('history-list-container');
 
-  if (!listEl) return;
+  if (!containerEl) return;
 
-  // Clear existing content (but keep the empty state element)
-  listEl.innerHTML = '';
-  // Remove any previously injected date headers
-  if (containerEl) {
-    containerEl.querySelectorAll('.history-date-header').forEach((el) => el.remove());
-  }
+  containerEl.innerHTML = '';
 
   if (!sessions || sessions.length === 0) {
-    if (emptyEl) emptyEl.removeAttribute('hidden');
+    if (emptyEl) {
+      emptyEl.removeAttribute('hidden');
+      containerEl.appendChild(emptyEl);
+    }
     return;
   }
 
   // Ensure newest-first order regardless of caller
-  const sorted = [...sessions].sort((a, b) => b.date.localeCompare(a.date));
+  const sorted = [...sessions].sort((a, b) => {
+    const aDate = _parseSessionDate(a.date);
+    const bDate = _parseSessionDate(b.date);
+    const aTime = aDate ? aDate.getTime() : -Infinity;
+    const bTime = bDate ? bDate.getTime() : -Infinity;
+
+    if (bTime !== aTime) return bTime - aTime;
+    return String(b.date ?? '').localeCompare(String(a.date ?? ''));
+  });
 
   if (emptyEl) emptyEl.setAttribute('hidden', '');
 
   const groups = _groupByDate(sorted);
+  const fragment = document.createDocumentFragment();
 
   groups.forEach(({ dateLabel, sessions: groupSessions }) => {
-    // Date header
+    const groupEl = document.createElement('section');
+    groupEl.className = 'history-date-group';
+
     const header = document.createElement('h2');
     header.className   = 'history-date-header';
     header.textContent = dateLabel;
-    listEl.before(header); // Insert before list; subsequent groups append to list
+    groupEl.appendChild(header);
 
-    // For proper grouping, append each session card directly to the list
+    const groupList = document.createElement('ul');
+    groupList.className = 'history-list';
+    groupList.setAttribute('role', 'list');
+
     groupSessions.forEach((session) => {
       const li = document.createElement('li');
       li.className           = 'session-card';
@@ -109,9 +143,14 @@ export function renderSessionList(sessions) {
         </div>
       `;
 
-      listEl.appendChild(li);
+      groupList.appendChild(li);
     });
+
+    groupEl.appendChild(groupList);
+    fragment.appendChild(groupEl);
   });
+
+  containerEl.appendChild(fragment);
 }
 
 /**
@@ -175,11 +214,11 @@ function _cancelLongPress() {
 }
 
 function _bindLongPressDelete() {
-  const listEl = document.getElementById('history-list');
-  if (!listEl) return;
+  const containerEl = document.getElementById('history-list-container');
+  if (!containerEl) return;
 
   // Pointer events (touch + mouse)
-  listEl.addEventListener('pointerdown', (e) => {
+  containerEl.addEventListener('pointerdown', (e) => {
     const card = e.target.closest('.session-card');
     if (!card) return;
 
@@ -194,7 +233,7 @@ function _bindLongPressDelete() {
     }, 500);
   });
 
-  listEl.addEventListener('pointerup', (e) => {
+  containerEl.addEventListener('pointerup', (e) => {
     const wasTap = _longPressTimer !== null;
     _cancelLongPress();
     if (wasTap && !_pointerMoved) {
@@ -207,11 +246,11 @@ function _bindLongPressDelete() {
     }
   });
 
-  listEl.addEventListener('pointerleave', () => {
+  containerEl.addEventListener('pointerleave', () => {
     _cancelLongPress();
   });
 
-  listEl.addEventListener('pointermove', (e) => {
+  containerEl.addEventListener('pointermove', (e) => {
     if (_longPressTimer === null) return;
     const dx = e.clientX - _startPointerX;
     const dy = e.clientY - _startPointerY;
@@ -235,10 +274,15 @@ function _openSessionDetail(sessionId) {
   document.querySelector('#session-detail-modal .session-detail-subtitle').textContent =
     session.driverName || '';
 
-  document.getElementById('detail-date').textContent = new Date(session.date + 'T00:00:00').toLocaleDateString(
-    'en-US',
-    { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' }
-  );
+  const detailDate = _parseSessionDate(session.date);
+  document.getElementById('detail-date').textContent = detailDate
+    ? detailDate.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      })
+    : 'Unknown Date';
   document.getElementById('detail-location').textContent = session.location || '—';
 
   const notesEl = document.getElementById('detail-setup-notes');
