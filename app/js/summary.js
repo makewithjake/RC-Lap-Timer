@@ -245,7 +245,8 @@ export function showSummary(rawSession) {
 
   // Chart
   const svgEl = document.getElementById('summary-chart');
-  if (svgEl && rawSession.laps?.length > 0) {
+  // Intentionally render on empty laps too so stale SVG content gets cleared.
+  if (svgEl) {
     renderChart(svgEl, rawSession.laps, bestLapMs);
   }
 
