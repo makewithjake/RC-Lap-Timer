@@ -33,6 +33,17 @@ Point your phone at the finish line and draw a **Trigger Zone** across the track
 | Offline | Service Worker (cache-first) |
 | Styling | CSS3 with design tokens |
 
+## Codebase Layout
+
+- app/index.html is the lap timer application shell.
+- app/js is the canonical runtime source for lap timer logic.
+- index.html is the marketing/landing page shell.
+- js is reserved for landing-page scripts (for example, landing interactions).
+
+Rule:
+- Do not add duplicate lap timer runtime modules under both app/js and js.
+- Bugfixes and feature changes for race/session behavior must be implemented in app/js.
+
 ## Usage
 
 1. Open the app and enter driver name, car name, and location.
