@@ -8,7 +8,7 @@
  */
 
 import { getHistory, deleteSession } from './storage.js';
-import { showScreen } from './router.js';
+import { getNavigationState, showScreenState, updateNavigationState } from './navigation.js';
 import { renderChart } from './summary.js';
 
 // ── Lap Time Formatter (local copy — identical to summary.js) ─────────────────
@@ -197,12 +197,18 @@ let _pointerMoved      = false;
 
 function _showDeleteChip() {
   const chip = document.getElementById('delete-confirm-chip');
-  if (chip) chip.removeAttribute('hidden');
+  if (chip) {
+    chip.removeAttribute('hidden');
+    chip.setAttribute('aria-hidden', 'false');
+  }
 }
 
 function _hideDeleteChip() {
   const chip = document.getElementById('delete-confirm-chip');
-  if (chip) chip.setAttribute('hidden', '');
+  if (chip) {
+    chip.setAttribute('hidden', '');
+    chip.setAttribute('aria-hidden', 'true');
+  }
   _pendingDeleteId = null;
 }
 
@@ -263,7 +269,7 @@ function _bindLongPressDelete() {
 
 // ── C4b — Session Detail Modal ────────────────────────────────────────────────
 
-function _openSessionDetail(sessionId) {
+function _openSessionDetail(sessionId, options = {}) {
   const session = getHistory().find((s) => s.id === sessionId);
   if (!session) return;
 
@@ -327,6 +333,24 @@ function _openSessionDetail(sessionId) {
   }
 
   modal.removeAttribute('hidden');
+  modal.setAttribute('aria-hidden', 'false');
+
+  if (options.syncHistory ?? true) {
+    updateNavigationState(
+      { screen: 'history', modal: 'session-detail', sessionId },
+      { replace: options.replace ?? false, syncHistory: true }
+    );
+  }
+}
+
+export function isSessionDetailOpen() {
+  const modal = document.getElementById('session-detail-modal');
+  return Boolean(modal && !modal.hasAttribute('hidden'));
+}
+
+export function closeSessionDetail() {
+  document.getElementById('session-detail-modal')?.setAttribute('hidden', '');
+  document.getElementById('session-detail-modal')?.setAttribute('aria-hidden', 'true');
 }
 
 function _bindDeleteChipButtons() {
@@ -367,11 +391,22 @@ export function initHistory() {
 
   const backBtn = document.getElementById('btn-history-back');
   if (backBtn) {
-    backBtn.addEventListener('click', () => showScreen('home'));
+    backBtn.addEventListener('click', () => {
+      if (history.length > 1) {
+        history.back();
+      } else {
+        showScreenState('home');
+      }
+    });
   }
 
   document.getElementById('btn-detail-close')?.addEventListener('click', () => {
-    document.getElementById('session-detail-modal')?.setAttribute('hidden', '');
+    if (getNavigationState().modal === 'session-detail' && history.length > 1) {
+      history.back();
+      return;
+    }
+
+    closeSessionDetail();
   });
 }
 
@@ -380,13 +415,25 @@ export function initHistory() {
 /**
  * Reset state, load sessions, and show the history screen.
  */
-export function showHistory() {
+export function showHistory(options = {}) {
   const searchEl = document.getElementById('history-search');
   if (searchEl) searchEl.value = '';
 
   _hideDeleteChip();
   renderSessionList(getHistory());
-  showScreen('history');
+  showScreenState('history', {
+    replace: options.replace ?? false,
+    syncHistory: options.syncHistory ?? true,
+    state: options.sessionId
+      ? { modal: 'session-detail', sessionId: options.sessionId }
+      : { modal: null },
+  });
+
+  if (options.sessionId) {
+    _openSessionDetail(options.sessionId, { syncHistory: false });
+  } else {
+    closeSessionDetail();
+  }
 }
 
 

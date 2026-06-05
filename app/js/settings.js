@@ -8,7 +8,7 @@
 
 import { getSettings, saveSettings, clearAllData } from './storage.js';
 import { getAvailableVoices, setPreferredVoice }   from './audio.js';
-import { showScreen } from './router.js';
+import { showScreenState } from './navigation.js';
 import { showHome } from './home.js';
 
 // ── D1 — Settings Form Hydration ──────────────────────────────────────────────
@@ -235,7 +235,13 @@ export function initSettings() {
 
   const backBtn = document.getElementById('btn-settings-back');
   if (backBtn) {
-    backBtn.addEventListener('click', () => showScreen('home'));
+    backBtn.addEventListener('click', () => {
+      if (history.length > 1) {
+        history.back();
+      } else {
+        showScreenState('home');
+      }
+    });
   }
 
   _bindLiveListeners();
@@ -247,14 +253,18 @@ export function initSettings() {
 /**
  * Hydrate form, populate voice list, update offline badge, show screen.
  */
-export function showSettings() {
+export function showSettings(options = {}) {
   const settings = getSettings();
   _hydrateForm(settings);
   if (settings.ttsEnabled) {
     _populateVoiceList(); // async, non-blocking — only when TTS is on
   }
   _updateOfflineBadge();
-  showScreen('settings');
+  showScreenState('settings', {
+    replace: options.replace ?? false,
+    syncHistory: options.syncHistory ?? true,
+    state: { modal: null },
+  });
 }
 
 

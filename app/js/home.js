@@ -1,4 +1,4 @@
-import { showScreen } from './router.js';
+import { showScreenState } from './navigation.js';
 import { startCamera } from './camera.js';
 import { showHistory } from './history.js';
 import { showSettings } from './settings.js';
@@ -39,9 +39,9 @@ export function initHome() {
   // Navigation
   document.getElementById('btn-start-session').addEventListener('click', async () => {
     clearLine();
-    showScreen('viewfinder');
-    history.pushState({ screen: 'viewfinder' }, '');
+    showScreenState('viewfinder');
     document.getElementById('viewfinder-help-modal')?.removeAttribute('hidden');
+    document.getElementById('viewfinder-help-modal')?.setAttribute('aria-hidden', 'false');
     resizeCanvas();
 
     const videoEl = document.getElementById('viewfinder-video');
@@ -72,7 +72,7 @@ export function initHome() {
  * Re-reads home screen inputs from localStorage and shows the home screen.
  * Call this after clearAllData() so inputs reflect the wiped state.
  */
-export function showHome() {
+export function showHome(options = {}) {
   const driverInput     = document.getElementById('input-driver-name');
   const carInput        = document.getElementById('input-car-name');
   const locationInput   = document.getElementById('input-location');
@@ -83,5 +83,9 @@ export function showHome() {
   if (locationInput)   locationInput.value   = localStorage.getItem(STORAGE_KEYS.location)   ?? '';
   if (setupNotesInput) setupNotesInput.value = localStorage.getItem(STORAGE_KEYS.setupNotes) ?? '';
 
-  showScreen('home');
+  showScreenState('home', {
+    replace: options.replace ?? false,
+    syncHistory: options.syncHistory ?? true,
+    state: { modal: null },
+  });
 }
