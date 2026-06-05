@@ -23,7 +23,6 @@ const KEY_SETTINGS = 'rc_settings';  // JSON string — Settings
  * @property {string|null} ttsVoiceName      — SpeechSynthesisVoice.name or null (system default)
  * @property {number}      ttsPitch          — 0.5–2.0; default 1.0
  * @property {number}      ttsVolume         — 0–1; default 1.0
- * @property {string}      units             — 'metric' | 'imperial'; default 'metric'
  */
 
 const DEFAULT_SETTINGS = Object.freeze({
@@ -32,7 +31,6 @@ const DEFAULT_SETTINGS = Object.freeze({
   ttsVoiceName:      null,
   ttsPitch:          1.0,
   ttsVolume:         1.0,
-  units:             'metric',
 });
 
 // ── Session CRUD ──────────────────────────────────────────────────────────────
@@ -225,11 +223,6 @@ export function saveSettings(partial) {
   }
   if (partial.ttsVolume !== undefined) {
     merged.ttsVolume = Math.max(0, Math.min(1, Number(partial.ttsVolume)));
-  }
-  if (partial.units !== undefined) {
-    if (partial.units === 'metric' || partial.units === 'imperial') {
-      merged.units = partial.units;
-    }
   }
   if (partial.ttsEnabled !== undefined) {
     merged.ttsEnabled = Boolean(partial.ttsEnabled);

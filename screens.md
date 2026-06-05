@@ -66,7 +66,6 @@ Technical configuration that persists across all sessions.
 
 - **Countdown Timer:** Default 10 seconds; defines countdown after feed setup before displaying the Dashboard
 - **TTS Voice Settings:** Select voice gender, pitch, and volume for lap announcements
-- **Unit Selection:** Toggle between Metric and Imperial (if distance tracking is added later)
 - **Clear All Data:** "Nuclear Option" to wipe the app's localStorage
 - **About/PWA Info:** Version number and "Offline Ready" status indicator
 

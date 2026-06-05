@@ -82,33 +82,6 @@ input[type="range"] {
   padding-top: var(--space-6);
 }
 
-/* ── Toggle Group ───────────────────────────────────────────────────────── */
-
-.toggle-group {
-  display: flex;
-  gap: 0;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  border: 1px solid var(--color-border);
-}
-
-.toggle-btn {
-  flex: 1;
-  background: var(--color-surface-raised);
-  color: var(--color-text-secondary);
-  border: none;
-  padding: var(--space-3) var(--space-4);
-  font-size: 0.875rem;
-  font-weight: 600;
-  min-height: var(--space-12);
-  cursor: pointer;
-}
-
-.toggle-btn--active {
-  background: var(--color-accent);
-  color: #000000;
-}
-
 /* ── About Panel ────────────────────────────────────────────────────────── */
 
 .settings-about {
