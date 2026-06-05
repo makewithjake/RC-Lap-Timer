@@ -43,11 +43,6 @@ function _hydrateForm(settings) {
     voiceEl.disabled = !settings.ttsEnabled;
   }
 
-  // Toggle buttons
-  document.querySelectorAll('.toggle-btn[data-value]').forEach((btn) => {
-    btn.classList.toggle('toggle-btn--active', btn.dataset.value === settings.units);
-  });
-
   const ttsToggleEl    = document.getElementById('toggle-tts-enabled');
   const ttsToggleLbl   = document.getElementById('label-tts-enabled');
   if (ttsToggleEl) {
@@ -144,15 +139,6 @@ function _bindLiveListeners() {
       setPreferredVoice(voiceName);
     });
   }
-
-  document.querySelectorAll('.toggle-btn[data-value]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.toggle-btn[data-value]').forEach((b) => {
-        b.classList.toggle('toggle-btn--active', b === btn);
-      });
-      saveSettings({ units: btn.dataset.value });
-    });
-  });
 
   const lapStartAudioEl = document.getElementById('setting-lap-start-audio');
   if (lapStartAudioEl) {
