@@ -9,7 +9,7 @@
  */
 
 import { buildSessionRecord, saveSession } from './storage.js';
-import { showScreen } from './router.js';
+import { showScreenState } from './navigation.js';
 
 // ── B1 — Lap Time Formatter ───────────────────────────────────────────────────
 
@@ -189,17 +189,17 @@ export function initSummary() {
       saveSession(record);
     }
     window.__rcSession = null;
-    showScreen('home');
+    showScreenState('home', { replace: true });
   });
 
   document.getElementById('btn-discard-session').addEventListener('click', () => {
     window.__rcSession = null;
-    showScreen('home');
+    showScreenState('home', { replace: true });
   });
 
   document.getElementById('btn-restart-session').addEventListener('click', () => {
     window.__rcSession = null;
-    showScreen('viewfinder');
+    showScreenState('viewfinder', { replace: true });
   });
 }
 
@@ -212,7 +212,7 @@ export function initSummary() {
 export function showSummary(rawSession) {
   if (!rawSession) {
     console.warn('[summary] showSummary called with no rawSession — redirecting to home');
-    showScreen('home');
+    showScreenState('home', { replace: true });
     return;
   }
 
@@ -250,7 +250,7 @@ export function showSummary(rawSession) {
     renderChart(svgEl, rawSession.laps, bestLapMs);
   }
 
-  showScreen('summary');
+  showScreenState('summary', { replace: true });
 }
 
 

@@ -1,9 +1,9 @@
 import { showScreen, currentScreen } from './router.js';
 import { getSettings, saveSettings } from './storage.js';
-import { initHome } from './home.js';
+import { initHome, showHome } from './home.js';
 import { initSummary } from './summary.js';
-import { initHistory } from './history.js';
-import { initSettings } from './settings.js';
+import { initHistory, showHistory, isSessionDetailOpen, closeSessionDetail } from './history.js';
+import { initSettings, showSettings } from './settings.js';
 import { stopCamera } from './camera.js';
 import {
   releaseWakeLock,
@@ -22,13 +22,13 @@ import {
 import {
   setSensitivity,
   setDebounce,
-  getZoneWidth,
   setZoneWidth,
   getAllSettings,
 } from './calibration.js';
 import { startDetection, stopDetection, isDetecting } from './detector.js';
 import { startCountdown, cancelCountdown } from './countdown.js';
 import { initDashboard } from './dashboard.js';
+import { getNavigationState, initNavigation, showScreenState } from './navigation.js';
 
 // ── Status chip helpers ───────────────────────────────────────
 
@@ -45,6 +45,206 @@ function updateCameraLockChip(locked) {
   chip.textContent = locked ? '📷 Camera Stabilized' : '📷 Camera Auto';
   chip.dataset.state = locked ? 'active' : 'inactive';
 }
+
+function _isModalOpen(id) {
+  const el = document.getElementById(id);
+  return Boolean(el && !el.hasAttribute('hidden'));
+}
+
+function _hideModal(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.setAttribute('hidden', '');
+  el.setAttribute('aria-hidden', 'true');
+}
+
+function _cleanupViewfinder() {
+  stopDetection();
+  clearLine();
+  stopCamera();
+  releaseWakeLock();
+  _hideModal('viewfinder-help-modal');
+}
+
+function _applyStateFromHistory(state) {
+  const targetState = state?.screen ? state : { screen: 'home' };
+  const activeScreen = currentScreen();
+
+  if (activeScreen === 'viewfinder' && targetState.screen !== 'viewfinder') {
+    _cleanupViewfinder();
+  }
+
+  if (targetState.screen !== 'history') {
+    closeSessionDetail();
+  }
+
+  if (targetState.screen !== 'settings') {
+    _hideModal('clear-data-modal');
+  }
+
+  if (targetState.screen !== 'viewfinder') {
+    _hideModal('viewfinder-help-modal');
+  }
+
+  switch (targetState.screen) {
+    case 'history':
+      showHistory({
+        syncHistory: false,
+        sessionId: targetState.modal === 'session-detail' ? targetState.sessionId : null,
+      });
+      break;
+    case 'settings':
+      showSettings({ syncHistory: false });
+      break;
+    case 'viewfinder':
+      showScreen('viewfinder');
+      break;
+    case 'countdown':
+      showScreen('countdown');
+      break;
+    case 'dashboard':
+      showScreen('dashboard');
+      break;
+    case 'summary':
+      showScreen('summary');
+      break;
+    case 'home':
+    default:
+      showHome({ syncHistory: false });
+      break;
+  }
+}
+
+function _performBackAction() {
+  const navState = getNavigationState();
+  const screen = currentScreen();
+
+  if (isSessionDetailOpen()) {
+    if (navState.modal === 'session-detail' && history.length > 1) {
+      history.back();
+    } else {
+      closeSessionDetail();
+    }
+    return true;
+  }
+
+  if (_isModalOpen('clear-data-modal')) {
+    _hideModal('clear-data-modal');
+    return true;
+  }
+
+  if (_isModalOpen('viewfinder-help-modal')) {
+    _hideModal('viewfinder-help-modal');
+    return true;
+  }
+
+  if (screen === 'viewfinder' || screen === 'history' || screen === 'settings') {
+    if (history.length > 1) {
+      history.back();
+    } else if (screen === 'viewfinder') {
+      _cleanupViewfinder();
+      showHome();
+    } else {
+      showHome();
+    }
+    return true;
+  }
+
+  return false;
+}
+
+function _bindBackSwipe() {
+  const edgeSize = (target) => {
+    if (currentScreen() === 'viewfinder' && target.closest('#viewfinder-canvas')) {
+      return 20;
+    }
+
+    return Math.min(window.innerWidth * 0.18, 88);
+  };
+  const verticalTolerance = 48;
+  let gesture = null;
+
+  function _swipeThreshold(target) {
+    if (currentScreen() === 'viewfinder' && target.closest('#viewfinder-canvas')) {
+      return 120;
+    }
+
+    return 72;
+  }
+
+  function _resetGesture() {
+    gesture = null;
+  }
+
+  document.addEventListener('pointerdown', (event) => {
+    if (!event.isPrimary || event.pointerType === 'mouse') return;
+    if (event.target.closest('input, textarea, select, button, [role="slider"]')) return;
+
+    const width = window.innerWidth;
+    const edge = edgeSize(event.target);
+    let startEdge = null;
+
+    if (event.clientX <= edge) {
+      startEdge = 'left';
+    } else if (event.clientX >= width - edge) {
+      startEdge = 'right';
+    }
+
+    if (!startEdge) return;
+
+    gesture = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      startEdge,
+      target: event.target,
+      claimed: false,
+    };
+  });
+
+  document.addEventListener('pointermove', (event) => {
+    if (!gesture || event.pointerId !== gesture.pointerId) return;
+
+    const dx = event.clientX - gesture.startX;
+    const dy = event.clientY - gesture.startY;
+
+    if (Math.abs(dy) > verticalTolerance && Math.abs(dy) > Math.abs(dx)) {
+      _resetGesture();
+      return;
+    }
+
+    if (Math.abs(dx) <= Math.abs(dy)) {
+      return;
+    }
+
+    gesture.claimed = true;
+
+    const swipeThreshold = _swipeThreshold(gesture.target);
+
+    const isRightSwipe = gesture.startEdge === 'left' && dx >= swipeThreshold;
+    const isLeftSwipe = gesture.startEdge === 'right' && dx <= -swipeThreshold;
+
+    if (isRightSwipe) {
+      const handled = _performBackAction();
+      _resetGesture();
+      if (handled) {
+        event.preventDefault();
+      }
+      return;
+    }
+
+    if (isLeftSwipe) {
+      _resetGesture();
+    }
+  }, { passive: false });
+
+  document.addEventListener('pointerup', (event) => {
+    if (!gesture || event.pointerId !== gesture.pointerId) return;
+    _resetGesture();
+  });
+
+  document.addEventListener('pointercancel', _resetGesture);
+ }
 
 // ─────────────────────────────────────────────────────────────
 
@@ -67,6 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 3. Show default landing screen
   showScreen('home');
+  initNavigation('home');
 
   // 4. Initialise Home Screen logic
   initHome();
@@ -346,25 +547,19 @@ document.addEventListener('DOMContentLoaded', () => {
         unlockTTS();
       }
 
-      const _enterDashboard = () => {
-        showScreen('dashboard');
-        history.pushState({ screen: 'dashboard' }, '');
+      const _enterDashboard = (replace = false) => {
+        showScreenState('dashboard', { replace });
         initDashboard({ roi, detectionSettings: settings });
       };
 
       if (delayedStart) {
-        showScreen('countdown');
-        history.pushState({ screen: 'countdown' }, '');
-        _runCountdown(_enterDashboard);
+        showScreenState('countdown');
+        _runCountdown(() => _enterDashboard(true));
       } else {
         _enterDashboard();
       }
     });
   }
-
-  // ── Stub screen back buttons ────────────────────────────────────────────────
-  document.getElementById('btn-history-back')?.addEventListener('click', () => showScreen('home'));
-  document.getElementById('btn-settings-back')?.addEventListener('click', () => showScreen('home'));
 
   // ── Phase 5: Cancel button — wired once at init so it always works ─────────
   const _cancelCountdownBtn = document.getElementById('btn-cancel-countdown');
@@ -376,9 +571,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Phase 7.5: Viewfinder help popup ───────────────────────────────────────
   document.getElementById('btn-viewfinder-help')?.addEventListener('click', () => {
     document.getElementById('viewfinder-help-modal')?.removeAttribute('hidden');
+    document.getElementById('viewfinder-help-modal')?.setAttribute('aria-hidden', 'false');
   });
   document.getElementById('btn-help-close')?.addEventListener('click', () => {
     document.getElementById('viewfinder-help-modal')?.setAttribute('hidden', '');
+    document.getElementById('viewfinder-help-modal')?.setAttribute('aria-hidden', 'true');
   });
   // ── Phase 5: Countdown helper ───────────────────────────────────────────────
   function _runCountdown(onComplete) {
@@ -403,8 +600,7 @@ document.addEventListener('DOMContentLoaded', () => {
         onComplete();
       },
       onCancel: () => {
-        showScreen('viewfinder');
-        history.pushState({ screen: 'viewfinder' }, '');
+        showScreenState('viewfinder', { replace: true });
         const roi      = getROI();
         const settings = getAllSettings();
         if (roi && hasCompleteLine()) {
@@ -421,18 +617,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  _bindBackSwipe();
+
   // 6. Handle back swipe / device back button
-  window.addEventListener('popstate', () => {
+  window.addEventListener('popstate', (event) => {
     const screen = currentScreen();
-    if (screen === 'viewfinder') {
-      stopDetection();
-      clearLine();
-      stopCamera();
-      releaseWakeLock();
-      showScreen('home');
-    } else if (screen === 'countdown' || screen === 'dashboard') {
-      history.pushState({ screen }, '');
+    if ((screen === 'countdown' || screen === 'dashboard' || screen === 'summary') && event.state?.screen && event.state.screen !== screen) {
+      history.forward();
+      return;
     }
+
+    _applyStateFromHistory(event.state);
   });
 
   // 7. Clean up camera + wake lock when user leaves the page
