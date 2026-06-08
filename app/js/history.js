@@ -7,7 +7,7 @@
  *   renderSessionList() — render (or re-render) the session list from a Session[]
  */
 
-import { getHistory, deleteSession } from './storage.js';
+import { getHistory, deleteSession, setLapExcluded } from './storage.js';
 import { getNavigationState, showScreenState, updateNavigationState } from './navigation.js';
 import { renderChart } from './summary.js';
 
@@ -302,6 +302,7 @@ function _openSessionDetail(sessionId, options = {}) {
 
   document.getElementById('detail-best-lap').textContent  = _formatLapTime(session.bestLapMs);
   document.getElementById('detail-avg-lap').textContent   = _formatLapTime(session.avgLapMs);
+  document.getElementById('detail-consistency').textContent = `±${session.consistencyScore ?? 0}ms`;
   document.getElementById('detail-total-time').textContent = _formatLapTime(session.totalTimeMs);
 
   const tbody = document.getElementById('detail-lap-tbody');
@@ -309,17 +310,43 @@ function _openSessionDetail(sessionId, options = {}) {
   (session.laps ?? []).forEach((lap) => {
     const tr = document.createElement('tr');
     if (lap.gapMs === 0) tr.setAttribute('data-best', 'true');
+    const isExcluded = Boolean(lap.excludedFromStats);
+    tr.dataset.excluded = String(isExcluded);
     const gapText = lap.gapMs === 0 ? 'Best' : '+' + _formatLapTime(lap.gapMs);
     const tdLap  = document.createElement('td');
     const tdTime = document.createElement('td');
     const tdGap  = document.createElement('td');
+    const tdExclude = document.createElement('td');
     tdLap.textContent  = lap.lapNumber;
     tdTime.textContent = _formatLapTime(lap.lapTimeMs);
     tdGap.textContent  = gapText;
+    tdExclude.className = 'session-detail-exclude-cell';
+    tdExclude.innerHTML = `
+      <label class="session-detail-exclude-label">
+        <input
+          type="checkbox"
+          class="session-detail-exclude-toggle"
+          data-lap-number="${lap.lapNumber}"
+          ${isExcluded ? 'checked' : ''}
+        />
+        <span>Exclude</span>
+      </label>
+    `;
     tr.appendChild(tdLap);
     tr.appendChild(tdTime);
     tr.appendChild(tdGap);
+    tr.appendChild(tdExclude);
     tbody.appendChild(tr);
+  });
+
+  tbody.querySelectorAll('.session-detail-exclude-toggle').forEach((toggle) => {
+    toggle.addEventListener('change', (event) => {
+      const target = /** @type {HTMLInputElement} */ (event.currentTarget);
+      const lapNumber = Number(target.dataset.lapNumber);
+      if (!Number.isFinite(lapNumber)) return;
+      setLapExcluded(session.id, lapNumber, target.checked);
+      _openSessionDetail(session.id, { syncHistory: false, replace: true });
+    });
   });
 
   const chartSvg = document.getElementById('detail-chart');
@@ -435,5 +462,4 @@ export function showHistory(options = {}) {
     closeSessionDetail();
   }
 }
-
 
