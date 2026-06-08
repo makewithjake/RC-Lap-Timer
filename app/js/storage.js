@@ -176,6 +176,7 @@ function _computeAvgAndConsistency(laps) {
 
   const totalLapMs = included.reduce((acc, l) => acc + l.lapTimeMs, 0);
   const avgLapMs = Math.round(totalLapMs / included.length);
+  // Consistency is population standard deviation of included lap times (milliseconds).
   const consistencyScore = Math.round(
     Math.sqrt(
       included.reduce((acc, l) => acc + (l.lapTimeMs - avgLapMs) ** 2, 0) / included.length
