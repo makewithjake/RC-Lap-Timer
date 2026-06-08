@@ -171,7 +171,7 @@ export function deleteSession(id) {
 }
 
 function _computeAvgAndConsistency(laps) {
-  const included = (laps ?? []).filter((lap) => !lap.excludedFromStats);
+  const included = (laps ?? []).filter((lap) => lap.excludedFromStats !== true);
   if (included.length === 0) return { avgLapMs: 0, consistencyScore: 0 };
 
   const totalLapMs = included.reduce((acc, l) => acc + l.lapTimeMs, 0);
