@@ -175,11 +175,12 @@ function _computeAvgAndConsistency(laps) {
   if (included.length === 0) return { avgLapMs: 0, consistencyScore: 0 };
 
   const totalLapMs = included.reduce((acc, l) => acc + l.lapTimeMs, 0);
-  const avgLapMs = Math.round(totalLapMs / included.length);
+  const meanLapMs = totalLapMs / included.length;
+  const avgLapMs = Math.round(meanLapMs);
   // Consistency is population standard deviation of included lap times (milliseconds).
   const consistencyScore = Math.round(
     Math.sqrt(
-      included.reduce((acc, l) => acc + (l.lapTimeMs - avgLapMs) ** 2, 0) / included.length
+      included.reduce((acc, l) => acc + (l.lapTimeMs - meanLapMs) ** 2, 0) / included.length
     )
   );
   return { avgLapMs, consistencyScore };
