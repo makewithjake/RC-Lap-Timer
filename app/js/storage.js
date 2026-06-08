@@ -23,6 +23,7 @@ const KEY_SETTINGS = 'rc_settings';  // JSON string — Settings
  * @property {string|null} ttsVoiceName      — SpeechSynthesisVoice.name or null (system default)
  * @property {number}      ttsPitch          — 0.5–2.0; default 1.0
  * @property {number}      ttsVolume         — 0–1; default 1.0
+ * @property {'contain'|'cover'} videoFitMode — preview framing mode; default contain
  */
 
 const DEFAULT_SETTINGS = Object.freeze({
@@ -31,6 +32,7 @@ const DEFAULT_SETTINGS = Object.freeze({
   ttsVoiceName:      null,
   ttsPitch:          1.0,
   ttsVolume:         1.0,
+  videoFitMode:      'contain',
 });
 
 // ── Session CRUD ──────────────────────────────────────────────────────────────
@@ -227,6 +229,9 @@ export function saveSettings(partial) {
   if (partial.ttsEnabled !== undefined) {
     merged.ttsEnabled = Boolean(partial.ttsEnabled);
   }
+  if (partial.videoFitMode !== undefined) {
+    merged.videoFitMode = partial.videoFitMode === 'cover' ? 'cover' : 'contain';
+  }
 
   try {
     localStorage.setItem(KEY_SETTINGS, JSON.stringify(merged));
@@ -234,5 +239,4 @@ export function saveSettings(partial) {
     console.warn('[storage] saveSettings write error:', err);
   }
 }
-
 
