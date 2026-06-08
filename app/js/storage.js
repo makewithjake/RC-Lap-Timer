@@ -40,6 +40,7 @@ const DEFAULT_SETTINGS = Object.freeze({
  * @property {number} lapNumber  — 1-based lap index
  * @property {number} lapTimeMs  — duration of this lap in milliseconds
  * @property {number} gapMs      — lapTimeMs − bestLapMs (0 for the fastest lap)
+ * @property {boolean} [excludedFromStats] — true if excluded from avg/consistency
  */
 
 /**
@@ -90,6 +91,7 @@ export function buildSessionRecord(rawSession) {
     lapNumber: l.lapNumber,
     lapTimeMs: l.lapTime,
     gapMs:     l.lapTime - bestLapMs,
+    excludedFromStats: false,
   }));
 
   const id = (typeof crypto !== 'undefined' && crypto.randomUUID)
@@ -168,6 +170,46 @@ export function deleteSession(id) {
   }
 }
 
+function _computeAvgAndConsistency(laps) {
+  const included = (laps ?? []).filter((lap) => !lap.excludedFromStats);
+  if (included.length === 0) return { avgLapMs: 0, consistencyScore: 0 };
+
+  const totalLapMs = included.reduce((acc, l) => acc + l.lapTimeMs, 0);
+  const avgLapMs = Math.round(totalLapMs / included.length);
+  const consistencyScore = Math.round(
+    Math.sqrt(
+      included.reduce((acc, l) => acc + (l.lapTimeMs - avgLapMs) ** 2, 0) / included.length
+    )
+  );
+  return { avgLapMs, consistencyScore };
+}
+
+/**
+ * Updates a lap's exclusion flag for a given session and re-computes avg/consistency.
+ * @param {string} sessionId
+ * @param {number} lapNumber
+ * @param {boolean} excluded
+ */
+export function setLapExcluded(sessionId, lapNumber, excluded) {
+  const sessions = getHistory();
+  const targetSession = sessions.find((s) => s.id === sessionId);
+  if (!targetSession) return;
+
+  const targetLap = (targetSession.laps ?? []).find((lap) => lap.lapNumber === lapNumber);
+  if (!targetLap) return;
+
+  targetLap.excludedFromStats = Boolean(excluded);
+  const { avgLapMs, consistencyScore } = _computeAvgAndConsistency(targetSession.laps);
+  targetSession.avgLapMs = avgLapMs;
+  targetSession.consistencyScore = consistencyScore;
+
+  try {
+    localStorage.setItem(KEY_SESSIONS, JSON.stringify(sessions));
+  } catch (err) {
+    console.warn('[storage] setLapExcluded write error:', err);
+  }
+}
+
 /**
  * Removes all app data from localStorage. Does not reload the page.
  */
@@ -234,5 +276,3 @@ export function saveSettings(partial) {
     console.warn('[storage] saveSettings write error:', err);
   }
 }
-
-
