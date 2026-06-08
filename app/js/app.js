@@ -58,12 +58,25 @@ function _hideModal(id) {
   el.setAttribute('aria-hidden', 'true');
 }
 
+function _setCalibrationTrayMinimized(minimized) {
+  const panel = document.getElementById('calibration-panel');
+  const toggleBtn = document.getElementById('btn-calibration-tray-toggle');
+  if (!panel || !toggleBtn) return;
+
+  panel.classList.toggle('is-minimized', minimized);
+  toggleBtn.classList.toggle('is-minimized', minimized);
+  toggleBtn.textContent = minimized ? '+' : '−';
+  toggleBtn.setAttribute('aria-expanded', String(!minimized));
+  toggleBtn.setAttribute('aria-label', minimized ? 'Expand calibration tray' : 'Minimize calibration tray');
+}
+
 function _cleanupViewfinder() {
   stopDetection();
   clearLine();
   stopCamera();
   releaseWakeLock();
   _hideModal('viewfinder-help-modal');
+  _setCalibrationTrayMinimized(false);
 }
 
 function _applyStateFromHistory(state) {
@@ -408,6 +421,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function _initCalibrationTrayToggle() {
+    const panel = document.getElementById('calibration-panel');
+    const toggleBtn = document.getElementById('btn-calibration-tray-toggle');
+    if (!panel || !toggleBtn) return;
+
+    _setCalibrationTrayMinimized(false);
+
+    toggleBtn.addEventListener('click', () => {
+      const isMinimized = panel.classList.contains('is-minimized');
+      _setCalibrationTrayMinimized(!isMinimized);
+    });
+  }
+
   // ── Phase 4: Virtual LED flash ────────────────────────────────────────────
   const _motionChipEl = document.getElementById('status-motion');
   const _flashEl      = document.getElementById('detection-flash');
@@ -478,6 +504,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   _initViewfinderCanvas();
   _initCalibrationSliders();
+  _initCalibrationTrayToggle();
 
   // ── Phase 5: Delayed Start toggle wiring ──────────────────────────────────
   const _delayedStartBtn   = document.getElementById('toggle-delayed-start');
