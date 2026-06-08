@@ -68,4 +68,3 @@ export function mapViewportPointToVideo(point, displayRect) {
     y: (point.y - displayRect.offsetY) / displayRect.scale,
   };
 }
-

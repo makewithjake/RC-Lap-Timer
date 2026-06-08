@@ -23,7 +23,7 @@ const KEY_SETTINGS = 'rc_settings';  // JSON string — Settings
  * @property {string|null} ttsVoiceName      — SpeechSynthesisVoice.name or null (system default)
  * @property {number}      ttsPitch          — 0.5–2.0; default 1.0
  * @property {number}      ttsVolume         — 0–1; default 1.0
- * @property {'contain'|'cover'} videoFitMode — preview framing mode; default contain
+ * @property {'contain'|'cover'} videoFitMode      — preview framing mode; default contain
  */
 
 const DEFAULT_SETTINGS = Object.freeze({
@@ -239,4 +239,3 @@ export function saveSettings(partial) {
     console.warn('[storage] saveSettings write error:', err);
   }
 }
-
