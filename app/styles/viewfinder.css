@@ -279,6 +279,16 @@
   transform: scale(0.97);
 }
 
+#btn-calibration-panel-toggle:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+#btn-calibration-panel-toggle:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
 .calibration-panel.is-collapsed {
   padding-top: var(--space-2);
   padding-bottom: var(--space-2);
