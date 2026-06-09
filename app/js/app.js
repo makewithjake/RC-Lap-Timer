@@ -476,8 +476,33 @@ document.addEventListener('DOMContentLoaded', () => {
     return { delayedStart, goalLaps };
   }
 
+  function _initCalibrationPanelToggle() {
+    const panelEl = document.getElementById('calibration-panel');
+    const toggleBtn = document.getElementById('btn-calibration-panel-toggle');
+    if (!panelEl || !toggleBtn) return;
+    let isCollapsed = false;
+
+    function _setCollapsed(collapsed) {
+      panelEl.classList.toggle('is-collapsed', collapsed);
+      toggleBtn.textContent = collapsed ? '+' : '-';
+      toggleBtn.setAttribute('aria-expanded', String(!collapsed));
+      toggleBtn.setAttribute(
+        'aria-label',
+        collapsed ? 'Expand calibration tray' : 'Collapse calibration tray'
+      );
+    }
+
+    _setCollapsed(isCollapsed);
+
+    toggleBtn.addEventListener('click', () => {
+      isCollapsed = !isCollapsed;
+      _setCollapsed(isCollapsed);
+    });
+  }
+
   _initViewfinderCanvas();
   _initCalibrationSliders();
+  _initCalibrationPanelToggle();
 
   // ── Phase 5: Delayed Start toggle wiring ──────────────────────────────────
   const _delayedStartBtn   = document.getElementById('toggle-delayed-start');
