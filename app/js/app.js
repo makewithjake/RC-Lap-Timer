@@ -480,6 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const panelEl = document.getElementById('calibration-panel');
     const toggleBtn = document.getElementById('btn-calibration-panel-toggle');
     if (!panelEl || !toggleBtn) return;
+    let isCollapsed = false;
 
     function _setCollapsed(collapsed) {
       panelEl.classList.toggle('is-collapsed', collapsed);
@@ -491,10 +492,11 @@ document.addEventListener('DOMContentLoaded', () => {
       );
     }
 
-    _setCollapsed(false);
+    _setCollapsed(isCollapsed);
 
     toggleBtn.addEventListener('click', () => {
-      _setCollapsed(!panelEl.classList.contains('is-collapsed'));
+      isCollapsed = !isCollapsed;
+      _setCollapsed(isCollapsed);
     });
   }
 
