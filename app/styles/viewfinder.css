@@ -243,6 +243,55 @@
   border-top: 1px solid var(--color-border);
 }
 
+.calibration-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.calibration-panel-title {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-secondary);
+}
+
+#btn-calibration-panel-toggle {
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-family: var(--font-ui);
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+#btn-calibration-panel-toggle:active {
+  opacity: 0.85;
+  transform: scale(0.97);
+}
+
+.calibration-panel.is-collapsed {
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
+}
+
+.calibration-panel.is-collapsed .calibration-row {
+  display: none;
+}
+
+.calibration-panel.is-collapsed .calibration-panel-header {
+  margin-bottom: 0;
+}
+
 /* ----------------------------------------------------------
    C3 — Calibration row: label + slider + range indicators
    ---------------------------------------------------------- */
