@@ -241,6 +241,52 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid var(--color-border);
+  max-height: 70vh;
+  overflow: hidden;
+  transition: padding 0.2s ease, max-height 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.calibration-panel.is-minimized {
+  padding-top: 0;
+  padding-bottom: 0;
+  border-top-color: transparent;
+  background-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  max-height: 0;
+  pointer-events: none;
+}
+
+.calibration-tray-toggle {
+  position: absolute;
+  right: 0;
+  bottom: calc(64px + var(--space-5));
+  width: 32px;
+  height: 56px;
+  border: 1px solid var(--color-border);
+  border-right: none;
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  background-color: rgba(17, 17, 17, 0.92);
+  color: var(--color-text-primary);
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 22;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.calibration-tray-toggle.is-minimized {
+  right: var(--space-3);
+  bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+  width: 40px;
+  height: 40px;
+  border-right: 1px solid var(--color-border);
+  border-radius: var(--radius-circle);
 }
 
 /* ----------------------------------------------------------
