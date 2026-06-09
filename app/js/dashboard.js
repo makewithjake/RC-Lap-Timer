@@ -252,7 +252,7 @@ function _handleStop() {
   showSummary(window.__rcSession.result);
 }
 
-function _handleReset(roi, detectionSettings) {
+function _handleReset(roi, detectionSettings, previewFitMode) {
   _stopClockRaf();
   stopDetection();
   _teardownDetectionVideo();
@@ -266,7 +266,7 @@ function _handleReset(roi, detectionSettings) {
   if (bigClock)  bigClock.textContent  = '0:00.00';
   if (totalTime) totalTime.textContent = '0:00.00';
 
-  _beginSession(roi, detectionSettings);
+  _beginSession(roi, detectionSettings, previewFitMode);
 }
 
 // ── Session Orchestration ─────────────────────────────────────────────────────
@@ -274,8 +274,9 @@ function _handleReset(roi, detectionSettings) {
 /**
  * @param {{ p1Norm, p2Norm, zoneWidthNorm }} roi
  * @param {{ sensitivity: number, debounce: number }} detectionSettings
+ * @param {'contain'|'cover'} previewFitMode
  */
-function _beginSession(roi, detectionSettings) {
+function _beginSession(roi, detectionSettings, previewFitMode) {
   const goalLaps = window.__rcSession?.goalLaps ?? null;
 
   startSession({
@@ -341,6 +342,7 @@ function _beginSession(roi, detectionSettings) {
       roi,
       sensitivity: detectionSettings.sensitivity,
       debounce:    detectionSettings.debounce,
+      fitMode:     previewFitMode,
       onTrigger:   recordTrigger,
     });
   };
@@ -380,10 +382,11 @@ let _dashAbortController = null;
  * @param {{
  *   roi:               { p1Norm, p2Norm, zoneWidthNorm },
  *   detectionSettings: { sensitivity: number, debounce: number },
+ *   previewFitMode?:   'contain'|'cover',
  * }} config
  */
 export function initDashboard(config) {
-  const { roi, detectionSettings } = config;
+  const { roi, detectionSettings, previewFitMode = 'contain' } = config;
 
   // Remove any listeners wired by a previous session
   if (_dashAbortController) _dashAbortController.abort();
@@ -417,10 +420,10 @@ export function initDashboard(config) {
   const resetBtn = document.getElementById('btn-dash-reset');
   if (resetBtn) {
     resetBtn.addEventListener('click', () => {
-      _handleReset(roi, detectionSettings);
+      _handleReset(roi, detectionSettings, previewFitMode);
     }, { signal });
   }
 
   acquireWakeLock();
-  _beginSession(roi, detectionSettings);
+  _beginSession(roi, detectionSettings, previewFitMode);
 }
