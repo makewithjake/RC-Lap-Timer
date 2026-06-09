@@ -1,3 +1,5 @@
+import { computeDisplayRect, normalizeFitMode } from './videoTransform.js';
+
 // ── Detection constants ───────────────────────────────────────────────────────
 /**
  * Minimum fraction of in-zone pixels that must exceed the per-pixel luminance
@@ -13,6 +15,7 @@ let _hiddenCtx    = null;      // 2D context for _hiddenCanvas
 let _prevPixels   = null;      // Float32Array — luminance values from the previous frame
 let _currPixels   = null;      // Float32Array — luminance values from the current frame (reused)
 let _roiPx        = null;      // Computed ROI geometry in pixel space (see _computeROIPixels)
+let _sampleRect   = null;      // Precomputed source/destination mapping for ROI sampling
 let _config          = null;      // Frozen config object set in startDetection()
 let _lastTrigger     = -Infinity; // performance.now() timestamp of the last fired trigger
 let _resumeAttempted = false;     // Guard: prevents repeated play() calls while awaiting resume
@@ -113,10 +116,56 @@ function _luminance(r, g, b) {
   return 0.299 * r + 0.587 * g + 0.114 * b;
 }
 
+/**
+ * Computes source-video and destination-hidden-canvas rectangles for drawing
+ * the portion of the ROI that overlaps the displayed video.
+ *
+ * @param {{ left:number, top:number, width:number, height:number }} roiPx
+ * @param {{ scale:number, offsetX:number, offsetY:number, displayWidth:number, displayHeight:number }} displayRect
+ * @param {number} videoWidth
+ * @param {number} videoHeight
+ * @returns {{
+ *   sx:number, sy:number, sw:number, sh:number,
+ *   dx:number, dy:number, dw:number, dh:number
+ * } | null}
+ */
+function _computeSampleRect(roiPx, displayRect, videoWidth, videoHeight) {
+  const roiLeft = roiPx.left;
+  const roiTop = roiPx.top;
+  const roiRight = roiPx.left + roiPx.width;
+  const roiBottom = roiPx.top + roiPx.height;
+
+  const videoLeft = displayRect.offsetX;
+  const videoTop = displayRect.offsetY;
+  const videoRight = displayRect.offsetX + displayRect.displayWidth;
+  const videoBottom = displayRect.offsetY + displayRect.displayHeight;
+
+  const overlapLeft = Math.max(roiLeft, videoLeft);
+  const overlapTop = Math.max(roiTop, videoTop);
+  const overlapRight = Math.min(roiRight, videoRight);
+  const overlapBottom = Math.min(roiBottom, videoBottom);
+
+  if (overlapRight <= overlapLeft || overlapBottom <= overlapTop) return null;
+
+  const sx = Math.max(0, (overlapLeft - displayRect.offsetX) / displayRect.scale);
+  const sy = Math.max(0, (overlapTop - displayRect.offsetY) / displayRect.scale);
+  const sw = Math.min(videoWidth, (overlapRight - displayRect.offsetX) / displayRect.scale) - sx;
+  const sh = Math.min(videoHeight, (overlapBottom - displayRect.offsetY) / displayRect.scale) - sy;
+
+  if (sw <= 0 || sh <= 0) return null;
+
+  const dx = overlapLeft - roiLeft;
+  const dy = overlapTop - roiTop;
+  const dw = overlapRight - overlapLeft;
+  const dh = overlapBottom - overlapTop;
+
+  return { sx, sy, sw, sh, dx, dy, dw, dh };
+}
+
 // ── A5 — RAF Tick ─────────────────────────────────────────────────────────────
 
 function _tick() {
-  const { videoEl, displayW, displayH, sensitivity, debounce, onTrigger } = _config;
+  const { videoEl, sensitivity, debounce, onTrigger } = _config;
 
   // Step 1: Guard — video not ready
   if (videoEl.readyState < 2 || videoEl.videoWidth === 0) {
@@ -150,28 +199,27 @@ function _tick() {
 
   try {
 
-  // Step 2: Scale factors
-  const scaleX = videoEl.videoWidth  / displayW;
-  const scaleY = videoEl.videoHeight / displayH;
+  // Step 2: Draw ROI crop to hidden canvas (transform-aware for contain/cover)
+  _hiddenCtx.clearRect(0, 0, _roiPx.width, _roiPx.height);
+  if (_sampleRect !== null) {
+    _hiddenCtx.drawImage(
+      videoEl,
+      _sampleRect.sx, _sampleRect.sy,
+      _sampleRect.sw, _sampleRect.sh,
+      _sampleRect.dx, _sampleRect.dy,
+      _sampleRect.dw, _sampleRect.dh
+    );
+  }
 
-  // Step 3: Draw ROI crop to hidden canvas
-  _hiddenCtx.drawImage(
-    videoEl,
-    _roiPx.left  * scaleX,  _roiPx.top  * scaleY,
-    _roiPx.width * scaleX,  _roiPx.height * scaleY,
-    0, 0,
-    _roiPx.width, _roiPx.height
-  );
-
-  // Step 4: Sample pixels
+  // Step 3: Sample pixels
   const imgData = _hiddenCtx.getImageData(0, 0, _roiPx.width, _roiPx.height);
   const data    = imgData.data;
 
-  // Step 5: Per-pixel threshold
+  // Step 4: Per-pixel threshold
   // sensitivity ∈ [1, 100]; higher = more sensitive = lower per-pixel threshold
   const pixelChangeThreshold = (100 - sensitivity) * 2.55;
 
-  // Step 6: Luminance differencing loop
+  // Step 5: Luminance differencing loop
   let inZoneCount  = 0;
   let changedCount = 0;
 
@@ -191,7 +239,7 @@ function _tick() {
     }
   }
 
-  // Step 7: Trigger decision
+  // Step 6: Trigger decision
   if (_prevPixels !== null && inZoneCount > 0) {
     const changeRatio = changedCount / inZoneCount;
     const now = performance.now();
@@ -201,7 +249,7 @@ function _tick() {
     }
   }
 
-  // Step 8: Swap pixel buffers.
+  // Step 7: Swap pixel buffers.
   // On the very first tick _prevPixels is null — allocate the second buffer now
   // so both buffers exist from frame 2 onward. From frame 2 onward a plain swap
   // reuses both pre-allocated arrays with zero new allocation.
@@ -216,7 +264,7 @@ function _tick() {
     console.error('[detector] _tick error (loop kept alive):', e);
   }
 
-  // Step 9: Reschedule — always outside try/catch so the loop survives any error
+  // Step 8: Reschedule — always outside try/catch so the loop survives any error
   _rafId = requestAnimationFrame(_tick);
 }
 
@@ -231,6 +279,7 @@ function _tick() {
  *   roi:         { p1Norm: {x,y}, p2Norm: {x,y}, zoneWidthNorm: number },
  *   sensitivity: number,
  *   debounce:    number,
+ *   fitMode?:    'contain' | 'cover',
  *   onTrigger:   () => void,
  * }} config
  */
@@ -241,6 +290,20 @@ export function startDetection(config) {
   const displayH = config.canvasEl.height;
 
   _roiPx = _computeROIPixels(config.roi, displayW, displayH);
+  const fitMode = normalizeFitMode(config.fitMode);
+  const displayRect = computeDisplayRect({
+    videoWidth: config.videoEl.videoWidth,
+    videoHeight: config.videoEl.videoHeight,
+    viewportWidth: displayW,
+    viewportHeight: displayH,
+    fitMode,
+  });
+  _sampleRect = _computeSampleRect(
+    _roiPx,
+    displayRect,
+    config.videoEl.videoWidth,
+    config.videoEl.videoHeight
+  );
 
   // Allocate hidden canvas sized to the ROI bounding box only
   _hiddenCanvas        = document.createElement('canvas');
@@ -256,10 +319,9 @@ export function startDetection(config) {
 
   _config = {
     videoEl:     config.videoEl,
-    displayW,
-    displayH,
     sensitivity: config.sensitivity,
     debounce:    config.debounce,
+    fitMode,
     onTrigger:   config.onTrigger,
   };
 
@@ -286,6 +348,7 @@ export function stopDetection() {
   _prevPixels      = null;
   _currPixels      = null;
   _roiPx           = null;
+  _sampleRect      = null;
   _config          = null;
   _resumeAttempted = false;
 }

@@ -373,6 +373,39 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function _applyCameraFraming(fitMode) {
+    const videoEl = document.getElementById('viewfinder-video');
+    if (!videoEl) return 'contain';
+    const normalized = fitMode === 'cover' ? 'cover' : 'contain';
+    videoEl.classList.toggle('video-fit-cover', normalized === 'cover');
+    return normalized;
+  }
+
+  function _initCameraFramingToggle() {
+    const toggle = document.getElementById('toggle-camera-framing');
+    const label = document.getElementById('camera-framing-value');
+    if (!toggle) return;
+
+    const settings = getSettings();
+    const initialMode = _applyCameraFraming(settings.videoFitMode);
+    const initialCover = initialMode === 'cover';
+    toggle.setAttribute('aria-checked', String(initialCover));
+    toggle.dataset.active = String(initialCover);
+    if (label) label.textContent = initialCover ? 'Fill Screen' : 'Full View';
+
+    toggle.addEventListener('click', () => {
+      const isCover = toggle.getAttribute('aria-checked') === 'true';
+      const nextMode = isCover ? 'contain' : 'cover';
+      const normalized = _applyCameraFraming(nextMode);
+      const nextCover = normalized === 'cover';
+      toggle.setAttribute('aria-checked', String(nextCover));
+      toggle.dataset.active = String(nextCover);
+      if (label) label.textContent = nextCover ? 'Fill Screen' : 'Full View';
+      saveSettings({ videoFitMode: normalized });
+      _restartDetectionIfActive();
+    });
+  }
+
   // ── Phase 3: Canvas drawing init ───────────────────────────────────────
 
   function _initViewfinderCanvas() {
@@ -392,12 +425,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (hasLine) {
         const roi      = getROI();
         const settings = getAllSettings();
+        const appSettings = getSettings();
         startDetection({
           videoEl:     videoEl,
           canvasEl:    canvasEl,
           roi,
           sensitivity: settings.sensitivity,
           debounce:    settings.debounce,
+          fitMode:     appSettings.videoFitMode,
           onTrigger:   _onDetectionTrigger,
         });
         if (_motionChipEl) {
@@ -474,6 +509,7 @@ document.addEventListener('DOMContentLoaded', () => {
     stopDetection();
     const roi      = getROI();
     const settings = getAllSettings();
+    const appSettings = getSettings();
     if (roi === null) return; // Guard: line was cleared between isDetecting() and getROI()
     startDetection({
       videoEl:     document.getElementById('viewfinder-video'),
@@ -481,6 +517,7 @@ document.addEventListener('DOMContentLoaded', () => {
       roi,
       sensitivity: settings.sensitivity,
       debounce:    settings.debounce,
+      fitMode:     appSettings.videoFitMode,
       onTrigger:   _onDetectionTrigger,
     });
     if (_motionChipEl) {
@@ -505,6 +542,7 @@ document.addEventListener('DOMContentLoaded', () => {
   _initViewfinderCanvas();
   _initCalibrationSliders();
   _initCalibrationTrayToggle();
+  _initCameraFramingToggle();
 
   // ── Phase 5: Delayed Start toggle wiring ──────────────────────────────────
   const _delayedStartBtn   = document.getElementById('toggle-delayed-start');
@@ -554,6 +592,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const roi      = getROI();
       const settings = getAllSettings();
+      const { videoFitMode } = getSettings();
       const { delayedStart, goalLaps } = _readViewfinderSessionConfig();
 
       const driverName = document.getElementById('input-driver-name')?.value.trim() ?? '';
@@ -563,6 +602,7 @@ document.addEventListener('DOMContentLoaded', () => {
       window.__rcSession = {
         roi,
         settings,
+        previewFitMode: videoFitMode,
         goalLaps,
         delayedStart,
         meta: { driverName, carName, location },
@@ -576,7 +616,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const _enterDashboard = (replace = false) => {
         showScreenState('dashboard', { replace });
-        initDashboard({ roi, detectionSettings: settings });
+        initDashboard({ roi, detectionSettings: settings, previewFitMode: videoFitMode });
       };
 
       if (delayedStart) {
@@ -630,6 +670,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showScreenState('viewfinder', { replace: true });
         const roi      = getROI();
         const settings = getAllSettings();
+        const appSettings = getSettings();
         if (roi && hasCompleteLine()) {
           startDetection({
             videoEl:     document.getElementById('viewfinder-video'),
@@ -637,6 +678,7 @@ document.addEventListener('DOMContentLoaded', () => {
             roi,
             sensitivity: settings.sensitivity,
             debounce:    settings.debounce,
+            fitMode:     appSettings.videoFitMode,
             onTrigger:   _onDetectionTrigger,
           });
         }
